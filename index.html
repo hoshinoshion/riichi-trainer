@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>立直麻将练习场</title>
+<meta name="description" content="单机网页日本麻将（立直麻将），与三位电脑对局，带向听数、进张、听牌和防守提示。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&family=Shippori+Mincho+B1:wght@700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="seal">雀</div><div><h1>立直麻将练习场</h1><p>单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
+    <div class="status" id="status"></div>
+  </header>
+
+  <main class="game">
+    <div class="stage">
+      <section class="opps" id="opps" aria-label="对手"></section>
+      <section class="tablewrap"><div class="square" id="square"></div></section>
+      <section class="me">
+        <div class="mebar" id="mebar"></div>
+        <div class="actions" id="actions" aria-live="polite"></div>
+        <div class="handrow"><div class="hand" id="hand"></div><div class="mymelds" id="mymelds"></div></div>
+      </section>
+    </div>
+  </main>
+
+  <aside class="side">
+    <section class="card coach">
+      <div class="chead"><h2>牌效助手</h2><span class="tag" id="coachTag"></span></div>
+      <div id="coachBody"></div>
+    </section>
+    <section class="card log"><h2>对局记录</h2><ol id="log"></ol></section>
+    <section class="card settings">
+      <h2>设置</h2>
+      <label class="srow" for="optHints">学习提示（向听 / 进张 / 听牌）<input type="checkbox" id="optHints"></label>
+      <label class="srow" for="optOneTap">单击直接出牌<input type="checkbox" id="optOneTap"></label>
+      <label class="srow" for="optSkip">自动跳过吃碰杠<input type="checkbox" id="optSkip"></label>
+      <label class="srow" for="optSpeed">电脑出牌速度
+        <select id="optSpeed"><option value="slow">慢</option><option value="mid">中</option><option value="fast">快</option></select></label>
+      <label class="srow" for="optLen">对局长度（新游戏生效）
+        <select id="optLen"><option value="east">东风战</option><option value="south">半庄战</option></select></label>
+      <button class="btn ghost" id="btnNew" type="button">重新开始一局游戏</button>
+    </section>
+    <details class="card ref" open>
+      <summary>规则速成</summary>
+      <ol>
+        <li><b>和牌形状</b>：14 张 = 4 组面子 + 1 对雀头。面子是顺子（如 3-4-5 万）或刻子（3 张相同）。特殊形：七对子、国士无双。</li>
+        <li><b>必须有役</b>：没有「役」就不能和牌，宝牌不算役。新手最常用的役：立直、断幺九（只用 2–8）、役牌（白发中、自风、场风的刻子）、门前清自摸和。</li>
+        <li><b>立直</b>：没鸣过牌且听牌时可宣言，交 1000 点。之后只能摸什么打什么，但多 1 番，还能翻里宝牌。</li>
+        <li><b>振听</b>：你听的牌里只要有一张在自己牌河里，就不能荣和别人打的牌，只能自摸。</li>
+        <li><b>鸣牌</b>：碰（谁打的都行）、吃（只能吃上家）、杠。鸣牌后立直、平和、一杯口、门清自摸等役就没了。</li>
+        <li><b>点数</b>：由番数和符数决定。闲家 1番30符 = 1000，满贯（5番）= 8000，庄家 ×1.5。</li>
+        <li><b>本作规则</b>：25000 点起、每色一张红五、食断有、头跳（无双响）、无抢杠和、无途中流局。</li>
+      </ol>
+    </details>
+    <details class="card ref">
+      <summary>役种一览</summary>
+      <div class="tbl-wrap"><table class="ytable" id="yakuTable"></table></div>
+    </details>
+  </aside>
+</div>
+<div class="modal" id="modal" hidden></div>
+
+<script src="js/engine.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
