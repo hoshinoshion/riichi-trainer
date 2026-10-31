@@ -1,11 +1,12 @@
 {
   "name": "riichi-trainer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "单机网页日本麻将（立直麻将）练习游戏，带牌效提示",
   "private": true,
   "license": "MIT",
   "scripts": {
     "start": "npx --yes serve .",
-    "test": "node --test"
+    "test": "node --test",
+    "sim": "node tools/sim.js"
   }
 }
