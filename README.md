@@ -1,55 +1,59 @@
-# 立直麻将练习场 · riichi-trainer
+# riichi-trainer
 
-一个单机的网页版日本麻将（立直麻将）。你和三位电脑对局，边打边看牌效提示，适合入门学习，也可以自己打着玩。
+English | [简体中文](README.zh-CN.md)
 
-纯 HTML / CSS / JavaScript，没有构建步骤，也不需要后端，浏览器打开就能玩。
+A single-player riichi (Japanese) mahjong game for the browser. You play against three computer opponents while a coach panel explains tile efficiency as you go. It is built for beginners learning the game, and for playing just for fun.
 
-## 功能
+Plain HTML, CSS and JavaScript: no build step and no backend. Open it in a browser and play.
 
-- **完整对局**：摸打、吃、碰、杠（暗杠 / 加杠 / 明杠）、立直、自摸、荣和、荒牌流局，东风战或半庄战
-- **算分**：全部常用役种和役满，符数、番数、满贯以上的点数档位，本场、供托、宝牌、红宝牌、里宝牌
-- **规则判定**：振听（舍牌振听、同巡振听、立直振听）、一发、两立直、海底 / 河底、岭上开花、食替限制（同种牌）
-- **学习提示**
-  - 出牌时列出每种打法的向听数和有效进张，并标出推荐打的牌
-  - 听牌时显示听哪些牌、各剩几张、荣和大约几番几点，没有役时会提醒
-  - 有人立直时显示手里的现物和较安全的牌
-  - 内置规则速成和役种一览
-- **电脑对手**：按牌效出牌、会立直、会碰役牌、能走断幺路线鸣牌，有人立直且自己差得远时会弃和防守
+The interface is in Simplified Chinese.
 
-## 规则说明
+## Features
 
-25000 点起，每色一张赤五，食断有。以下暂未实现：双响 / 三响（采用头跳）、抢杠、立直后暗杠、九种九牌等途中流局、流局满贯、包牌。
+- **Full games**: draw and discard, chi, pon, kan (closed, added and open), riichi, tsumo, ron and exhaustive draws, in East-only or East-South games
+- **Scoring**: all standard yaku and yakuman, fu and han, mangan and higher limits, honba, riichi deposits, dora, red fives and ura-dora
+- **Rules**: furiten (discard, temporary and riichi furiten), ippatsu, double riichi, haitei and houtei, rinshan kaihou, and a swap-calling (kuikae) restriction on the same tile
+- **Learning aids**
+  - Before each discard, lists every option with its shanten count and effective draws, and marks the recommended tile
+  - When you are tenpai, shows your waits, how many of each are left, and roughly what a ron would score; warns you when the hand has no yaku
+  - When someone declares riichi, shows which tiles in your hand are safe (genbutsu) and which are relatively safe
+  - Built-in rules primer and yaku reference
+- **Computer opponents**: discard by tile efficiency, declare riichi, call pon on value tiles, call toward open tanyao, and fold when someone is in riichi and their own hand is far from ready
 
-## 本地运行
+## Rules
 
-直接用浏览器打开 `index.html` 即可。也可以起一个本地服务器：
+Each player starts with 25,000 points. One red five per suit, open tanyao allowed. Not implemented yet: double and triple ron (head bump is used instead), robbing a kan (chankan), closed kan after riichi, abortive draws such as nine terminals, nagashi mangan and pao.
+
+## Running locally
+
+Open `index.html` in a browser, or start a local server:
 
 ```bash
-npm start          # 等同于 npx serve .
+npm start          # same as npx serve .
 ```
 
-## 测试
+## Tests
 
-算分引擎有单元测试，需要 Node.js 18 及以上：
+The scoring engine has unit tests. They need Node.js 18 or later:
 
 ```bash
 npm test
 ```
 
-## 项目结构
+## Project layout
 
 ```
-index.html          页面结构
-css/style.css       样式（牌面、牌桌、面板）
-js/engine.js        与界面无关的规则引擎：向听数、和牌拆解、役种、符数、点数
-js/game.js          对局流程、电脑 AI、玩家操作、界面渲染、学习提示
-tests/              引擎测试
+index.html          Page structure
+css/style.css       Styles for tiles, table and panels
+js/engine.js        UI-independent rules engine: shanten, hand decomposition, yaku, fu and points
+js/game.js          Game flow, computer AI, player actions, rendering and coach panel
+tests/              Engine tests
 ```
 
-## 部署
+## Deployment
 
-这是纯静态网站，可以直接部署到 GitHub Pages：仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支选 `main`、目录选 `/ (root)`。几分钟后可以在 `https://hoshinoshion.github.io/riichi-trainer/` 访问。Cloudflare Pages、Vercel、Netlify 也都能直接部署，不需要构建命令。
+This is a static site, so it can be published with GitHub Pages: in the repository go to Settings → Pages, set the source to `Deploy from a branch`, and choose branch `main` with folder `/ (root)`. After a few minutes it is available at `https://hoshinoshion.github.io/riichi-trainer/`. Cloudflare Pages, Vercel and Netlify also work with no build command.
 
-## 开源协议
+## License
 
 [MIT](LICENSE)
