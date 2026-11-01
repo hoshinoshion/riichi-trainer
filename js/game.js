@@ -570,21 +570,14 @@ function winModal(w,l,winId,res,deltas,before){
 }
 
 // ===================== Rendering =====================
-function render(){if(!G)return;updateTools();renderStatus();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
-function renderStatus(){
-  const inds=doraInds();
-  $('#status').innerHTML=`<div class="stat"><small>${t('stat.round')}</small><b>${t('roundStat',{b:G.bakaze,k:G.kyoku,h:G.honba})}</b></div>
-  <div class="stat"><small>${t('stat.kyotaku')}</small><b>${G.kyotaku}</b></div>
-  <div class="stat"><small>${t('stat.wall')}</small><b>${G.wall.length}</b></div>
-  <div class="stat"><small>${t('stat.dora')}</small><div class="dora">${[0,1,2,3,4].map(i=>i<inds.length?tileT(inds[i]):backHTML()).join('')}</div></div>`;
-}
+function render(){if(!G)return;updateTools();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
 // Opponents sit around the discard area: 下家 (1) right, 对家 (2) top, 上家 (3) left.
 function renderOpps(){
   for(const p of [1,2,3]){
     const pl=G.players[p],sw=seatOf(p);
-    $('#opp'+p).innerHTML=`<div class="plate${G.turn===p?' on':''}"><div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><span class="sc">${pl.score}</span></div>
-    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div>${pl.riichi?`<span class="rtag">${t('riichiTag')}</span>`:''}</div>
-    <div class="pm">${pl.melds.map(m=>meldHTML(m,'mini')).join('')}</div></div>`;
+    $('#opp'+p).innerHTML=`<div class="plate${G.turn===p?' on':''}">
+    <div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><b class="sc">${pl.score}</b>${pl.riichi?`<span class="rtag">${t('riichiTag')}</span>`:''}</div>
+    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div><div class="pm">${pl.melds.map(m=>meldHTML(m,'mini')).join('')}</div></div></div>`;
   }
 }
 function renderSquare(){
@@ -593,9 +586,14 @@ function renderSquare(){
     const pl=G.players[p];
     h+=`<div class="pond" style="--r:${ROT[p]}deg">${pl.river.map((r,i)=>tileHTML(r.id,[r.riichi?'yoko':'',r.called?'gone':'',r.fresh?'fresh':'',G.last&&G.last.p===p&&i===pl.river.length-1&&!r.called&&G.turn!==-1?'last':''].join(' '))).join('')}</div>`;
   }
+  // Centre: each seat's wind on its edge (highlighted on that player's turn, riichi stick when declared);
+  // round, honba, riichi deposits, dora indicators and the wall count in the middle.
   h+='<div class="center">';
-  for(let p=0;p<4;p++){const pl=G.players[p];h+=`<div class="seat${G.turn===p?' on':''}${seatOf(p)===0?' dealer':''}" style="--r:${ROT[p]}deg"><b>${WIND_CH[seatOf(p)]}</b><span>${pl.score}</span>${pl.riichi?'<i class="stick"></i>':''}</div>`;}
-  h+=`<div class="mid"><b>${roundName()}</b><span>${t('wallLeft',{n:G.wall.length})}</span></div></div>`;
+  for(let p=0;p<4;p++){const pl=G.players[p];h+=`<div class="seat${G.turn===p?' on':''}${seatOf(p)===0?' dealer':''}" style="--r:${ROT[p]}deg"><b>${WIND_CH[seatOf(p)]}</b>${pl.riichi?'<i class="stick"></i>':''}</div>`;}
+  const inds=doraInds();
+  h+=`<div class="mid"><b>${roundName()}</b><span>${t('honba',{n:G.honba})} · <i class="stick" title="${t('stat.kyotaku')}"></i>×${G.kyotaku}</span>
+    <div class="cdora" title="${t('stat.dora')}">${[0,1,2,3,4].map(i=>i<inds.length?tileT(inds[i]):backHTML()).join('')}</div>
+    <span>${t('wallLeft',{n:G.wall.length})}</span></div></div>`;
   $('#square').innerHTML=h;
 }
 function renderMe(){

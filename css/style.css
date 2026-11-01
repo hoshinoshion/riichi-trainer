@@ -73,7 +73,7 @@ button{font:inherit;color:inherit}
 /* Phone: the main-column wrapper dissolves so the yaku list can come last, after settings and rules. */
 .maincol{display:contents}
 .maincol>.game{grid-area:game}.maincol>.yaku{grid-area:yaku}
-@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 470px)/18.8)}}
+@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 420px)/18.8)}}
 @media (min-width:900px){
   /* Each column stacks on its own, so a tall side column never pushes the yaku list away from the table. */
   .app{grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr;grid-template-areas:"top top" "main coach" "main side"}
@@ -100,13 +100,6 @@ button{font:inherit;color:inherit}
 .tool svg{width:16px;height:16px;flex:none}
 .tool select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:16px}
 .tool:focus-within{outline:2px solid var(--gold);outline-offset:2px}
-/* Status strip at the top of the table */
-.status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-variant-numeric:tabular-nums;padding:0 4px}
-.status .stat:last-child{margin-left:auto}
-.stat{display:flex;flex-direction:column;gap:2px}
-.stat small{color:var(--muted);font-size:11px;letter-spacing:.08em}
-.stat b{font:700 16px/1.1 var(--f-ui)}
-.stat .dora{display:flex;gap:3px;--w:22px}
 
 /* game column */
 .game{container-type:inline-size;min-width:0}
@@ -117,41 +110,46 @@ button{font:inherit;color:inherit}
 /* The table: status strip, opponents around the discard area, then your seat and hand. */
 .table{background:var(--table-bg);box-shadow:var(--table-shadow);border-radius:20px;padding:var(--tpad);display:grid;gap:12px;min-width:0}
 .arena{display:grid;grid-template-columns:var(--side) minmax(0,1fr) var(--side);grid-template-areas:". top ." "left board right";gap:8px;align-items:center}
-.opp{min-width:0}.opp.top{grid-area:top;display:flex;justify-content:center}.opp.top .plate{min-width:min(100%,260px)}
-.opp.left{grid-area:left}.opp.right{grid-area:right}
+.opp{min-width:0;display:flex;justify-content:center;align-items:center}
+.opp.top{grid-area:top}.opp.left{grid-area:left}.opp.right{grid-area:right}
 .board{grid-area:board;display:flex;justify-content:center;min-width:0}
 /* Side seats stand upright when there is room beside the board. */
 @container (min-width:601px){
-  .opp.left .plate,.opp.right .plate{padding:10px 6px;justify-items:center;text-align:center}
-  .opp.left .ph,.opp.right .ph,.opp.left .pb,.opp.right .pb{flex-direction:column;gap:4px}
-  .opp.left .sc,.opp.right .sc{margin:0}
-  .opp.left .backs,.opp.right .backs{flex-direction:column;gap:1px}
-  .opp.left .backs i,.opp.right .backs i{width:18px;height:4px;flex:none}
-  .opp.left .pm,.opp.right .pm{justify-content:center}
+  .opp.left .plate,.opp.right .plate{flex-direction:column}
+  .opp.left .ph,.opp.right .ph{flex-direction:column;border-radius:14px;padding:8px 6px;gap:4px;text-align:center}
+  .opp.left .pb,.opp.right .pb{flex-direction:column}
+  .opp.left .backs,.opp.right .backs{flex-direction:column}
+  .opp.left .backs i,.opp.right .backs i{width:14px;height:9px}
+  .opp.left .pm,.opp.right .pm{flex-direction:column;align-items:center}
 }
 /* Narrow table: the three opponents share one row above the board, which then gets the full width. */
 @container (max-width:600px){
   .stage{--side:0px;--tpad:8px}
   .table{border-radius:16px;gap:10px}
-  .arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"left top right" "board board board";gap:6px;align-items:stretch}
-  .opp{display:grid}.opp .plate{align-content:start}
-  .opp.top .plate{min-width:0}
-  .plate{padding:6px 8px;gap:4px}
-  .ph{flex-wrap:wrap;row-gap:2px}.sc{order:9;flex-basis:100%;margin-left:0}
-  .status{gap:6px 12px}.stat b{font-size:14px}.stat .dora{--w:18px}
+  .arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"left top right" "board board board";gap:6px;align-items:start}
+  /* .table prefix: these must beat the base seat rules that come later in the file. */
+  .table .plate{width:100%}
+  .table .ph{flex-wrap:wrap;justify-content:center;border-radius:12px;padding:5px 6px;row-gap:3px;width:100%}
+  .table .sc{order:8}.table .ph .rtag{order:9}
+  .table .pb{flex-direction:column;gap:5px;width:100%}
+  .table .backs{gap:1px;justify-content:center;max-width:100%}
+  .table .backs i{width:6px;height:9px;border-radius:1.5px;flex:0 1 6px;min-width:3px;box-shadow:none}
 }
 
 /* opponent plates */
-.plate{background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:12px;padding:8px 10px;display:grid;gap:6px;min-width:0;position:relative;transition:border-color .2s,box-shadow .2s}
-.plate.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
-.ph{display:flex;align-items:center;gap:6px;min-width:0}
+/* A seat: a name pill (wind, name, level, score, riichi), then tile backs and melds, straight on the table. */
+.plate{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;max-width:100%}
+.ph{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:4px 12px 4px 4px;white-space:nowrap;transition:border-color .2s,box-shadow .2s}
+.plate.on .ph{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
 .wb{width:22px;height:22px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);font:800 14px/20px var(--f-tile);text-align:center;flex:none}
 .wb.dealer{background:var(--t-red);border-color:var(--t-red);color:#fff}
 .nm{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.sc{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
-.pb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:14px}
-.backs{display:flex;gap:1px;min-width:0;overflow:hidden}
-.backs i{flex:0 1 6px;min-width:3px;height:10px;border-radius:1.5px;background:linear-gradient(var(--back),var(--back-2))}
+.sc{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
+.pb{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%}
+/* Concealed tiles as small tile backs. */
+.backs{display:flex;gap:2px;min-width:0;overflow:hidden}
+.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:var(--back);box-shadow:inset 0 0 0 1.5px var(--back-2)}
+:root[data-theme="classic"] .backs i{background:linear-gradient(var(--back),var(--back-2));box-shadow:0 1.5px 0 var(--ivory-2)}
 .lv{font-size:10.5px;font-weight:700;line-height:16px;padding:0 5px;border-radius:4px;flex:none;border:1px solid var(--line);color:var(--muted)}
 .lv-easy{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
 .lv-hard{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
@@ -162,19 +160,21 @@ button{font:inherit;color:inherit}
 .pm:empty{display:none}
 
 /* table */
-.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;border-radius:16px;box-shadow:inset 0 0 0 1px var(--board-line);overflow:hidden}
+.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative}
 .pond{--w:var(--pw);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 8px);display:flex;flex-wrap:wrap;gap:3px 1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
-.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.2);height:calc(var(--pw)*6.2);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:12px;border:1px solid var(--center-line)}
-.seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*1.7));display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:calc(var(--pw)*.58);font-variant-numeric:tabular-nums;color:var(--muted);padding:1px 4px;border-radius:4px}
-.seat b{font:800 calc(var(--pw)*.72)/1 var(--f-tile);color:var(--text)}
+.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:0 1px 3px var(--tile-shadow)}
+.seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
+.seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
 .seat.dealer b{color:var(--dealer)}
 .seat.on{background:var(--gold);color:var(--gold-ink)}
 .seat.on b{color:var(--gold-ink)}
-.stick{display:inline-block;width:calc(var(--pw)*1.2);height:3px;border-radius:2px;background:var(--stick);position:relative}
+.stick{display:inline-block;vertical-align:middle;width:calc(var(--pw)*1.2);height:3px;border-radius:2px;background:var(--stick);position:relative}
 .stick::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;border-radius:50%;background:var(--t-red)}
-.mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none}
-.mid b{font:900 calc(var(--pw)*.8)/1.1 var(--f-head)}
-.mid span{font-size:calc(var(--pw)*.55);color:var(--muted);font-variant-numeric:tabular-nums}
+.mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--pw)*.18);pointer-events:none}
+.mid b{font:900 calc(var(--pw)*.78)/1.1 var(--f-head)}
+.mid span{font-size:calc(var(--pw)*.48);color:var(--muted);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:calc(var(--pw)*.15);white-space:nowrap}
+.mid .stick{width:calc(var(--pw)*.8);height:2px}
+.cdora{display:flex;gap:2px;--w:calc(var(--pw)*.62);margin:calc(var(--pw)*.08) 0}
 
 /* tiles */
 /* Modern themes: flat tiles with a thin outline and a soft shadow. Classic overrides below with the 3D look. */
@@ -207,9 +207,9 @@ button{font:inherit;color:inherit}
 
 /* my area */
 .me{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
-.mebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:center;font-size:13px;color:var(--muted)}
-/* Your turn: a dot before your seat info, like the highlight on opponent plates. */
-.mebar.on::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.mebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:center;font-size:13px;color:var(--muted);justify-self:center;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:5px 14px;transition:border-color .2s,box-shadow .2s}
+.mebar.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+
 .mebar b{color:var(--text);font-variant-numeric:tabular-nums}
 .actions{min-height:48px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;text-align:center}
 .amsg{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:6px}
