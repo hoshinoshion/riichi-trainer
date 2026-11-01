@@ -12,9 +12,9 @@ img{max-width:100%}
   --ink:#f4f4f1; --ink-2:#ebebe7; --panel:#ffffff; --panel-2:#f2f2ee; --line:#e2e1db;
   --text:#1c1c1e; --muted:#6c6c72;
   --gold:#0f766e; --gold-ink:#ffffff;
-  --ivory:#fdfcf8; --ivory-2:#e6e3da;
+  --ivory:#fffefb; --ivory-2:#e6e3da;
   --back:#14897f; --back-2:#0f6b63;
-  --tile-edge:#d3d0c6; --tile-shadow:rgba(0,0,0,.13);
+  --tile-edge:#d8d5cc; --tile-shadow:rgba(0,0,0,.12);
   --table-bg:#e9e8e2; --table-shadow:inset 0 0 0 1px var(--line);
   --felt-core:#f8f8f5; --center-line:var(--line);
   --stick:#3a3a3e; --dealer:#d4380d;
@@ -29,9 +29,9 @@ img{max-width:100%}
   --ink:#111214; --ink-2:#17181b; --panel:#1a1b1f; --panel-2:#232428; --line:#2e2f34;
   --text:#ececee; --muted:#9a9aa2;
   --gold:#2dd4bf; --gold-ink:#04201c;
-  --ivory:#f4f2ec; --ivory-2:#d9d5ca;
+  --ivory:#f3f1eb; --ivory-2:#d9d5ca;
   --back:#14897f; --back-2:#0f6b63;
-  --tile-edge:#8e8b82; --tile-shadow:rgba(0,0,0,.45);
+  --tile-edge:rgba(0,0,0,.55); --tile-shadow:rgba(0,0,0,.5);
   --table-bg:#18191c; --table-shadow:inset 0 0 0 1px var(--line);
   --felt-core:#202125; --center-line:var(--line);
   --stick:#e9e7e0; --dealer:#ff7a5c;
@@ -138,10 +138,14 @@ button{font:inherit;color:inherit}
 .mid span{font-size:calc(var(--pw)*.55);color:var(--muted);font-variant-numeric:tabular-nums}
 
 /* tiles */
-.tile{width:var(--w);height:calc(var(--w)*1.36);position:relative;flex:none;border-radius:calc(var(--w)*.13);background:linear-gradient(170deg,var(--ivory) 55%,var(--ivory-2));box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--w)*.07) 0 var(--tile-edge),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow);margin-bottom:calc(var(--w)*.07)}
+/* Modern themes: flat tiles with a thin outline and a soft shadow. Classic overrides below with the 3D look. */
+.tile{width:var(--w);height:calc(var(--w)*1.36);position:relative;flex:none;border-radius:calc(var(--w)*.14);background:var(--ivory);box-shadow:0 0 0 1px var(--tile-edge),0 1px 3px var(--tile-shadow);margin-bottom:calc(var(--w)*.07)}
+.tile svg .h{fill:var(--ivory)} .tile svg .hs{stroke:var(--ivory)}
 .tile .face{position:absolute;inset:7% 9% 9%;display:flex;align-items:center;justify-content:center}
 .tile svg{width:100%;height:100%;display:block}
-.tile.back{background:linear-gradient(170deg,var(--back),var(--back-2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),0 calc(var(--w)*.07) 0 var(--ivory-2),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow)}
+.tile.back{background:var(--back);box-shadow:inset 0 0 0 calc(var(--w)*.09) var(--back-2),inset 0 0 0 calc(var(--w)*.09 + 1px) rgba(255,255,255,.18),0 1px 3px var(--tile-shadow)}
+:root[data-theme="classic"] .tile{border-radius:calc(var(--w)*.13);background:linear-gradient(170deg,var(--ivory) 55%,var(--ivory-2));box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--w)*.07) 0 var(--tile-edge),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow)}
+:root[data-theme="classic"] .tile.back{background:linear-gradient(170deg,var(--back),var(--back-2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),0 calc(var(--w)*.07) 0 var(--ivory-2),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow)}
 .mf{display:flex;flex-direction:column;align-items:center;line-height:.95;font-family:var(--f-tile);font-weight:800}
 .mf .n{font-size:calc(var(--w)*.46);color:var(--t-ink)}
 .mf .s{font-size:calc(var(--w)*.48);color:var(--t-red)}
@@ -179,7 +183,8 @@ button{font:inherit;color:inherit}
 .hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:14px}
 .hand .tile{cursor:pointer;transition:transform .12s ease}
 .hand .tile:hover{transform:translateY(-6%)}
-.hand .tile.sel{transform:translateY(-30%);box-shadow:0 0 0 2px var(--gold),0 calc(var(--w)*.07) 0 var(--tile-edge),0 6px 10px rgba(0,0,0,.45)}
+.hand .tile.sel{transform:translateY(-30%);box-shadow:0 0 0 2px var(--gold),0 6px 12px var(--tile-shadow)}
+:root[data-theme="classic"] .hand .tile.sel{box-shadow:0 0 0 2px var(--gold),0 calc(var(--w)*.07) 0 var(--tile-edge),0 6px 10px rgba(0,0,0,.45)}
 .hand .tile.drawn{margin-left:calc(var(--w)*.4)}
 .hand .tile.dim{filter:brightness(.45) saturate(.6);cursor:not-allowed}
 .hand .tile.rec::after{content:"";position:absolute;left:50%;bottom:calc(var(--w)*-.32);width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--gold)}

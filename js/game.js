@@ -13,16 +13,16 @@ const PIN_POS={2:[[15,10.5],[15,29.5]],3:[[7.5,8],[15,20],[22.5,32]],4:[[9,11],[
 const PIN_R={2:7,3:5.6,4:5.4,5:5,6:4.7,7:4.2,8:4.2,9:4};
 const PIN_COL={2:'GB',3:'BRG',4:'BGGB',5:'BGRGB',6:'GGRRRR',7:'GGGRRRR',8:'BBBBBBBB',9:'BBBRRRGGG'};
 const SOU={2:{p:[[15,10.5],[15,29.5]],h:15},3:{p:[[15,10.5],[9,29.5],[21,29.5]],h:15},4:{p:[[9,10.5],[21,10.5],[9,29.5],[21,29.5]],h:15},5:{p:[[8,10.5],[22,10.5],[15,20],[8,29.5],[22,29.5]],h:15,red:[2]},6:{p:[[7,10.5],[15,10.5],[23,10.5],[7,29.5],[15,29.5],[23,29.5]],h:15},7:{p:[[15,7],[7,20.5],[15,20.5],[23,20.5],[7,33],[15,33],[23,33]],h:10.5,red:[0]},8:{p:[[6,10.5],[12,10.5],[18,10.5],[24,10.5],[6,29.5],[12,29.5],[18,29.5],[24,29.5]],h:15,w:3.6},9:{p:[[7,7],[15,7],[23,7],[7,20],[15,20],[23,20],[7,33],[15,33],[23,33]],h:11,red:[1,4,7]}};
-function stick(x,y,w,h,c){return`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${w/2}" fill="${c}"/><rect x="${x-w/2-.4}" y="${y-.5}" width="${w+.8}" height="1" rx=".5" fill="${c}"/><line x1="${x}" y1="${y-h/2+1.8}" x2="${x}" y2="${y+h/2-1.8}" stroke="${C.I}" stroke-width=".6" opacity=".6"/>`;}
+function stick(x,y,w,h,c){return`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${w/2}" fill="${c}"/><rect x="${x-w/2-.4}" y="${y-.5}" width="${w+.8}" height="1" rx=".5" fill="${c}"/><line x1="${x}" y1="${y-h/2+1.8}" x2="${x}" y2="${y+h/2-1.8}" stroke="${C.I}" class="hs" stroke-width=".6" opacity=".6"/>`;}
 function pinSVG(n,red){
   let s='';
-  if(n===1)s=`<circle cx="15" cy="20" r="11.5" fill="${C.G}"/><circle cx="15" cy="20" r="9" fill="${C.I}"/><circle cx="15" cy="20" r="7" fill="${C.B}"/><circle cx="15" cy="20" r="3.8" fill="${C.I}"/><circle cx="15" cy="20" r="2.2" fill="${C.R}"/>`;
-  else PIN_POS[n].forEach(([x,y],i)=>{const c=C[red?'R':PIN_COL[n][i]],r=PIN_R[n];s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${(r*.6).toFixed(2)}" fill="${C.I}"/><circle cx="${x}" cy="${y}" r="${(r*.3).toFixed(2)}" fill="${c}"/>`;});
+  if(n===1)s=`<circle cx="15" cy="20" r="11.5" fill="${C.G}"/><circle cx="15" cy="20" r="9" fill="${C.I}" class="h"/><circle cx="15" cy="20" r="7" fill="${C.B}"/><circle cx="15" cy="20" r="3.8" fill="${C.I}" class="h"/><circle cx="15" cy="20" r="2.2" fill="${C.R}"/>`;
+  else PIN_POS[n].forEach(([x,y],i)=>{const c=C[red?'R':PIN_COL[n][i]],r=PIN_R[n];s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${(r*.6).toFixed(2)}" fill="${C.I}" class="h"/><circle cx="${x}" cy="${y}" r="${(r*.3).toFixed(2)}" fill="${c}"/>`;});
   return`<svg viewBox="0 0 30 40" aria-hidden="true">${s}</svg>`;
 }
 function souSVG(n,red){
   let s='';
-  if(n===1)s=stick(15,22,7,30,C.G)+`<circle cx="15" cy="8" r="4.2" fill="${C.R}"/><circle cx="15" cy="8" r="1.6" fill="${C.I}"/>`;
+  if(n===1)s=stick(15,22,7,30,C.G)+`<circle cx="15" cy="8" r="4.2" fill="${C.R}"/><circle cx="15" cy="8" r="1.6" fill="${C.I}" class="h"/>`;
   else{const L=SOU[n];L.p.forEach(([x,y],i)=>{s+=stick(x,y,L.w||4,L.h,(red||(L.red&&L.red.includes(i)))?C.R:C.G);});}
   return`<svg viewBox="0 0 30 40" aria-hidden="true">${s}</svg>`;
 }
