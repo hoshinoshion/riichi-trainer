@@ -38,19 +38,33 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 <div class="app">
   <header class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><g transform="rotate(-14 24 33)"><rect x="12" y="16" width="24" height="33" rx="5" fill="#fbfaf5" fill-opacity=".42"/></g><g transform="rotate(9 40 32)"><rect x="27" y="14" width="25" height="35" rx="5.5" fill="#fbfaf5"/><circle cx="39.5" cy="31.5" r="6" fill="#e5484d"/></g></svg><div><h1 data-i18n="title">立直麻将练习场</h1><p data-i18n="subtitle">单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
-    <div class="status" id="status"></div>
+    <div class="tools">
+      <button class="tool" id="btnNew" type="button" data-i18n-title="newGame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="newGame">新对局</span></button>
+      <label class="tool sel" data-i18n-title="set.lang"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="langCur"></span>
+        <select id="optLang" data-i18n-aria="set.lang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
+      <label class="tool sel" data-i18n-title="set.theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg><span id="themeCur"></span>
+        <select id="optTheme" data-i18n-aria="set.theme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option></select></label>
+    </div>
   </header>
 
   <div class="maincol">
   <main class="game">
     <div class="stage">
-      <section class="opps" id="opps" aria-label="对手" data-i18n-aria="oppsLabel"></section>
-      <section class="tablewrap"><div class="square" id="square"></div></section>
-      <section class="me">
-        <div class="mebar" id="mebar"></div>
+      <!-- One table surface: the four seats around the play mat (round info in its centre). -->
+      <section class="table">
+        <div class="arena" aria-label="对手" data-i18n-aria="oppsLabel">
+          <div class="opp top" id="opp2"></div>
+          <div class="opp left" id="opp3"></div>
+          <div class="board"><div class="square" id="square"></div></div>
+          <div class="opp right" id="opp1"></div>
+          <div class="opp bottom"><div class="mebar" id="mebar"></div></div>
+        </div>
+      </section>
+      <!-- Your hand sits just below the table, like the tiles in front of you. -->
+      <div class="me">
         <div class="actions" id="actions" aria-live="polite"></div>
         <div class="handrow"><div class="hand" id="hand"></div><div class="mymelds" id="mymelds"></div></div>
-      </section>
+      </div>
     </div>
   </main>
     <details class="card ref yaku" open>
@@ -70,10 +84,6 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
     <section class="card log"><h2 data-i18n="log">对局记录</h2><ol id="log"></ol></section>
     <section class="card settings">
       <h2 data-i18n="settings">设置</h2>
-      <label class="srow" for="optLang"><span>🌐 <span data-i18n="set.lang">语言 · Language</span></span>
-        <select id="optLang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
-      <label class="srow" for="optTheme"><span data-i18n="set.theme">外观主题</span>
-        <select id="optTheme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option></select></label>
       <label class="srow" for="optHints"><span data-i18n="set.hints">学习提示（向听 / 进张 / 听牌）</span><input type="checkbox" id="optHints"></label>
       <label class="srow" for="optOneTap"><span data-i18n="set.oneTap">单击直接出牌</span><input type="checkbox" id="optOneTap"></label>
       <label class="srow" for="optSkip"><span data-i18n="set.skip">自动跳过吃碰杠</span><input type="checkbox" id="optSkip"></label>
@@ -84,7 +94,6 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <select id="optSpeed"><option value="slow" data-i18n="opt.slow">慢</option><option value="mid" data-i18n="opt.mid">中</option><option value="fast" data-i18n="opt.fast">快</option></select></label>
       <label class="srow" for="optLen"><span data-i18n="set.len">对局长度（新游戏生效）</span>
         <select id="optLen"><option value="east" data-i18n="opt.east">东风战</option><option value="south" data-i18n="opt.south">半庄战</option></select></label>
-      <button class="btn ghost" id="btnNew" type="button" data-i18n="set.new">重新开始一局游戏</button>
     </section>
     <details class="card ref rules" open>
       <summary data-i18n="rulesTitle">规则速成</summary>
