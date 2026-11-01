@@ -31,16 +31,22 @@ button{font:inherit;color:inherit}
 /* Phone: one column in reading order (table, coach, log + settings, rules).
    Medium: table with coach, log and settings on the right; rules below.
    Wide: coach on the left, table in the middle, log and settings on the right; rules below. */
-.app{--gut:16px;max-width:1480px;margin:0 auto;padding-block:14px 40px;padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:max(var(--gut),env(safe-area-inset-right,0px));display:grid;gap:16px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "game" "coach" "side" "refs"}
-.top{grid-area:top}.game{grid-area:game}.coachcol{grid-area:coach;min-width:0}.side{grid-area:side}.refs{grid-area:refs}
+.app{--gut:16px;max-width:1480px;margin:0 auto;padding-block:14px 40px;padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:max(var(--gut),env(safe-area-inset-right,0px));display:grid;gap:16px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "game" "coach" "side" "yaku"}
+.top{grid-area:top}.coachcol{grid-area:coach;min-width:0}.side{grid-area:side}
+/* Phone: the main-column wrapper dissolves so the yaku list can come last, after settings and rules. */
+.maincol{display:contents}
+.maincol>.game{grid-area:game}.maincol>.yaku{grid-area:yaku}
 @media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 390px)/18.8)}}
 @media (min-width:900px){
-  .app{grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr auto;grid-template-areas:"top top" "game coach" "game side" "refs refs"}
+  /* Each column stacks on its own, so a tall side column never pushes the yaku list away from the table. */
+  .app{grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr;grid-template-areas:"top top" "main coach" "main side"}
+  .maincol{display:grid;gap:16px;align-content:start;min-width:0;grid-area:main}
+  .maincol>.game,.maincol>.yaku{grid-area:auto}
   .side{align-self:start}
 }
 @media (min-width:1240px){
-  .app{grid-template-columns:300px minmax(0,1fr) 290px;grid-template-rows:auto 1fr auto;grid-template-areas:"top top top" "coach game side" "refs refs refs";gap:16px 20px}
-  .coachcol{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto;border-radius:14px}
+  .app{grid-template-columns:300px minmax(0,1fr) 290px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "coach main side";gap:16px 20px}
+  .coachcol{align-self:start}
   .log ol{max-height:260px}
 }
 
@@ -177,8 +183,6 @@ button{font:inherit;color:inherit}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px}
 .srow select{max-width:58%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--text);font:inherit}
 .srow input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold)}
-.refs{display:grid;gap:14px;align-items:start}
-@media (min-width:900px){.refs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ref summary{cursor:pointer;font:900 16px/1.3 var(--f-head);list-style:none;display:flex;justify-content:space-between;align-items:center}
 .ref summary::-webkit-details-marker{display:none}
 .ref summary::after{content:"＋";color:var(--muted);font-family:var(--f-ui)}
