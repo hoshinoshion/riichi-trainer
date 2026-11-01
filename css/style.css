@@ -77,7 +77,7 @@ button{font:inherit;color:inherit}
 /* Phone: the main-column wrapper dissolves so the yaku list can come last, after settings and rules. */
 .maincol{display:contents}
 .maincol>.game{grid-area:game}.maincol>.yaku{grid-area:yaku}
-@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 420px)/18.8)}}
+@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 450px)/18.8)}}
 @media (min-width:900px){
   /* Each column stacks on its own, so a tall side column never pushes the yaku list away from the table. */
   .app{grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr;grid-template-areas:"top top" "main coach" "main side"}
@@ -113,9 +113,11 @@ button{font:inherit;color:inherit}
   --tw:min(44px,calc((100cqi - 2*var(--tpad) - 14px)/15.2))}
 /* The table: status strip, opponents around the discard area, then your seat and hand. */
 .table{background:var(--table-bg);box-shadow:var(--table-shadow);border-radius:20px;padding:var(--tpad);display:grid;gap:12px;min-width:0}
-.arena{display:grid;grid-template-columns:var(--side) auto var(--side);justify-content:center;grid-template-areas:". top ." "left board right";gap:8px var(--agap);align-items:center}
+/* Top and bottom rows share one height (1fr of an auto-height grid), so the mat sits in the exact centre. */
+.arena{display:grid;grid-template-columns:var(--side) auto var(--side);grid-template-rows:1fr auto 1fr;justify-content:center;grid-template-areas:". top ." "left board right" ". bottom .";gap:10px var(--agap);align-items:center}
 .opp{min-width:0;display:flex;justify-content:center;align-items:center}
-.opp.top{grid-area:top}.opp.left{grid-area:left}.opp.right{grid-area:right}
+.opp.top{grid-area:top;align-self:end}.opp.left{grid-area:left}.opp.right{grid-area:right}
+.opp.bottom{grid-area:bottom;align-self:start}
 .board{grid-area:board;display:flex;justify-content:center;min-width:0}
 /* Side seats stand upright when there is room beside the board. */
 @container (min-width:601px){
@@ -135,7 +137,8 @@ button{font:inherit;color:inherit}
 @container (max-width:600px){
   .stage{--side:0px;--agap:0px;--tpad:8px}
   .table{border-radius:16px;gap:10px}
-  .arena{grid-template-columns:repeat(3,minmax(0,1fr));justify-content:stretch;grid-template-areas:"left top right" "board board board";gap:6px;align-items:start}
+  .arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto;justify-content:stretch;grid-template-areas:"left top right" "board board board" "bottom bottom bottom";gap:6px;align-items:start}
+  .opp.top{align-self:start}
   /* .table prefix: these must beat the base seat rules that come later in the file. */
   .table .plate{width:100%}
   .table .ph{flex-wrap:wrap;justify-content:center;border-radius:12px;padding:5px 6px;row-gap:3px;width:100%}

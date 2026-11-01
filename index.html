@@ -50,20 +50,21 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
   <div class="maincol">
   <main class="game">
     <div class="stage">
-      <!-- One table surface: opponents around the discard area (round info in its centre), then your seat and hand. -->
+      <!-- One table surface: the four seats around the play mat (round info in its centre). -->
       <section class="table">
         <div class="arena" aria-label="对手" data-i18n-aria="oppsLabel">
           <div class="opp top" id="opp2"></div>
           <div class="opp left" id="opp3"></div>
           <div class="board"><div class="square" id="square"></div></div>
           <div class="opp right" id="opp1"></div>
-        </div>
-        <div class="me">
-          <div class="mebar" id="mebar"></div>
-          <div class="actions" id="actions" aria-live="polite"></div>
-          <div class="handrow"><div class="hand" id="hand"></div><div class="mymelds" id="mymelds"></div></div>
+          <div class="opp bottom"><div class="mebar" id="mebar"></div></div>
         </div>
       </section>
+      <!-- Your hand sits just below the table, like the tiles in front of you. -->
+      <div class="me">
+        <div class="actions" id="actions" aria-live="polite"></div>
+        <div class="handrow"><div class="hand" id="hand"></div><div class="mymelds" id="mymelds"></div></div>
+      </div>
     </div>
   </main>
     <details class="card ref yaku" open>
