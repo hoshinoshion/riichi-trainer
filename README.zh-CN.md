@@ -62,7 +62,11 @@ tools/sim.js        无界面的电脑互打模拟器，用来调难度
 
 ## 部署
 
-这是纯静态网站，可以直接部署到 GitHub Pages：仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支选 `main`、目录选 `/ (root)`。几分钟后可以在 `https://hoshinoshion.github.io/riichi-trainer/` 访问。Cloudflare Pages、Vercel、Netlify 也都能直接部署，不需要构建命令。
+这是纯静态网站，不需要构建。
+
+**Cloudflare Workers**（仓库已带 `wrangler.jsonc`）：Cloudflare 控制台 → Workers & Pages → Create application → GitHub，选择本仓库，构建命令留空，部署命令保持 `npx wrangler deploy`，点 Save and Deploy。Worker 名称要和 `wrangler.jsonc` 里的 `name` 一致。之后每次推送到 `main` 都会自动重新部署。网站只以静态资源形式提供，访问不计入 Worker 请求用量；`.assetsignore` 会把测试、工具脚本和文档排除在上传之外。
+
+**GitHub Pages**：仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支选 `main`、目录选 `/ (root)`。几分钟后可以在 `https://hoshinoshion.github.io/riichi-trainer/` 访问。Vercel、Netlify 也都能直接部署，不需要构建命令。
 
 ## 开源协议
 

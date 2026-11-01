@@ -64,7 +64,11 @@ tools/sim.js        Headless AI-vs-AI simulator for tuning difficulty
 
 ## Deployment
 
-This is a static site, so it can be published with GitHub Pages: in the repository go to Settings → Pages, set the source to `Deploy from a branch`, and choose branch `main` with folder `/ (root)`. After a few minutes it is available at `https://hoshinoshion.github.io/riichi-trainer/`. Cloudflare Pages, Vercel and Netlify also work with no build command.
+This is a static site with no build step.
+
+**Cloudflare Workers** (the repository includes `wrangler.jsonc`): in the Cloudflare dashboard go to Workers & Pages → Create application → GitHub, pick this repository, leave the build command empty and keep the deploy command `npx wrangler deploy`, then select Save and Deploy. The Worker name must match `name` in `wrangler.jsonc`. Every push to `main` redeploys. The site is served as static assets only, so visits do not count toward Worker request usage. `.assetsignore` keeps tests, tools and docs out of the upload.
+
+**GitHub Pages**: in the repository go to Settings → Pages, set the source to `Deploy from a branch`, and choose branch `main` with folder `/ (root)`. After a few minutes it is available at `https://hoshinoshion.github.io/riichi-trainer/`. Vercel and Netlify also work with no build command.
 
 ## License
 

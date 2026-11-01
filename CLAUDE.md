@@ -14,4 +14,5 @@ Single-player riichi mahjong in the browser for learning. Static site: no build 
 - Keep engine logic in `engine.js` and free of DOM access so it stays testable.
 - Add a test in `tests/engine.test.js` for any scoring or yaku change; run `npm test`.
 - When changing AI behaviour, check the levels still rank easy < normal < hard with `npm run sim` (games are noisy: use 100+ games before trusting a difference of a few thousand points).
+- Deployed to Cloudflare Workers as static assets only (`wrangler.jsonc`, assets dir `.`). Any new public file must not be excluded by `.assetsignore`; any new dev-only file or folder should be added to it.
 - Plain scripts loaded in order (`engine.js` then `game.js`); no modules or bundler.

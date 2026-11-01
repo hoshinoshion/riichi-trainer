@@ -1,0 +1,9 @@
+// Cloudflare Workers config: static assets only, no Worker script.
+// Requests that match a file here are served directly and are not billed as Worker requests.
+{
+  "name": "riichi-trainer",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "."
+  }
+}

@@ -1,0 +1,14 @@
+# Files that are not uploaded as public static assets on Cloudflare Workers
+.git
+.gitignore
+.assetsignore
+.DS_Store
+node_modules
+tests
+tools
+*.md
+LICENSE
+package.json
+package-lock.json
+wrangler.jsonc
+.wrangler
