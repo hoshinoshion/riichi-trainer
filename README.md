@@ -8,7 +8,7 @@ A single-player riichi (Japanese) mahjong game for the browser. You play against
 
 Plain HTML, CSS and JavaScript: no build step and no backend. Play it online, or open `index.html` locally.
 
-The interface is in Simplified Chinese.
+The interface is available in Japanese, English, Simplified Chinese and Traditional Chinese. It follows your browser language (Japanese if none of these match) and can be switched in Settings.
 
 ## Features
 
@@ -25,6 +25,9 @@ The interface is in Simplified Chinese.
   - **Normal (普通)**: discards by effective draws, declares riichi, calls pon on value tiles and toward open tanyao, and folds against riichi when far from tenpai
   - **Hard (困难)**: looks two draws ahead to prefer good shapes, picks the tenpai wait with the best expected score, stays damaten on hands already worth a mangan, decides push or fold from its hand value, treats dangerous open hands as threats, folds using suji, kabe and no-chance reads, and avoids kan into a riichi
   - **Mixed**: one opponent at each level (shimocha easy, toimen normal, kamicha hard), handy for comparing styles
+- **Languages**: Japanese, English, Simplified Chinese and Traditional Chinese, picked from the browser language and switchable in Settings
+- **Themes**: modern light and dark (following the system setting by default) plus the classic felt table, switchable in Settings
+- **Installable app (PWA)**: add it to your phone's home screen and it opens full screen like an app, and keeps working offline. On iPhone, open the site in Safari, tap Share → Add to Home Screen; on Android Chrome, use the menu → Install app (or Add to Home screen)
 
 ## Rules
 
@@ -56,13 +59,18 @@ node tools/sim.js 60 normal,normal,hard east # custom game count, levels and len
 ## Project layout
 
 ```
-index.html          Page structure
+index.html          Page structure (and the inline script that picks the theme before first paint)
 favicon.svg         Site icon
-css/style.css       Styles for tiles, table and panels
+manifest*.webmanifest, sw.js  PWA manifests (one per language) and offline service worker
+icons/              Logo and app icons (PNGs rendered by tools/icons.js)
+css/style.css       Styles and theme colour tokens
+js/i18n.js          UI text in four languages and the t() lookup
 js/engine.js        UI-independent rules engine: shanten, hand decomposition, yaku, fu and points
 js/game.js          Game flow, computer AI, player actions, rendering and coach panel
-tests/              Engine tests
+js/shell.js         Browser-only shell: theme switching and service worker registration
+tests/              Engine, game-rule and translation tests
 tools/sim.js        Headless AI-vs-AI simulator for tuning difficulty
+tools/icons.js      Renders the PNG app icons from icons/logo.svg
 ```
 
 ## Deployment

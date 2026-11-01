@@ -1,10 +1,10 @@
 // ===================== Settings =====================
-const S=(()=>{const d={hints:true,oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
+const S=(()=>{const d={hints:true,oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal',theme:'auto',lang:'auto'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
 function saveS(){try{localStorage.setItem('rmj-settings',JSON.stringify(S));}catch(e){}}
 const DELAY={slow:950,mid:560,fast:220};
 const delay=()=>DELAY[S.speed]||560;
 const $=s=>document.querySelector(s);
-const NAMES=['你','下家','对家','上家'];
+setLang(S.lang);
 const ROT=[0,-90,180,90];
 
 // ===================== Tile rendering =====================
@@ -13,16 +13,16 @@ const PIN_POS={2:[[15,10.5],[15,29.5]],3:[[7.5,8],[15,20],[22.5,32]],4:[[9,11],[
 const PIN_R={2:7,3:5.6,4:5.4,5:5,6:4.7,7:4.2,8:4.2,9:4};
 const PIN_COL={2:'GB',3:'BRG',4:'BGGB',5:'BGRGB',6:'GGRRRR',7:'GGGRRRR',8:'BBBBBBBB',9:'BBBRRRGGG'};
 const SOU={2:{p:[[15,10.5],[15,29.5]],h:15},3:{p:[[15,10.5],[9,29.5],[21,29.5]],h:15},4:{p:[[9,10.5],[21,10.5],[9,29.5],[21,29.5]],h:15},5:{p:[[8,10.5],[22,10.5],[15,20],[8,29.5],[22,29.5]],h:15,red:[2]},6:{p:[[7,10.5],[15,10.5],[23,10.5],[7,29.5],[15,29.5],[23,29.5]],h:15},7:{p:[[15,7],[7,20.5],[15,20.5],[23,20.5],[7,33],[15,33],[23,33]],h:10.5,red:[0]},8:{p:[[6,10.5],[12,10.5],[18,10.5],[24,10.5],[6,29.5],[12,29.5],[18,29.5],[24,29.5]],h:15,w:3.6},9:{p:[[7,7],[15,7],[23,7],[7,20],[15,20],[23,20],[7,33],[15,33],[23,33]],h:11,red:[1,4,7]}};
-function stick(x,y,w,h,c){return`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${w/2}" fill="${c}"/><rect x="${x-w/2-.4}" y="${y-.5}" width="${w+.8}" height="1" rx=".5" fill="${c}"/><line x1="${x}" y1="${y-h/2+1.8}" x2="${x}" y2="${y+h/2-1.8}" stroke="${C.I}" stroke-width=".6" opacity=".6"/>`;}
+function stick(x,y,w,h,c){return`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${w/2}" fill="${c}"/><rect x="${x-w/2-.4}" y="${y-.5}" width="${w+.8}" height="1" rx=".5" fill="${c}"/><line x1="${x}" y1="${y-h/2+1.8}" x2="${x}" y2="${y+h/2-1.8}" stroke="${C.I}" class="hs" stroke-width=".6" opacity=".6"/>`;}
 function pinSVG(n,red){
   let s='';
-  if(n===1)s=`<circle cx="15" cy="20" r="11.5" fill="${C.G}"/><circle cx="15" cy="20" r="9" fill="${C.I}"/><circle cx="15" cy="20" r="7" fill="${C.B}"/><circle cx="15" cy="20" r="3.8" fill="${C.I}"/><circle cx="15" cy="20" r="2.2" fill="${C.R}"/>`;
-  else PIN_POS[n].forEach(([x,y],i)=>{const c=C[red?'R':PIN_COL[n][i]],r=PIN_R[n];s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${(r*.6).toFixed(2)}" fill="${C.I}"/><circle cx="${x}" cy="${y}" r="${(r*.3).toFixed(2)}" fill="${c}"/>`;});
+  if(n===1)s=`<circle cx="15" cy="20" r="11.5" fill="${C.G}"/><circle cx="15" cy="20" r="9" fill="${C.I}" class="h"/><circle cx="15" cy="20" r="7" fill="${C.B}"/><circle cx="15" cy="20" r="3.8" fill="${C.I}" class="h"/><circle cx="15" cy="20" r="2.2" fill="${C.R}"/>`;
+  else PIN_POS[n].forEach(([x,y],i)=>{const c=C[red?'R':PIN_COL[n][i]],r=PIN_R[n];s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${(r*.6).toFixed(2)}" fill="${C.I}" class="h"/><circle cx="${x}" cy="${y}" r="${(r*.3).toFixed(2)}" fill="${c}"/>`;});
   return`<svg viewBox="0 0 30 40" aria-hidden="true">${s}</svg>`;
 }
 function souSVG(n,red){
   let s='';
-  if(n===1)s=stick(15,22,7,30,C.G)+`<circle cx="15" cy="8" r="4.2" fill="${C.R}"/><circle cx="15" cy="8" r="1.6" fill="${C.I}"/>`;
+  if(n===1)s=stick(15,22,7,30,C.G)+`<circle cx="15" cy="8" r="4.2" fill="${C.R}"/><circle cx="15" cy="8" r="1.6" fill="${C.I}" class="h"/>`;
   else{const L=SOU[n];L.p.forEach(([x,y],i)=>{s+=stick(x,y,L.w||4,L.h,(red||(L.red&&L.red.includes(i)))?C.R:C.G);});}
   return`<svg viewBox="0 0 30 40" aria-hidden="true">${s}</svg>`;
 }
@@ -37,7 +37,7 @@ function face(t,red){
   else h=`<div class="hf h${t}">${'東南西北白發中'[t-27]}</div>`;
   return faceCache[k]=h;
 }
-function tileHTML(id,cls='',attr=''){return`<div class="tile ${cls}" ${attr} title="${tName(tt(id))}${RED_IDS.has(id)?'（赤）':''}"><div class="face">${face(tt(id),RED_IDS.has(id))}</div></div>`;}
+function tileHTML(id,cls='',attr=''){return`<div class="tile ${cls}" ${attr} title="${TN(tt(id))}${RED_IDS.has(id)?t('red'):''}"><div class="face">${face(tt(id),RED_IDS.has(id))}</div></div>`;}
 function tileT(t,cls=''){return tileHTML(t*4+3,cls);}
 function backHTML(cls=''){return`<div class="tile back ${cls}"></div>`;}
 function meldHTML(m,cls=''){
@@ -56,13 +56,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function pause(ms){const g=GEN;await sleep(ms);if(g!==GEN)throw ABORT;}
 async function input(){const g=GEN;const v=await new Promise(r=>inputResolve=r);if(v.type==='abort'||g!==GEN)throw ABORT;return v;}
 function give(v){if(inputResolve){const r=inputResolve;inputResolve=null;r(v);}}
-function log(s){G.log.push(s);}
+// Log entries are stored as a key plus raw values and translated when shown, so switching language rewrites them.
+function log(k,v){G.log.push({k,v});}
 const seatOf=p=>(p-G.dealer+4)%4;
-const roundName=()=>`${'东南西北'[G.bakaze]}${'一二三四'[G.kyoku]}局`;
+const roundName=()=>t('round',{b:G.bakaze,k:G.kyoku});
 const doraInds=()=>G.dead.slice(4,4+G.doraCount).map(tt);
 const uraInds=()=>G.dead.slice(9,9+G.doraCount).map(tt);
 const isMenzen=pl=>pl.melds.every(m=>m.type==='ankan');
-const shName=s=>s<0?'和了':s===0?'听牌':s===1?'一向听':s===2?'两向听':s+' 向听';
+const shName=SH;
 
 function newGame(){
   GEN++;give({type:'abort'});
@@ -80,7 +81,7 @@ function startRound(){
   for(let i=0;i<13;i++)for(let k=0;k<4;k++)G.players[(G.dealer+k)%4].hand.push(G.wall.pop());
   G.players.forEach(p=>p.hand.sort((a,b)=>a-b));
   Object.assign(UI,{mode:'idle',selected:null,riichiMode:false,opts:null,call:null});
-  log(`${roundName()} ${G.honba}本场 开始，庄家：${NAMES[G.dealer]}`);
+  log('start',{b:G.bakaze,k:G.kyoku,h:G.honba,d:G.dealer});
 }
 function ctxFor(p,winId,isTsumo,sit,withUra){
   const pl=G.players[p];
@@ -179,8 +180,8 @@ function doDiscard(p,id,riichi){
   flushDora();
   const pl=G.players[p];pl.hand.splice(pl.hand.indexOf(id),1);
   const tsumogiri=id===pl.drawn;pl.drawn=null;pl.hand.sort((a,b)=>a-b);
-  if(riichi){pl.doubleRiichi=G.noCalls&&pl.river.length===0;pl.riichi=true;pl.ippatsu=true;pl.riichiPending=true;log(`${NAMES[p]} ${pl.doubleRiichi?'两立直':'立直'}！打 ${tName(tt(id))}`);}
-  else{pl.ippatsu=false;log(`${NAMES[p]} 打 ${tName(tt(id))}${tsumogiri?'（摸切）':''}`);}
+  if(riichi){pl.doubleRiichi=G.noCalls&&pl.river.length===0;pl.riichi=true;pl.ippatsu=true;pl.riichiPending=true;log('riichi',{p,dbl:pl.doubleRiichi,t:tt(id)});}
+  else{pl.ippatsu=false;log('discard',{p,t:tt(id),tg:tsumogiri});}
   pl.river.push({id,riichi,tsumogiri,fresh:true});
   pl.tempFuriten=false;
   G.players.forEach((q,i)=>{if(i!==p&&q.riichi)q.safe.add(tt(id));});
@@ -193,8 +194,8 @@ function flushDora(){G.doraCount+=G.pendingDora;G.pendingDora=0;}
 function revealKan(open){G.kanCount++;G.wall.shift();flushDora();if(open)G.pendingDora++;else G.doraCount++;}
 function doSelfKan(p,o){
   const pl=G.players[p];
-  if(o.kind==='ankan'){const ids=pl.hand.filter(id=>tt(id)===o.t);pl.hand=pl.hand.filter(id=>tt(id)!==o.t);pl.melds.push({type:'ankan',ids,called:null,from:0});log(`${NAMES[p]} 暗杠 ${tName(o.t)}`);}
-  else{const id=pl.hand.find(x=>tt(x)===o.t);pl.hand.splice(pl.hand.indexOf(id),1);const m=pl.melds[o.i];m.type='kakan';m.ids.push(id);log(`${NAMES[p]} 加杠 ${tName(o.t)}`);}
+  if(o.kind==='ankan'){const ids=pl.hand.filter(id=>tt(id)===o.t);pl.hand=pl.hand.filter(id=>tt(id)!==o.t);pl.melds.push({type:'ankan',ids,called:null,from:0});log('ankan',{p,t:o.t});}
+  else{const id=pl.hand.find(x=>tt(x)===o.t);pl.hand.splice(pl.hand.indexOf(id),1);const m=pl.melds[o.i];m.type='kakan';m.ids.push(id);log('kakan',{p,t:o.t});}
   pl.drawn=null;pl.hand.sort((a,b)=>a-b);brokeFlow();revealKan(o.kind!=='ankan');
 }
 function applyCall(call,d,id){
@@ -205,7 +206,7 @@ function applyCall(call,d,id){
   pl.melds.push({type:call.type==='kan'?'minkan':call.type,ids:[...use,id],called:id,from:(d-call.q+4)%4});
   brokeFlow();
   if(call.type==='kan')revealKan(true);
-  log(`${NAMES[call.q]} ${{pon:'碰',chi:'吃',kan:'明杠'}[call.type]} ${tName(tt(id))}`);
+  log('call',{p:call.q,type:call.type,t:tt(id)});
 }
 
 // ===================== AI =====================
@@ -213,9 +214,8 @@ function applyCall(call,d,id){
 // 普通: pure tile efficiency, folds against riichi when far from tenpai.
 // 困难: picks the tenpai wait with the best expected score, damaten on big hands, push/fold by hand value,
 // reads dangerous open hands as threats, uses suji / kabe / no-chance when folding, avoids kan into a riichi.
-const LEVELS={easy:'入门',normal:'普通',hard:'困难'};
 const MIXED=[null,'easy','normal','hard'];
-function lvl(p){return S.ai==='mixed'?MIXED[p]:(LEVELS[S.ai]?S.ai:'normal');}
+function lvl(p){return S.ai==='mixed'?MIXED[p]:(['easy','normal','hard'].includes(S.ai)?S.ai:'normal');}
 const rnd=Math.random;
 function keepValue(t,p){
   const pl=G.players[p],c=counts(pl.hand);let v;
@@ -498,9 +498,9 @@ async function finishWin(w,l,winId,res){
   deltas[w]+=G.kyotaku*1000;
   const before=G.players.map(x=>x.score);
   G.players.forEach((x,i)=>x.score+=deltas[i]);G.kyotaku=0;
-  log(`${NAMES[w]} ${l===null?'自摸':'荣和'}${l!==null?'（'+NAMES[l]+'放铳）':''} ${res.yakuman?res.label:res.han+'番'}`);
+  log('win',{w,l,ym:res.yakuman,label:res.label,han:res.han});
   G.turn=-1;render();
-  await showModal(winModal(w,l,winId,res,deltas,before),'下一局');
+  await showModal(winModal(w,l,winId,res,deltas,before),t('next'));
   return{winner:w};
 }
 async function exhaustive(){
@@ -508,10 +508,10 @@ async function exhaustive(){
   if(n>0&&n<4)ten.forEach((x,i)=>deltas[i]=x?3000/n:-3000/(4-n));
   const before=G.players.map(x=>x.score);
   G.players.forEach((x,i)=>x.score+=deltas[i]);
-  log(`流局：听牌 ${ten.map((x,i)=>x?NAMES[i]:null).filter(Boolean).join('、')||'无人'}`);
+  log('draw',{ten:ten.map((x,i)=>x?i:-1).filter(i=>i>=0)});
   G.turn=-1;render();
-  const hands=G.players.map((pl,i)=>ten[i]?`<div class="mrow"><div><b>${NAMES[i]}</b> 听牌：${waitsOf(i).map(t=>tName(t)).join(' ')}</div><div class="mhand">${pl.hand.map(id=>tileHTML(id)).join('')}${pl.melds.length?'<span class="gap"></span>':''}${pl.melds.map(m=>meldHTML(m)).join('')}</div></div>`:'').join('');
-  await showModal(`<div><span class="mkind draw">流局</span><h2>牌山摸完了</h2></div>${hands||'<p class="note">四家都没听牌，不用付点。</p>'}<p class="note">流局时没听牌的人向听牌的人共付 3000 点。庄家听牌则连庄，本场数 +1。</p>${deltasHTML(deltas,before)}`,'下一局');
+  const hands=G.players.map((pl,i)=>ten[i]?`<div class="mrow"><div>${t('tenpaiLine',{p:P(i),waits:waitsOf(i).map(TN).join(' ')})}</div><div class="mhand">${pl.hand.map(id=>tileHTML(id)).join('')}${pl.melds.length?'<span class="gap"></span>':''}${pl.melds.map(m=>meldHTML(m)).join('')}</div></div>`:'').join('');
+  await showModal(`<div><span class="mkind draw">${t('drawKind')}</span><h2>${t('drawTitle')}</h2></div>${hands||`<p class="note">${t('noTenpai')}</p>`}<p class="note">${t('drawNote')}</p>${deltasHTML(deltas,before)}`,t('next'));
   return{draw:true,dealerTenpai:ten[G.dealer]};
 }
 async function gameLoop(){
@@ -534,8 +534,8 @@ async function showFinal(){
   const order=[0,1,2,3].sort((a,b)=>G.players[b].score-G.players[a].score||a-b);
   G.players[order[0]].score+=G.kyotaku*1000;G.kyotaku=0;
   render();
-  const html=`<div><span class="mkind">终局</span><h2>${order[0]===0?'恭喜，你拿下第一！':'对局结束'}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${NAMES[p]}</span><span>${G.players[p].score}</span></div>`).join('')}</div>`;
-  await showModal(html,'再来一局');
+  const html=`<div><span class="mkind">${t('endKind')}</span><h2>${order[0]===0?t('firstPlace'):t('gameOver')}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${P(p)}</span><span>${G.players[p].score}</span></div>`).join('')}</div>`;
+  await showModal(html,t('again'));
   newGame();
 }
 
@@ -549,21 +549,21 @@ function showModal(html,btn){
   });
 }
 function deltasHTML(deltas,before){
-  return`<div class="deltas">${[0,1,2,3].map(i=>`<div><small>${NAMES[i]} · ${WIND_CH[seatOf(i)]}</small>${before[i]+deltas[i]}<small class="${deltas[i]>0?'up':deltas[i]<0?'dn':''}">${deltas[i]>0?'+':''}${deltas[i]||'±0'}</small></div>`).join('')}</div>`;
+  return`<div class="deltas">${[0,1,2,3].map(i=>`<div><small>${P(i)} · ${W4(seatOf(i))}</small>${before[i]+deltas[i]}<small class="${deltas[i]>0?'up':deltas[i]<0?'dn':''}">${deltas[i]>0?'+':''}${deltas[i]||'±0'}</small></div>`).join('')}</div>`;
 }
 function winModal(w,l,winId,res,deltas,before){
   const pl=G.players[w];
   const hand=(l===null?pl.hand.filter(x=>x!==winId):pl.hand.slice()).sort((a,b)=>a-b);
   const handH=hand.map(id=>tileHTML(id)).join('')+'<span class="gap"></span>'+tileHTML(winId,'win')+(pl.melds.length?'<span class="gap"></span>':'')+pl.melds.map(m=>meldHTML(m)).join('');
-  let rows=res.yaku.map(([n,h])=>`<li><span>${n}</span><b>${typeof h==='number'?h+' 番':h}</b></li>`).join('');
-  if(!res.yakuman)rows+=[['宝牌',res.dora],['赤宝牌',res.aka],['里宝牌',res.ura]].filter(x=>x[1]).map(([n,h])=>`<li><span>${n}</span><b>${h} 番</b></li>`).join('');
-  const total=res.yakuman?res.label:`${res.fu} 符 ${res.han} 番${res.label?' · '+res.label:''}`;
-  const pay=l===null?(res.isDealer?`每家付 ${res.tsumoAll}`:`庄家付 ${res.tsumoD}，闲家各付 ${res.tsumoN}`):`${NAMES[l]} 付 ${res.ron}`;
-  const extra=(G.honba?`，本场 +${l===null?G.honba*100+'/家':G.honba*300}`:'');
-  const ura=(pl.riichi)?`<div>里宝牌指示 ${uraInds().map(t=>tileT(t,'xs')).join('')}</div>`:'';
-  return`<div><span class="mkind">${l===null?'自摸':'荣和'}</span><h2>${w===0?'你和牌了！':NAMES[w]+' 和牌'}${l===0?'（你放铳）':''}</h2></div>
+  let rows=res.yaku.map(([n,h])=>`<li><span>${YN(n)}</span><b>${typeof h==='number'?t('han',{n:h}):t('yakuman')}</b></li>`).join('');
+  if(!res.yakuman)rows+=[[t('dora'),res.dora],[t('aka'),res.aka],[t('ura'),res.ura]].filter(x=>x[1]).map(([n,h])=>`<li><span>${n}</span><b>${t('han',{n:h})}</b></li>`).join('');
+  const total=res.yakuman?LBL(res.label):t('fuHan',{fu:res.fu,han:res.han,label:LBL(res.label)});
+  const pay=l===null?(res.isDealer?t('payAll',{n:res.tsumoAll}):t('payTsumo',{d:res.tsumoD,n:res.tsumoN})):t('payRon',{p:P(l),n:res.ron});
+  const extra=(G.honba?(l===null?t('honbaTsumo',{n:G.honba*100}):t('honbaRon',{n:G.honba*300})):'');
+  const ura=(pl.riichi)?`<div>${t('uraInd')} ${uraInds().map(x=>tileT(x,'xs')).join('')}</div>`:'';
+  return`<div><span class="mkind">${l===null?t('tsumo'):t('ron')}</span><h2>${w===0?t('youWon'):t('playerWon',{p:P(w)})}${l===0?t('youDealt'):''}</h2></div>
   <div class="mhand">${handH}</div>
-  <div class="mdora"><div>宝牌指示 ${doraInds().map(t=>tileT(t,'xs')).join('')}</div>${ura}</div>
+  <div class="mdora"><div>${t('doraInd')} ${doraInds().map(x=>tileT(x,'xs')).join('')}</div>${ura}</div>
   <ul class="myaku">${rows}</ul>
   <div class="mtotal">${total}<small>${pay}${extra}</small></div>
   ${deltasHTML(deltas,before)}`;
@@ -573,16 +573,16 @@ function winModal(w,l,winId,res,deltas,before){
 function render(){if(!G)return;renderStatus();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
 function renderStatus(){
   const inds=doraInds();
-  $('#status').innerHTML=`<div class="stat"><small>场次</small><b>${roundName()} ${G.honba}本场</b></div>
-  <div class="stat"><small>供托</small><b>${G.kyotaku}</b></div>
-  <div class="stat"><small>余牌</small><b>${G.wall.length}</b></div>
-  <div class="stat"><small>宝牌指示</small><div class="dora">${[0,1,2,3,4].map(i=>i<inds.length?tileT(inds[i]):backHTML()).join('')}</div></div>`;
+  $('#status').innerHTML=`<div class="stat"><small>${t('stat.round')}</small><b>${t('roundStat',{b:G.bakaze,k:G.kyoku,h:G.honba})}</b></div>
+  <div class="stat"><small>${t('stat.kyotaku')}</small><b>${G.kyotaku}</b></div>
+  <div class="stat"><small>${t('stat.wall')}</small><b>${G.wall.length}</b></div>
+  <div class="stat"><small>${t('stat.dora')}</small><div class="dora">${[0,1,2,3,4].map(i=>i<inds.length?tileT(inds[i]):backHTML()).join('')}</div></div>`;
 }
 function renderOpps(){
   $('#opps').innerHTML=[3,2,1].map(p=>{
     const pl=G.players[p],sw=seatOf(p);
-    return`<div class="plate${G.turn===p?' on':''}"><div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${NAMES[p]}</span><span class="lv lv-${lvl(p)}" title="电脑难度">${LEVELS[lvl(p)]}</span><span class="sc">${pl.score}</span></div>
-    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div>${pl.riichi?'<span class="rtag">立直</span>':''}</div>
+    return`<div class="plate${G.turn===p?' on':''}"><div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><span class="sc">${pl.score}</span></div>
+    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div>${pl.riichi?`<span class="rtag">${t('riichiTag')}</span>`:''}</div>
     <div class="pm">${pl.melds.map(m=>meldHTML(m,'mini')).join('')}</div></div>`;
   }).join('');
 }
@@ -594,13 +594,13 @@ function renderSquare(){
   }
   h+='<div class="center">';
   for(let p=0;p<4;p++){const pl=G.players[p];h+=`<div class="seat${G.turn===p?' on':''}${seatOf(p)===0?' dealer':''}" style="--r:${ROT[p]}deg"><b>${WIND_CH[seatOf(p)]}</b><span>${pl.score}</span>${pl.riichi?'<i class="stick"></i>':''}</div>`;}
-  h+=`<div class="mid"><b>${roundName()}</b><span>余 ${G.wall.length}</span></div></div>`;
+  h+=`<div class="mid"><b>${roundName()}</b><span>${t('wallLeft',{n:G.wall.length})}</span></div></div>`;
   $('#square').innerHTML=h;
 }
 function renderMe(){
   const pl=G.players[0],sw=seatOf(0);
   const w0=pl.hand.length%3===1?waitsOf(0):[],fur=w0.length&&isFuriten(0,w0);
-  $('#mebar').innerHTML=`<span>你 · <b>${WIND_CH[sw]}家${sw===0?'（庄）':''}</b></span><span>点数 <b>${pl.score}</b></span>${pl.riichi?'<span class="rtag">立直中</span>':''}${fur?'<span class="ftag">振听</span>':''}`;
+  $('#mebar').innerHTML=`<span>${t('seat',{w:sw,dealer:sw===0})}</span><span>${t('points')} <b>${pl.score}</b></span>${pl.riichi?`<span class="rtag">${t('riichiOn')}</span>`:''}${fur?`<span class="ftag">${t('furiten')}</span>`:''}`;
   const ids=pl.hand.filter(x=>x!==pl.drawn).sort((a,b)=>a-b);
   if(pl.drawn!=null)ids.push(pl.drawn);
   const dset=new Set(doraInds().map(doraOf));
@@ -625,41 +625,41 @@ function renderActions(){
   const ae=document.activeElement,act=ae&&ae.closest&&ae.closest('#actions')?ae.dataset.act:null;
   if(UI.mode==='discard'){
     const o=UI.opts;
-    if(UI.riichiMode)h+=`<span class="amsg">点选立直宣言牌：亮着的牌打出后都能听牌</span><button class="btn ghost" data-act="riichi-cancel" type="button">取消</button>`;
+    if(UI.riichiMode)h+=`<span class="amsg">${t('pickRiichi')}</span><button class="btn ghost" data-act="riichi-cancel" type="button">${t('cancel')}</button>`;
     else{
-      h+=`<span class="amsg">${UI.selected!=null?'再点一次打出 <b>'+tName(tt(UI.selected))+'</b>':'轮到你：'+(S.oneTap?'点一张牌打出':'点一张牌选中，再点一次打出')}</span>`;
-      if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">自摸</button>`;
-      if(o.riichi.size)h+=`<button class="btn gold" data-act="riichi" type="button">立直</button>`;
-      o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${k.kind==='ankan'?'暗杠':'加杠'} ${tileT(k.t)}</button>`);
+      h+=`<span class="amsg">${UI.selected!=null?t('tapAgain',{t:TN(tt(UI.selected))}):t('yourTurn',{one:S.oneTap})}</span>`;
+      if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">${t('tsumo')}</button>`;
+      if(o.riichi.size)h+=`<button class="btn gold" data-act="riichi" type="button">${t('riichi')}</button>`;
+      o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${k.kind==='ankan'?t('ankan'):t('kakan')} ${tileT(k.t)}</button>`);
     }
   }else if(UI.mode==='riichiTsumo'){
     const o=UI.opts;
-    h=`<span class="amsg">${o.tsumo?'摸到和牌了！':'立直中：这张可以暗杠，听牌不变'}</span>`;
-    if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">自摸</button>`;
-    o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">暗杠 ${tileT(k.t)}</button>`);
-    h+=`<button class="btn ghost" data-act="pass" type="button">${o.tsumo?'不和，摸切':'不杠，摸切'}</button>`;
+    h=`<span class="amsg">${o.tsumo?t('gotWin'):t('riichiKanOK')}</span>`;
+    if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">${t('tsumo')}</button>`;
+    o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${t('ankan')} ${tileT(k.t)}</button>`);
+    h+=`<button class="btn ghost" data-act="pass" type="button">${o.tsumo?t('passNoWin'):t('passNoKan')}</button>`;
   }else if(UI.mode==='call'){
     const c=UI.call;
-    h=`<span class="amsg">${NAMES[c.d]} 打出 ${tileHTML(c.id,'chip')}</span>`;
-    if(c.ron)h+=`<button class="btn win" data-act="ron" type="button">荣和</button>`;
-    if(c.pon)h+=`<button class="btn gold" data-act="pon" type="button">碰</button>`;
-    if(c.kan)h+=`<button class="btn" data-act="kan" type="button">杠</button>`;
-    c.chis.forEach((p,i)=>h+=`<button class="btn" data-act="chi:${i}" type="button">吃 ${tileT(p[0])}${tileT(p[1])}</button>`);
-    h+=`<button class="btn ghost" data-act="pass" type="button">跳过</button>`;
+    h=`<span class="amsg">${t('discardedBy',{p:P(c.d)})} ${tileHTML(c.id,'chip')}</span>`;
+    if(c.ron)h+=`<button class="btn win" data-act="ron" type="button">${t('ron')}</button>`;
+    if(c.pon)h+=`<button class="btn gold" data-act="pon" type="button">${t('pon')}</button>`;
+    if(c.kan)h+=`<button class="btn" data-act="kan" type="button">${t('kan')}</button>`;
+    c.chis.forEach((p,i)=>h+=`<button class="btn" data-act="chi:${i}" type="button">${t('chi')} ${tileT(p[0])}${tileT(p[1])}</button>`);
+    h+=`<button class="btn ghost" data-act="pass" type="button">${t('skip')}</button>`;
   }else if(G.turn>=1){
-    h=`<span class="amsg">${NAMES[G.turn]} 思考中…</span>`;
-  }else if(G.turn===0&&G.players[0].riichi){h=`<span class="amsg">立直中，自动摸切</span>`;}
+    h=`<span class="amsg">${t('thinking',{p:P(G.turn)})}</span>`;
+  }else if(G.turn===0&&G.players[0].riichi){h=`<span class="amsg">${t('riichiAuto')}</span>`;}
   el.innerHTML=h;
   if(act){const b=el.querySelector(`[data-act="${act}"]`);if(b)b.focus();}
 }
-function waitLine(t,rem){
-  const res=evaluate(ctxFor(0,t*4+3,false,{riichi:G.players[0].riichi,double:G.players[0].doubleRiichi},false));
-  const txt=res?`荣和 ${res.yakuman?res.label:res.han+'番'} · ${res.ron} 点`:(isMenzen(G.players[0])?'<span class="noyaku">无役：要立直或自摸才能和</span>':'<span class="noyaku">无役：这张来了也不能和</span>');
-  return`<div class="wait">${tileT(t,'chip')}<div class="wl">${tName(t)} <small>剩 ${rem} 张</small><br>${txt}</div></div>`;
+function waitLine(x,rem){
+  const res=evaluate(ctxFor(0,x*4+3,false,{riichi:G.players[0].riichi,double:G.players[0].doubleRiichi},false));
+  const txt=res?t('ronValue',{v:res.yakuman?LBL(res.label):t('han',{n:res.han}),pts:res.ron}):`<span class="noyaku">${isMenzen(G.players[0])?t('noYakuClosed'):t('noYakuOpen')}</span>`;
+  return`<div class="wait">${tileT(x,'chip')}<div class="wl">${TN(x)} <small>${t('left',{n:rem})}</small><br>${txt}</div></div>`;
 }
 function renderCoach(){
   const body=$('#coachBody'),tag=$('#coachTag');
-  if(!S.hints){body.innerHTML='<p class="note">学习提示已关闭，可在「设置」里打开。</p>';tag.textContent='';return;}
+  if(!S.hints){body.innerHTML=`<p class="note">${t('hintsOff')}</p>`;tag.textContent='';return;}
   const pl=G.players[0];let h='';
   if(!pl.hand.length){body.innerHTML='';return;}
   const vis=visibleTo(0);
@@ -667,38 +667,39 @@ function renderCoach(){
     const c=counts(pl.hand);const cur=shanten(c,pl.melds.length);
     let rows=ukeireTable(0);if(UI.opts&&UI.opts.forbid)rows=rows.filter(r=>!UI.opts.forbid.includes(r.d));
     if(UI.riichiMode)rows=rows.filter(r=>UI.opts.riichi.has(r.d));
-    tag.textContent='14 张 · 选择打哪张';
-    h+=`<div class="big${cur<=0?' tenpai':''}">${cur===-1?'已经和了！':'现在 '+shName(cur)}</div>`;
-    h+=`<p class="note">下面按「打出后的向听数 → 有效进张数」排序。进张越多，越快听牌。</p>`;
+    tag.textContent=t('tag14');
+    h+=`<div class="big${cur<=0?' tenpai':''}">${cur===-1?t('won'):t('now',{s:shName(cur)})}</div>`;
+    h+=`<p class="note">${t('sortNote')}</p>`;
     const selT=UI.selected!=null?tt(UI.selected):-1;
     let show=rows.slice(0,5);const sr=rows.find(r=>r.d===selT);if(sr&&!show.includes(sr))show.push(sr);
-    h+=show.map((r,i)=>`<div class="crow${i===0?' best':''}${r.d===selT?' sel':''}">${tileT(r.d,'chip')}<div><div class="cl">打 <b>${tName(r.d)}</b> → ${r.s===0?'<b>听牌</b> · 听 '+r.tiles.length+' 种 '+r.n+' 张':shName(r.s)+' · 进张 '+r.tiles.length+' 种 '+r.n+' 张'}${i===0?' · 推荐':''}</div><div class="ct">${r.tiles.map(([t,n])=>tileT(t,'xs')+`<span class="cnt">${n}</span>`).join('')}</div></div></div>`).join('');
+    h+=show.map((r,i)=>`<div class="crow${i===0?' best':''}${r.d===selT?' sel':''}">${tileT(r.d,'chip')}<div><div class="cl">${t('crow',{t:TN(r.d),s:r.s,kinds:r.tiles.length,n:r.n,best:i===0})}</div><div class="ct">${r.tiles.map(([x,n])=>tileT(x,'xs')+`<span class="cnt">${n}</span>`).join('')}</div></div></div>`).join('');
   }else{
     const c=counts(pl.hand),s=shanten(c,pl.melds.length);
-    tag.textContent='13 张 · 等待中';
+    tag.textContent=t('tag13');
     h+=`<div class="big${s===0?' tenpai':''}">${shName(s)}</div>`;
     if(s===0){
       const w=waitsOf(0),fur=isFuriten(0,w);
-      h+=`<p class="note">${fur?'<span class="noyaku">振听中：只能自摸，不能荣和。</span>':'听这些牌。别人打出来可以荣和，自己摸到可以自摸。'}</p>`;
-      h+=w.map(t=>waitLine(t,4-vis[t])).join('');
+      h+=`<p class="note">${fur?`<span class="noyaku">${t('furitenNote')}</span>`:t('tenpaiNote')}</p>`;
+      h+=w.map(x=>waitLine(x,4-vis[x])).join('');
     }else{
       const acc=[];let n=0;
-      for(let t=0;t<34;t++){const rem=4-vis[t];if(rem<=0)continue;c[t]++;if(shanten(c,pl.melds.length)<s){acc.push([t,rem]);n+=rem;}c[t]--;}
-      h+=`<p class="note">摸到这些牌会前进一步（共 ${acc.length} 种 ${n} 张）：</p><div class="chips">${acc.map(([t,r])=>tileT(t,'xs')+`<span class="cnt" style="font-size:11px;color:var(--muted);align-self:flex-end;margin:0 4px 0 1px">${r}</span>`).join('')}</div>`;
+      for(let x=0;x<34;x++){const rem=4-vis[x];if(rem<=0)continue;c[x]++;if(shanten(c,pl.melds.length)<s){acc.push([x,rem]);n+=rem;}c[x]--;}
+      h+=`<p class="note">${t('advance',{kinds:acc.length,n})}</p><div class="chips">${acc.map(([x,r])=>tileT(x,'xs')+`<span class="cnt" style="font-size:11px;color:var(--muted);align-self:flex-end;margin:0 4px 0 1px">${r}</span>`).join('')}</div>`;
     }
   }
   const threats=[1,2,3].filter(i=>G.players[i].riichi);
   if(threats.length&&!pl.riichi){
     const mine=[...new Set(pl.hand.map(tt))];
-    const safe=mine.filter(t=>threats.every(r=>danger(t,r)===0));
-    const semi=mine.filter(t=>!safe.includes(t)&&threats.every(r=>danger(t,r)<=3));
-    h+=`<div class="safe"><h3>${threats.map(i=>NAMES[i]).join('、')} 已立直 · 防守参考</h3>
-    <div class="note" style="margin:0 0 4px">现物（绝对安全）：</div><div class="chips">${safe.map(t=>tileT(t,'xs')).join('')||'<span class="note" style="margin:0">没有</span>'}</div>
-    <div class="note" style="margin:8px 0 4px">较安全（筋牌、见得多的字牌）：</div><div class="chips">${semi.map(t=>tileT(t,'xs')).join('')||'<span class="note" style="margin:0">没有</span>'}</div></div>`;
+    const safe=mine.filter(x=>threats.every(r=>danger(x,r)===0));
+    const semi=mine.filter(x=>!safe.includes(x)&&threats.every(r=>danger(x,r)<=3));
+    const none=`<span class="note" style="margin:0">${t('none')}</span>`;
+    h+=`<div class="safe"><h3>${t('safeHead',{names:threats.map(P)})}</h3>
+    <div class="note" style="margin:0 0 4px">${t('genbutsu')}</div><div class="chips">${safe.map(x=>tileT(x,'xs')).join('')||none}</div>
+    <div class="note" style="margin:8px 0 4px">${t('semiSafe')}</div><div class="chips">${semi.map(x=>tileT(x,'xs')).join('')||none}</div></div>`;
   }
   body.innerHTML=h;
 }
-function renderLog(){$('#log').innerHTML=G.log.slice(-12).reverse().map(s=>`<li>${s}</li>`).join('');}
+function renderLog(){$('#log').innerHTML=G.log.slice(-12).reverse().map(e=>`<li>${t('log.'+e.k,e.v)}</li>`).join('');}
 
 // ===================== Events =====================
 function submit(v){Object.assign(UI,{selected:null,riichiMode:false});give(v);}
@@ -733,19 +734,29 @@ $('#actions').addEventListener('click',e=>{
   }
 });
 const bind=(id,key,isBox)=>{const el=$('#'+id);if(isBox)el.checked=S[key];else el.value=S[key];el.addEventListener('change',()=>{S[key]=isBox?el.checked:el.value;saveS();render();});};
-bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);
-const AI_HINT={easy:'入门：只看大致牌效，经常打错，常无役乱鸣，几乎不弃和。适合刚学规则时练手。',
-  normal:'普通：按进张数打牌效，有人立直且自己离听牌远时弃和。',
-  hard:'困难：多看两步、优先好形，听牌时选打点期望最高的听法，大牌默听，按手牌价值决定押退，会防危险的副露，弃和时用筋、壁、No Chance。',
-  mixed:'混合：下家入门、对家普通、上家困难，方便比较三种打法。'};
-const aiHint=()=>{$('#aiHint').textContent=AI_HINT[S.ai]||AI_HINT.normal;};
-$('#optAI').addEventListener('change',aiHint);aiHint();
+bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);bind('optLang','lang',false);
+const aiHint=()=>{$('#aiHint').textContent=L('aiHint')[S.ai]||L('aiHint').normal;};
+$('#optAI').addEventListener('change',aiHint);
 $('#btnNew').addEventListener('click',newGame);
 
-const YAKU=[['1 番',[['立直','1','门清听牌时宣言，交 1000 点'],['一发','1','立直后一巡内和牌，中途无人鸣牌'],['门前清自摸和','1','没鸣牌，自摸和牌'],['平和','1','4 组顺子 + 非役牌雀头 + 两面听，门清'],['断幺九','1 / 1','全部是 2–8 的数牌，鸣牌也算'],['一杯口','1','两组完全相同的顺子，门清'],['役牌','1 / 1','白、发、中、自风、场风的刻子，各算 1 番'],['海底摸月 / 河底捞鱼','1 / 1','摸最后一张自摸 / 荣和最后一张打出的牌'],['岭上开花','1 / 1','杠后补的岭上牌自摸']]],
-['2 番',[['两立直','2','第一巡就立直'],['七对子','2','7 个不同的对子，门清，固定 25 符'],['三色同顺','2 / 1','万筒索同数字的顺子，如 345 万筒索'],['一气通贯','2 / 1','同一花色 123、456、789'],['混全带幺九','2 / 1','每组面子和雀头都带幺九或字牌，含顺子'],['对对和','2 / 2','4 组都是刻子'],['三暗刻','2 / 2','3 组自己摸到的刻子'],['三色同刻','2 / 2','三种花色同数字的刻子'],['三杠子','2 / 2','杠了 3 次'],['混老头','2 / 2','只有幺九牌和字牌'],['小三元','2 / 2','白发中中两组刻子 + 一组雀头']]],
-['3 番以上',[['混一色','3 / 2','一种花色 + 字牌'],['纯全带幺九','3 / 2','每组都带 1 或 9，没有字牌'],['二杯口','3','两个一杯口，门清'],['清一色','6 / 5','只有一种花色']]],
-['役满',[['国士无双','役满','13 种幺九牌各一张，其中一种成对'],['四暗刻','役满','4 组暗刻'],['大三元','役满','白发中三组刻子'],['小四喜 / 大四喜','役满','东南西北：三刻一对 / 四刻'],['字一色 / 绿一色 / 清老头','役满','全字牌 / 全绿色牌 / 全 1、9'],['九莲宝灯','役满','同花色 1112345678999 + 任意一张'],['四杠子','役满','杠了 4 次'],['天和 / 地和','役满','庄家起手和 / 闲家第一巡自摸']]]];
-$('#yakuTable').innerHTML='<tr><th>役</th><th>番（门清 / 鸣牌）</th><th>条件</th></tr>'+YAKU.map(([g,rows])=>`<tr class="grp"><td colspan="3">${g}</td></tr>`+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')).join('');
+function renderYakuTable(){
+  const desc=L('yakuDesc'),head=L('yakuHead');let i=0;
+  $('#yakuTable').innerHTML=`<tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>`+YAKU_REF.map((rows,g)=>`<tr class="grp"><td colspan="3">${L('yakuGroups')[g]}</td></tr>`+
+    rows.map(([names,han])=>`<tr><td>${names.split('|').map(YN).join(' / ')}</td><td>${han||t('yakuman')}</td><td>${desc[i++]}</td></tr>`).join('')).join('');
+}
+// Static page text: elements carry data-i18n (text) or data-i18n-html (markup) keys.
+function translatePage(){
+  document.querySelectorAll('[data-i18n]').forEach(e=>{e.textContent=t(e.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-aria]').forEach(e=>{e.setAttribute('aria-label',t(e.dataset.i18nAria));});
+  $('#rulesList').innerHTML=L('rules').map(r=>`<li>${r}</li>`).join('');
+  renderYakuTable();aiHint();
+  const root=document.documentElement;if(!root)return;
+  root.lang=LANG;document.title=t('title');
+  const meta=(sel,v)=>{const m=document.querySelector(sel);if(m)m.setAttribute('content',v);};
+  meta('meta[name=description]',t('desc'));meta('meta[name=apple-mobile-web-app-title]',t('short'));
+  const man=document.querySelector('link[rel=manifest]');if(man)man.setAttribute('href',LANG==='zh-CN'?'manifest.webmanifest':`manifest.${LANG}.webmanifest`);
+}
+$('#optLang').addEventListener('change',()=>{setLang(S.lang);translatePage();render();});
+translatePage();
 
 newGame();
