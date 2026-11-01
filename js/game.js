@@ -67,7 +67,7 @@ const shName=s=>s<0?'和了':s===0?'听牌':s===1?'一向听':s===2?'两向听':
 function newGame(){
   GEN++;give({type:'abort'});
   G={players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
-     dealer:0,kyoku:0,bakaze:0,honba:0,kyotaku:0,lastWind:S.len==='south'?1:0,log:[],turn:0,wall:[],dead:[],kanCount:0,doraCount:1,noCalls:true,last:null};
+     dealer:0,kyoku:0,bakaze:0,honba:0,kyotaku:0,lastWind:S.len==='south'?1:0,log:[],turn:0,wall:[],dead:[],kanCount:0,doraCount:1,pendingDora:0,noCalls:true,last:null};
   $('#modal').hidden=true;
   gameLoop();
 }
@@ -75,7 +75,7 @@ function startRound(){
   const w=[...Array(136).keys()];
   for(let i=w.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
   G.dead=w.splice(0,14);G.wall=w;
-  G.kanCount=0;G.doraCount=1;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];
+  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];
   for(const p of G.players)Object.assign(p,{hand:[],melds:[],river:[],drawn:null,riichi:false,doubleRiichi:false,ippatsu:false,riichiPending:false,tempFuriten:false,riichiFuriten:false,safe:new Set()});
   for(let i=0;i<13;i++)for(let k=0;k<4;k++)G.players[(G.dealer+k)%4].hand.push(G.wall.pop());
   G.players.forEach(p=>p.hand.sort((a,b)=>a-b));
@@ -91,12 +91,13 @@ function sitFor(p,isTsumo,rinshan){
   return{riichi:pl.riichi,double:pl.doubleRiichi,ippatsu:pl.ippatsu,rinshan,haitei:isTsumo&&!rinshan&&G.wall.length===0,houtei:!isTsumo&&G.wall.length===0,
     tenhou:isTsumo&&first&&p===G.dealer,chiihou:isTsumo&&first&&p!==G.dealer};
 }
-function waitsOf(p){
-  const pl=G.players[p],c=counts(pl.hand),mc=pl.melds.length,w=[];
-  if(pl.hand.length%3!==1)return w;
+function waitsFor(hand,mc){
+  const c=counts(hand),w=[];
+  if(hand.length%3!==1)return w;
   for(let t=0;t<34;t++){if(c[t]>=4)continue;c[t]++;if(shanten(c,mc)===-1)w.push(t);c[t]--;}
   return w;
 }
+function waitsOf(p){const pl=G.players[p];return waitsFor(pl.hand,pl.melds.length);}
 function isFuriten(p,w){const pl=G.players[p];w=w||waitsOf(p);return pl.tempFuriten||pl.riichiFuriten||pl.river.some(r=>w.includes(tt(r.id)));}
 function markMissed(p){const pl=G.players[p];pl.tempFuriten=true;if(pl.riichi)pl.riichiFuriten=true;}
 function ronCheck(q,id){
@@ -111,7 +112,16 @@ function visibleTo(p){
   for(const i of doraInds())v[i]++;
   return v;
 }
+// Memoised per seat: render() and the AI ask for the same table several times per turn.
+// The key covers everything visibleTo() reads. Callers must not mutate the returned rows.
+const ukCache=new Map();
 function ukeireTable(p){
+  const pl=G.players[p];
+  const key=pl.hand.join()+'|'+G.players.map(q=>q.river.length+'.'+q.melds.map(m=>m.ids.length).join('')).join()+'|'+G.doraCount;
+  const hit=ukCache.get(p);if(hit&&hit.g===G&&hit.key===key)return hit.rows;
+  const rows=ukeireCompute(p);ukCache.set(p,{g:G,key,rows});return rows;
+}
+function ukeireCompute(p){
   const pl=G.players[p],c=counts(pl.hand),mc=pl.melds.length,vis=visibleTo(p),rows=[];
   for(let d=0;d<34;d++){
     if(!c[d])continue;c[d]--;
@@ -130,14 +140,31 @@ function riichiTypes(p){
   return set;
 }
 function kanOptions(p){
-  const pl=G.players[p];if(pl.riichi||G.wall.length===0||G.kanCount>=4)return[];
+  const pl=G.players[p];if(G.wall.length===0||G.kanCount>=4)return[];
   const c=counts(pl.hand),o=[];
+  if(pl.riichi){
+    // After riichi: only a closed kan of the tile just drawn, and only if it leaves the waits unchanged.
+    if(pl.drawn==null)return o;const t=tt(pl.drawn);if(c[t]!==4)return o;
+    const before=waitsFor(pl.hand.filter(id=>id!==pl.drawn),pl.melds.length);
+    const after=waitsFor(pl.hand.filter(id=>tt(id)!==t),pl.melds.length+1);
+    if(before.length&&before.join()===after.join())o.push({kind:'ankan',t});
+    return o;
+  }
   for(let t=0;t<34;t++)if(c[t]===4)o.push({kind:'ankan',t});
   pl.melds.forEach((m,i)=>{if(m.type==='pon'&&c[tt(m.ids[0])])o.push({kind:'kakan',t:tt(m.ids[0]),i});});
   return o;
 }
-// A call is only allowed if the caller still has a legal discard afterwards (the called tile type is forbidden).
-function leavesDiscard(c,useT,t){const r=c.slice();for(const u of useT)r[u]--;r[t]=0;return r.some(x=>x>0);}
+// Kuikae: after a call the called tile type may not be discarded, nor, after a chi on the end of a
+// ryanmen (e.g. 34 + 2), the tile at the other end (5).
+function kuikaeOf(t,useT){
+  const f=[t];if(!useT||useT[0]===useT[1])return f;
+  const lo=Math.min(...useT),hi=Math.max(...useT);
+  if(lo===t+1&&t%9<=5)f.push(t+3);
+  if(hi===t-1&&t%9>=3)f.push(t-3);
+  return f;
+}
+// A call is only allowed if the caller still has a legal discard afterwards.
+function leavesDiscard(c,useT,t){const r=c.slice();for(const u of useT)r[u]--;for(const f of kuikaeOf(t,useT))r[f]=0;return r.some(x=>x>0);}
 function chiPatterns(t,c){
   if(t>=27)return[];const n=t%9,o=[];
   if(n>=2&&c[t-2]&&c[t-1])o.push([t-2,t-1]);
@@ -149,6 +176,7 @@ function chiPatterns(t,c){
 // ===================== Actions =====================
 function drawTile(p,id){const pl=G.players[p];pl.hand.push(id);pl.drawn=id;}
 function doDiscard(p,id,riichi){
+  flushDora();
   const pl=G.players[p];pl.hand.splice(pl.hand.indexOf(id),1);
   const tsumogiri=id===pl.drawn;pl.drawn=null;pl.hand.sort((a,b)=>a-b);
   if(riichi){pl.doubleRiichi=G.noCalls&&pl.river.length===0;pl.riichi=true;pl.ippatsu=true;pl.riichiPending=true;log(`${NAMES[p]} ${pl.doubleRiichi?'两立直':'立直'}！打 ${tName(tt(id))}`);}
@@ -159,12 +187,15 @@ function doDiscard(p,id,riichi){
   G.last={p,id};
 }
 function brokeFlow(){G.noCalls=false;G.players.forEach(x=>x.ippatsu=false);}
-function revealKan(){G.kanCount++;G.doraCount++;G.wall.shift();}
+// Closed kan: the new dora indicator is turned at once. Open or added kan: it is turned when the next
+// tile is discarded (or at the next kan), so a rinshan win on an open kan does not see it.
+function flushDora(){G.doraCount+=G.pendingDora;G.pendingDora=0;}
+function revealKan(open){G.kanCount++;G.wall.shift();flushDora();if(open)G.pendingDora++;else G.doraCount++;}
 function doSelfKan(p,o){
   const pl=G.players[p];
   if(o.kind==='ankan'){const ids=pl.hand.filter(id=>tt(id)===o.t);pl.hand=pl.hand.filter(id=>tt(id)!==o.t);pl.melds.push({type:'ankan',ids,called:null,from:0});log(`${NAMES[p]} 暗杠 ${tName(o.t)}`);}
   else{const id=pl.hand.find(x=>tt(x)===o.t);pl.hand.splice(pl.hand.indexOf(id),1);const m=pl.melds[o.i];m.type='kakan';m.ids.push(id);log(`${NAMES[p]} 加杠 ${tName(o.t)}`);}
-  pl.drawn=null;pl.hand.sort((a,b)=>a-b);brokeFlow();revealKan();
+  pl.drawn=null;pl.hand.sort((a,b)=>a-b);brokeFlow();revealKan(o.kind!=='ankan');
 }
 function applyCall(call,d,id){
   const pl=G.players[call.q],use=[];
@@ -173,7 +204,7 @@ function applyCall(call,d,id){
   const dr=G.players[d].river;dr[dr.length-1].called=true;
   pl.melds.push({type:call.type==='kan'?'minkan':call.type,ids:[...use,id],called:id,from:(d-call.q+4)%4});
   brokeFlow();
-  if(call.type==='kan')revealKan();
+  if(call.type==='kan')revealKan(true);
   log(`${NAMES[call.q]} ${{pon:'碰',chi:'吃',kan:'明杠'}[call.type]} ${tName(tt(id))}`);
 }
 
@@ -271,8 +302,8 @@ function ukeire2(p,d,vis){
   }
   c[d]++;return tot;
 }
-function aiChooseDiscard(p,forbidT){
-  const pl=G.players[p],L=lvl(p);let rows=ukeireTable(p).filter(r=>r.d!==forbidT);
+function aiChooseDiscard(p,forbid=[]){
+  const pl=G.players[p],L=lvl(p);let rows=ukeireTable(p).filter(r=>!forbid.includes(r.d));
   if(!rows.length)rows=ukeireTable(p);
   const bestS=Math.min(...rows.map(r=>r.s));
   const atk=r=>r.s*1000-r.n*10+keepValue(r.d,p);
@@ -375,7 +406,7 @@ async function aiTurn(p,info){
   await pause(delay());
   const pl=G.players[p],L=lvl(p);
   if(!info.afterCall){const res=evaluate(ctxFor(p,pl.drawn,true,sitFor(p,true,info.rinshan),true));if(res)return{type:'tsumo',res};}
-  if(pl.riichi)return{type:'discard',id:pl.drawn};
+  if(pl.riichi){const k=kanOptions(p);if(k.length)return{type:'kan',opt:k[0]};return{type:'discard',id:pl.drawn};}
   if(!info.afterCall){
     const c=counts(pl.hand),mc=pl.melds.length,s0=shanten(c,mc);
     const riichiNear=G.players.some((x,i)=>i!==p&&x.riichi);
@@ -385,7 +416,7 @@ async function aiTurn(p,info){
       else{c[o.t]--;const s=shanten(c,mc);c[o.t]++;if(s<=s0)return{type:'kan',opt:o};}
     }
   }
-  const ch=aiChooseDiscard(p,info.forbidT);
+  const ch=aiChooseDiscard(p,info.forbid);
   const riichi=!info.afterCall&&ch.s===0&&riichiTypes(p).has(ch.d)&&aiWantsRiichi(p,ch.d);
   return{type:'discard',id:ch.id,riichi};
 }
@@ -393,10 +424,11 @@ async function aiTurn(p,info){
 // ===================== Human =====================
 async function humanTurn(p,info){
   const pl=G.players[p];
-  const opts={tsumo:null,riichi:new Set(),kans:[],forbidT:info.forbidT};
+  const opts={tsumo:null,riichi:new Set(),kans:[],forbid:info.forbid};
   if(!info.afterCall)opts.tsumo=evaluate(ctxFor(p,pl.drawn,true,sitFor(p,true,info.rinshan),true));
   if(pl.riichi){
-    if(opts.tsumo){UI.mode='riichiTsumo';UI.opts=opts;render();const v=await input();UI.mode='idle';UI.opts=null;if(v.type==='tsumo')return{type:'tsumo',res:opts.tsumo};}
+    opts.kans=kanOptions(p);
+    if(opts.tsumo||opts.kans.length){UI.mode='riichiTsumo';UI.opts=opts;render();const v=await input();UI.mode='idle';UI.opts=null;if(v.type==='tsumo')return{type:'tsumo',res:opts.tsumo};if(v.type==='kan')return v;}
     else{render();await pause(Math.min(delay(),650));}
     return{type:'discard',id:pl.drawn};
   }
@@ -438,13 +470,13 @@ async function resolveCalls(d,id){
   return{};
 }
 async function roundLoop(){
-  let p=G.dealer,mode='draw',forbidT=-1;
+  let p=G.dealer,mode='draw',forbid=[];
   while(true){
     const pl=G.players[p];let rinshan=false;G.turn=p;
     if(mode==='draw'){if(!G.wall.length)return await exhaustive();drawTile(p,G.wall.pop());}
     else if(mode==='rinshan'){drawTile(p,G.dead[G.kanCount-1]);rinshan=true;}
     render();
-    const info={rinshan,afterCall:mode==='call',forbidT:mode==='call'?forbidT:-1};
+    const info={rinshan,afterCall:mode==='call',forbid:mode==='call'?forbid:[]};
     const dec=pl.isHuman?await humanTurn(p,info):await aiTurn(p,info);
     if(dec.type==='tsumo')return await finishWin(p,null,pl.drawn,dec.res);
     if(dec.type==='kan'){doSelfKan(p,dec.opt);render();await pause(delay()*.6);mode='rinshan';continue;}
@@ -454,7 +486,7 @@ async function roundLoop(){
     const cr=await resolveCalls(p,dec.id);
     if(cr.ron)return await finishWin(cr.ron.q,p,dec.id,cr.ron.res);
     if(pl.riichiPending){pl.riichiPending=false;pl.score-=1000;G.kyotaku++;}
-    if(cr.call){applyCall(cr.call,p,dec.id);forbidT=tt(dec.id);p=cr.call.q;mode=cr.call.type==='kan'?'rinshan':'call';render();await pause(delay()*.6);continue;}
+    if(cr.call){applyCall(cr.call,p,dec.id);forbid=kuikaeOf(tt(dec.id),cr.call.useT);p=cr.call.q;mode=cr.call.type==='kan'?'rinshan':'call';render();await pause(delay()*.6);continue;}
     p=(p+1)%4;mode='draw';
   }
 }
@@ -567,26 +599,30 @@ function renderSquare(){
 }
 function renderMe(){
   const pl=G.players[0],sw=seatOf(0);
-  const fur=pl.hand.length%3===1&&waitsOf(0).length&&isFuriten(0);
+  const w0=pl.hand.length%3===1?waitsOf(0):[],fur=w0.length&&isFuriten(0,w0);
   $('#mebar').innerHTML=`<span>你 · <b>${WIND_CH[sw]}家${sw===0?'（庄）':''}</b></span><span>点数 <b>${pl.score}</b></span>${pl.riichi?'<span class="rtag">立直中</span>':''}${fur?'<span class="ftag">振听</span>':''}`;
   const ids=pl.hand.filter(x=>x!==pl.drawn).sort((a,b)=>a-b);
   if(pl.drawn!=null)ids.push(pl.drawn);
   const dset=new Set(doraInds().map(doraOf));
   let rec=new Set();
-  if(S.hints&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>r.d!==UI.opts.forbidT);if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
+  if(S.hints&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d));if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
+  // Re-rendering replaces the tiles, so put keyboard focus back on the same tile (or the first one).
+  const ae=document.activeElement,fid=ae&&ae.closest&&ae.closest('#hand')?ae.dataset.id:null;
   $('#hand').innerHTML=ids.map(id=>{
     const t=tt(id),cls=[];
     if(id===pl.drawn&&pl.hand.length%3===2)cls.push('drawn');
     if(UI.selected===id)cls.push('sel');
-    if(UI.mode==='discard'&&(t===UI.opts.forbidT||(UI.riichiMode&&!UI.opts.riichi.has(t))))cls.push('dim');
+    if(UI.mode==='discard'&&(UI.opts.forbid.includes(t)||(UI.riichiMode&&!UI.opts.riichi.has(t))))cls.push('dim');
     if(rec.has(t)&&(id===pl.drawn||ids.filter(x=>tt(x)===t)[0]===id))cls.push('rec');
     if(dset.has(t))cls.push('dora');
     return tileHTML(id,cls.join(' '),`data-id="${id}" role="button" tabindex="0"`);
   }).join('');
+  if(fid!=null){const el=$(`#hand [data-id="${fid}"]`)||$('#hand .tile[data-id]');if(el)el.focus();}
   $('#mymelds').innerHTML=pl.melds.map(m=>meldHTML(m)).join('');
 }
 function renderActions(){
   const el=$('#actions');let h='';
+  const ae=document.activeElement,act=ae&&ae.closest&&ae.closest('#actions')?ae.dataset.act:null;
   if(UI.mode==='discard'){
     const o=UI.opts;
     if(UI.riichiMode)h+=`<span class="amsg">点选立直宣言牌：亮着的牌打出后都能听牌</span><button class="btn ghost" data-act="riichi-cancel" type="button">取消</button>`;
@@ -597,7 +633,11 @@ function renderActions(){
       o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${k.kind==='ankan'?'暗杠':'加杠'} ${tileT(k.t)}</button>`);
     }
   }else if(UI.mode==='riichiTsumo'){
-    h=`<span class="amsg">摸到和牌了！</span><button class="btn win" data-act="tsumo" type="button">自摸</button><button class="btn ghost" data-act="pass" type="button">不和，摸切</button>`;
+    const o=UI.opts;
+    h=`<span class="amsg">${o.tsumo?'摸到和牌了！':'立直中：这张可以暗杠，听牌不变'}</span>`;
+    if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">自摸</button>`;
+    o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">暗杠 ${tileT(k.t)}</button>`);
+    h+=`<button class="btn ghost" data-act="pass" type="button">${o.tsumo?'不和，摸切':'不杠，摸切'}</button>`;
   }else if(UI.mode==='call'){
     const c=UI.call;
     h=`<span class="amsg">${NAMES[c.d]} 打出 ${tileHTML(c.id,'chip')}</span>`;
@@ -610,6 +650,7 @@ function renderActions(){
     h=`<span class="amsg">${NAMES[G.turn]} 思考中…</span>`;
   }else if(G.turn===0&&G.players[0].riichi){h=`<span class="amsg">立直中，自动摸切</span>`;}
   el.innerHTML=h;
+  if(act){const b=el.querySelector(`[data-act="${act}"]`);if(b)b.focus();}
 }
 function waitLine(t,rem){
   const res=evaluate(ctxFor(0,t*4+3,false,{riichi:G.players[0].riichi,double:G.players[0].doubleRiichi},false));
@@ -624,7 +665,7 @@ function renderCoach(){
   const vis=visibleTo(0);
   if(pl.hand.length%3===2){
     const c=counts(pl.hand);const cur=shanten(c,pl.melds.length);
-    let rows=ukeireTable(0);if(UI.opts&&UI.opts.forbidT>=0)rows=rows.filter(r=>r.d!==UI.opts.forbidT);
+    let rows=ukeireTable(0);if(UI.opts&&UI.opts.forbid)rows=rows.filter(r=>!UI.opts.forbid.includes(r.d));
     if(UI.riichiMode)rows=rows.filter(r=>UI.opts.riichi.has(r.d));
     tag.textContent='14 张 · 选择打哪张';
     h+=`<div class="big${cur<=0?' tenpai':''}">${cur===-1?'已经和了！':'现在 '+shName(cur)}</div>`;
@@ -664,12 +705,19 @@ function submit(v){Object.assign(UI,{selected:null,riichiMode:false});give(v);}
 $('#hand').addEventListener('click',e=>{
   const el=e.target.closest('.tile[data-id]');if(!el||UI.mode!=='discard')return;
   const id=+el.dataset.id,t=tt(id);
-  if(t===UI.opts.forbidT)return;
+  if(UI.opts.forbid.includes(t))return;
   if(UI.riichiMode&&!UI.opts.riichi.has(t))return;
   if(UI.selected===id||S.oneTap){UI.mode='idle';submit({type:'discard',id,riichi:UI.riichiMode});}
   else{UI.selected=id;renderMe();renderActions();renderCoach();}
 });
-$('#hand').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.click();}});
+$('#hand').addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.click();return;}
+  // Arrow keys move focus along the hand.
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    const tiles=[...document.querySelectorAll('#hand .tile[data-id]')],i=tiles.indexOf(e.target);if(i<0)return;
+    e.preventDefault();const n=tiles[i+(e.key==='ArrowRight'?1:-1)];if(n)n.focus();
+  }
+});
 $('#actions').addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const [a,i]=b.dataset.act.split(':');
@@ -678,7 +726,7 @@ $('#actions').addEventListener('click',e=>{
     else if(a==='riichi'){UI.riichiMode=true;UI.selected=null;render();}
     else if(a==='riichi-cancel'){UI.riichiMode=false;UI.selected=null;render();}
     else if(a==='kan'){const o=UI.opts.kans[+i];UI.mode='idle';submit({type:'kan',opt:o});}
-  }else if(UI.mode==='riichiTsumo'){submit({type:a==='tsumo'?'tsumo':'pass'});}
+  }else if(UI.mode==='riichiTsumo'){if(a==='kan')submit({type:'kan',opt:UI.opts.kans[+i]});else submit({type:a==='tsumo'?'tsumo':'pass'});}
   else if(UI.mode==='call'){
     if(a==='chi')submit({type:'chi',useT:UI.call.chis[+i]});
     else submit({type:a});

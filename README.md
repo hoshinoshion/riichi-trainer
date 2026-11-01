@@ -14,7 +14,7 @@ The interface is in Simplified Chinese.
 
 - **Full games**: draw and discard, chi, pon, kan (closed, added and open), riichi, tsumo, ron and exhaustive draws, in East-only or East-South games
 - **Scoring**: all standard yaku and yakuman, fu and han, mangan and higher limits, honba, riichi deposits, dora, red fives and ura-dora
-- **Rules**: furiten (discard, temporary and riichi furiten), ippatsu, double riichi, haitei and houtei, rinshan kaihou, and a swap-calling (kuikae) restriction on the same tile
+- **Rules**: furiten (discard, temporary and riichi furiten), ippatsu, double riichi, haitei and houtei, rinshan kaihou, swap-calling (kuikae) restriction on the called tile and its suji, closed kan after riichi when it keeps the same waits, and kan dora turned after the discard for open and added kans
 - **Learning aids**
   - Before each discard, lists every option with its shanten count and effective draws, and marks the recommended tile
   - When you are tenpai, shows your waits, how many of each are left, and roughly what a ron would score; warns you when the hand has no yaku
@@ -28,7 +28,7 @@ The interface is in Simplified Chinese.
 
 ## Rules
 
-Each player starts with 25,000 points. One red five per suit, open tanyao allowed. Not implemented yet: double and triple ron (head bump is used instead), robbing a kan (chankan), closed kan after riichi, abortive draws such as nine terminals, nagashi mangan and pao.
+Each player starts with 25,000 points. One red five per suit, open tanyao allowed. Not implemented yet: double and triple ron (head bump is used instead), robbing a kan (chankan), abortive draws such as nine terminals, nagashi mangan and pao.
 
 ## Running locally
 
