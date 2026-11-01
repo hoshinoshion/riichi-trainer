@@ -1,0 +1,31 @@
+{
+  "name": "リーチ麻雀トレーナー",
+  "short_name": "リーチ麻雀",
+  "description": "ブラウザで遊べる一人用のリーチ麻雀。CPU 3人と対局しながら牌効率・待ち・守備のヒントを見られます。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f4f1",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

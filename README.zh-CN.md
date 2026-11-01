@@ -18,6 +18,7 @@
   - 听牌时显示听哪些牌、各剩几张、荣和大约几番几点，没有役时会提醒
   - 有人立直时显示手里的现物和较安全的牌
   - 内置规则速成和役种一览
+- **多语言**：日语、英语、简体中文、繁体中文，按浏览器语言自动选择（都不匹配时用日语），可在「设置」里切换
 - **主题**：现代浅色和深色（默认跟随系统），以及经典牌桌风格，可在「设置」里切换
 - **可安装（PWA）**：添加到手机主屏幕后像 App 一样全屏打开，离线也能玩。iPhone 用 Safari 打开网站，点「分享」→「添加到主屏幕」；安卓 Chrome 点菜单 →「安装应用」或「添加到主屏幕」
 - **电脑对手，三档难度**（在「设置」里切换，立即生效；对手名牌上会标出难度）
@@ -58,13 +59,14 @@ node tools/sim.js 60 normal,normal,hard east # 自定场数、难度组合和长
 ```
 index.html          页面结构（含首屏前选择主题的内联脚本）
 favicon.svg         网站图标
-manifest.webmanifest, sw.js   PWA 清单和离线用的 Service Worker
+manifest*.webmanifest, sw.js  PWA 清单（每种语言一份）和离线用的 Service Worker
 icons/              Logo 和 App 图标（PNG 由 tools/icons.js 生成）
 css/style.css       样式和主题配色变量
+js/i18n.js          四种语言的界面文字和 t() 查找函数
 js/engine.js        与界面无关的规则引擎：向听数、和牌拆解、役种、符数、点数
 js/game.js          对局流程、电脑 AI、玩家操作、界面渲染、学习提示
 js/shell.js         只在浏览器里运行的外壳：主题切换、注册 Service Worker
-tests/              引擎和对局规则测试
+tests/              引擎、对局规则和翻译测试
 tools/sim.js        无界面的电脑互打模拟器，用来调难度
 tools/icons.js      从 icons/logo.svg 生成 PNG 图标
 ```

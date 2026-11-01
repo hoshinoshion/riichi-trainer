@@ -1,11 +1,12 @@
 # riichi-trainer
 
-Single-player riichi mahjong in the browser for learning. Static site: no build step, no framework, no backend. UI text is Simplified Chinese.
+Single-player riichi mahjong in the browser for learning. Static site: no build step, no framework, no backend. UI text comes in Japanese, English, Simplified and Traditional Chinese (`js/i18n.js`).
 
 ## Layout
 
 - `js/engine.js` — pure rules engine, no DOM. Tile ids 0–135, tile type = `id >> 2` (0–8 man, 9–17 pin, 18–26 sou, 27–30 winds 东南西北, 31–33 白发中). Red fives are ids 16, 52, 88. Main entry: `evaluate(ctx)` returns the best scoring interpretation or `null` when the hand is not complete or has no yaku. Exports via `module.exports` for Node tests.
 - `js/game.js` — game state `G`, round flow (`roundLoop`, `resolveCalls`), AI (`aiTurn`, `aiPon`, `aiChi`, `aiChooseDiscard`, `aiWantsRiichi`; difficulty via `lvl(p)` → `easy` / `normal` / `hard`, setting `S.ai`, `mixed` = seats 1–3 easy/normal/hard), human input (`humanTurn`, `input()`), rendering (`render*`), coach panel (`renderCoach`).
+- `js/i18n.js` — UI strings for `ja`, `en`, `zh-CN`, `zh-TW` and `t(key, vars)`. Never hard-code UI text in `game.js` or `index.html`: add a key to all four languages (`tests/i18n.test.js` fails if one is missing). Static page text uses `data-i18n` / `data-i18n-aria` attributes. The engine keeps returning Simplified Chinese yaku and limit names; display them through `YN()` / `LBL()`. Log entries are stored as `log(key, vars)` and translated when rendered. Language: `S.lang` (`auto` = first supported browser language, else Japanese).
 - `js/shell.js` — browser-only code (theme switching, service worker registration), loaded after `game.js` and never by tests or `tools/sim.js`. Anything touching `window`, `matchMedia` or `navigator` belongs here, not in `game.js`.
 - Themes: colours are CSS custom properties in `css/style.css`; `:root` is modern light, `:root[data-theme="dark"]` and `:root[data-theme="classic"]` override it. Use the tokens (`--panel`, `--gold` accent, `--tile-edge`, …), never hard-coded colours. An inline script in `index.html` sets `data-theme` before first paint; keep its theme-colour map in sync with `THEME_COLOR` in `shell.js`.
 - PWA: `manifest.webmanifest`, `sw.js` (network-first, cache as offline fallback) and `icons/` (regenerate PNGs with `node tools/icons.js` after editing `icons/logo.svg`). Add new files the app needs offline to `SHELL` in `sw.js`.
@@ -18,4 +19,4 @@ Single-player riichi mahjong in the browser for learning. Static site: no build 
 - Add a test in `tests/engine.test.js` for any scoring or yaku change; run `npm test`.
 - When changing AI behaviour, check the levels still rank easy < normal < hard with `npm run sim` (games are noisy: use 100+ games before trusting a difference of a few thousand points).
 - Deployed to Cloudflare Workers as static assets only (`wrangler.jsonc`, assets dir `.`). Any new public file must not be excluded by `.assetsignore`; any new dev-only file or folder should be added to it.
-- Plain scripts loaded in order (`engine.js`, `game.js`, `shell.js`); no modules or bundler.
+- Plain scripts loaded in order (`engine.js`, `i18n.js`, `game.js`, `shell.js`); no modules or bundler. Tests and `tools/sim.js` load the first three into a VM.

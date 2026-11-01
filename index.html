@@ -37,14 +37,14 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 
 <div class="app">
   <header class="top">
-    <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><rect x="19" y="10" width="26" height="36" rx="6" fill="#fbfaf5"/><circle cx="32" cy="28" r="6.5" fill="#e5484d"/><rect x="13" y="51" width="38" height="5" rx="2.5" fill="#fbfaf5" opacity=".85"/></svg><div><h1>立直麻将练习场</h1><p>单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
+    <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><g transform="rotate(-14 24 33)"><rect x="12" y="16" width="24" height="33" rx="5" fill="#fbfaf5" fill-opacity=".42"/></g><g transform="rotate(9 40 32)"><rect x="27" y="14" width="25" height="35" rx="5.5" fill="#fbfaf5"/><circle cx="39.5" cy="31.5" r="6" fill="#e5484d"/></g></svg><div><h1 data-i18n="title">立直麻将练习场</h1><p data-i18n="subtitle">单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
     <div class="status" id="status"></div>
   </header>
 
   <div class="maincol">
   <main class="game">
     <div class="stage">
-      <section class="opps" id="opps" aria-label="对手"></section>
+      <section class="opps" id="opps" aria-label="对手" data-i18n-aria="oppsLabel"></section>
       <section class="tablewrap"><div class="square" id="square"></div></section>
       <section class="me">
         <div class="mebar" id="mebar"></div>
@@ -54,39 +54,41 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
     </div>
   </main>
     <details class="card ref yaku" open>
-      <summary>役种一览</summary>
+      <summary data-i18n="yakuTitle">役种一览</summary>
       <div class="tbl-wrap"><table class="ytable" id="yakuTable"></table></div>
     </details>
   </div>
 
-  <aside class="coachcol" aria-label="牌效助手">
+  <aside class="coachcol" aria-label="牌效助手" data-i18n-aria="coach">
     <section class="card coach">
-      <div class="chead"><h2>牌效助手</h2><span class="tag" id="coachTag"></span></div>
+      <div class="chead"><h2 data-i18n="coach">牌效助手</h2><span class="tag" id="coachTag"></span></div>
       <div id="coachBody"></div>
     </section>
   </aside>
 
   <aside class="side">
-    <section class="card log"><h2>对局记录</h2><ol id="log"></ol></section>
+    <section class="card log"><h2 data-i18n="log">对局记录</h2><ol id="log"></ol></section>
     <section class="card settings">
-      <h2>设置</h2>
-      <label class="srow" for="optTheme">外观主题
-        <select id="optTheme"><option value="auto">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="classic">经典牌桌</option></select></label>
-      <label class="srow" for="optHints">学习提示（向听 / 进张 / 听牌）<input type="checkbox" id="optHints"></label>
-      <label class="srow" for="optOneTap">单击直接出牌<input type="checkbox" id="optOneTap"></label>
-      <label class="srow" for="optSkip">自动跳过吃碰杠<input type="checkbox" id="optSkip"></label>
-      <label class="srow" for="optAI">电脑难度
-        <select id="optAI"><option value="easy">入门</option><option value="normal">普通</option><option value="hard">困难</option><option value="mixed">混合（三档各一家）</option></select></label>
+      <h2 data-i18n="settings">设置</h2>
+      <label class="srow" for="optLang"><span>🌐 <span data-i18n="set.lang">语言 · Language</span></span>
+        <select id="optLang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
+      <label class="srow" for="optTheme"><span data-i18n="set.theme">外观主题</span>
+        <select id="optTheme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option></select></label>
+      <label class="srow" for="optHints"><span data-i18n="set.hints">学习提示（向听 / 进张 / 听牌）</span><input type="checkbox" id="optHints"></label>
+      <label class="srow" for="optOneTap"><span data-i18n="set.oneTap">单击直接出牌</span><input type="checkbox" id="optOneTap"></label>
+      <label class="srow" for="optSkip"><span data-i18n="set.skip">自动跳过吃碰杠</span><input type="checkbox" id="optSkip"></label>
+      <label class="srow" for="optAI"><span data-i18n="set.ai">电脑难度</span>
+        <select id="optAI"><option value="easy" data-i18n="lv.easy">入门</option><option value="normal" data-i18n="lv.normal">普通</option><option value="hard" data-i18n="lv.hard">困难</option><option value="mixed" data-i18n="opt.mixed">混合（三档各一家）</option></select></label>
       <p class="shint" id="aiHint"></p>
-      <label class="srow" for="optSpeed">电脑出牌速度
-        <select id="optSpeed"><option value="slow">慢</option><option value="mid">中</option><option value="fast">快</option></select></label>
-      <label class="srow" for="optLen">对局长度（新游戏生效）
-        <select id="optLen"><option value="east">东风战</option><option value="south">半庄战</option></select></label>
-      <button class="btn ghost" id="btnNew" type="button">重新开始一局游戏</button>
+      <label class="srow" for="optSpeed"><span data-i18n="set.speed">电脑出牌速度</span>
+        <select id="optSpeed"><option value="slow" data-i18n="opt.slow">慢</option><option value="mid" data-i18n="opt.mid">中</option><option value="fast" data-i18n="opt.fast">快</option></select></label>
+      <label class="srow" for="optLen"><span data-i18n="set.len">对局长度（新游戏生效）</span>
+        <select id="optLen"><option value="east" data-i18n="opt.east">东风战</option><option value="south" data-i18n="opt.south">半庄战</option></select></label>
+      <button class="btn ghost" id="btnNew" type="button" data-i18n="set.new">重新开始一局游戏</button>
     </section>
     <details class="card ref rules" open>
-      <summary>规则速成</summary>
-      <ol>
+      <summary data-i18n="rulesTitle">规则速成</summary>
+      <ol id="rulesList">
         <li><b>和牌形状</b>：14 张 = 4 组面子 + 1 对雀头。面子是顺子（如 3-4-5 万）或刻子（3 张相同）。特殊形：七对子、国士无双。</li>
         <li><b>必须有役</b>：没有「役」就不能和牌，宝牌不算役。新手最常用的役：立直、断幺九（只用 2–8）、役牌（白发中、自风、场风的刻子）、门前清自摸和。</li>
         <li><b>立直</b>：没鸣过牌且听牌时可宣言，交 1000 点。之后只能摸什么打什么，但多 1 番，还能翻里宝牌。</li>
@@ -102,6 +104,7 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 <div class="modal" id="modal" hidden></div>
 
 <script src="js/engine.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/game.js"></script>
 <script src="js/shell.js"></script>
 </body>

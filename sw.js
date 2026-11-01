@@ -2,9 +2,9 @@
 // Same-origin files are network-first, so a new deploy shows up on the next load and the cache is only
 // the offline fallback. Google Fonts are cache-first (the page has local fallback fonts anyway).
 // When adding a public file the app needs offline, add it to SHELL; bump CACHE to drop old entries.
-const CACHE = 'riichi-v1';
-const SHELL = ['./', 'css/style.css', 'js/engine.js', 'js/game.js', 'js/shell.js', 'favicon.svg',
-  'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+const CACHE = 'riichi-v2';
+const SHELL = ['./', 'css/style.css', 'js/engine.js', 'js/i18n.js', 'js/game.js', 'js/shell.js', 'favicon.svg',
+  'manifest.webmanifest', 'manifest.ja.webmanifest', 'manifest.en.webmanifest', 'manifest.zh-TW.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

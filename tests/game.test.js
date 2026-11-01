@@ -13,6 +13,7 @@ const ctx = { console, Math, setTimeout, Promise, Set, Map, Array, JSON, Object,
   document: { querySelector: s => els[s] || (els[s] = el()), querySelectorAll: () => [] } };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8') + '\n' +
+  fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8') + '\n' +
   fs.readFileSync(path.join(root, 'js/game.js'), 'utf8').replace(/\nnewGame\(\);\s*$/, '\n') +
   '\nthis.setG = g => { G = g; }; this.getG = () => G;', ctx);
 const run = src => vm.runInContext(src, ctx);

@@ -19,10 +19,11 @@ const root = path.join(__dirname, '..');
 const el = () => ({ innerHTML: '', textContent: '', hidden: true, value: '', checked: false, addEventListener() {}, focus() {} });
 const els = {};
 const ctx = { console, Math, setTimeout, Promise, Set, Map, Array, JSON, Object, Infinity,
-  document: { querySelector: s => els[s] || (els[s] = el()) } };
+  document: { querySelector: s => els[s] || (els[s] = el()), querySelectorAll: () => [] } };
 vm.createContext(ctx);
 
 let src = fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8') + '\n' +
+  fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8') + '\n' +
   fs.readFileSync(path.join(root, 'js/game.js'), 'utf8').replace(/\nnewGame\(\);\s*$/, '\n');
 src += `
 var SIMLV = ['normal', 'normal', 'normal', 'normal'], DONE = null, EV = [], HANDS = 0;
@@ -32,10 +33,9 @@ function render() {}
 function showModal() { return Promise.resolve(); }
 async function humanTurn(p, info) { return aiTurn(p, info); }
 async function input() { const c = UI.call; return { type: c && c.ron ? 'ron' : 'pass' }; }
-function log(s) {
-  G.log.push(s);
-  const m = s.match(/^(你|下家|对家|上家) (自摸|荣和)(?:（(你|下家|对家|上家)放铳）)?/);
-  if (m) EV.push({ w: NAMES.indexOf(m[1]), l: m[3] ? NAMES.indexOf(m[3]) : -1 });
+function log(k, v) {
+  G.log.push({ k, v });
+  if (k === 'win') EV.push({ w: v.w, l: v.l == null ? -1 : v.l });
 }
 const _startRound = startRound;
 startRound = function () { HANDS++; _startRound(); };

@@ -220,7 +220,8 @@ button{font:inherit;color:inherit}
 .log li:first-child{color:var(--text)}
 .settings{display:grid;gap:10px}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px}
-.srow select{max-width:58%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--text);font:inherit}
+.settings>*{min-width:0}.srow>span{min-width:0}
+.srow select{min-width:0;flex:0 1 auto;max-width:58%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--text);font:inherit}
 .srow input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold)}
 .ref summary{cursor:pointer;font:900 16px/1.3 var(--f-head);list-style:none;display:flex;justify-content:space-between;align-items:center}
 .ref summary::-webkit-details-marker{display:none}
