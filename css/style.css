@@ -18,6 +18,7 @@ img{max-width:100%}
   --table-bg:#e9e8e2; --table-shadow:inset 0 0 0 1px var(--line);
   --felt-core:#f8f8f5; --center-line:var(--line);
   --stick:#3a3a3e; --dealer:#d4380d;
+  --seat-bg:var(--panel); --seat-line:var(--line); --board-line:rgba(0,0,0,.07);
   --t-red:#c3302a; --t-blue:#22479a; --t-green:#16704a; --t-ink:#1c1c20;
   --warn:#d4380d; --ok:#15803d;
   --f-tile:"Shippori Mincho B1","Noto Serif SC","Songti SC",serif;
@@ -35,6 +36,7 @@ img{max-width:100%}
   --table-bg:#18191c; --table-shadow:inset 0 0 0 1px var(--line);
   --felt-core:#202125; --center-line:var(--line);
   --stick:#e9e7e0; --dealer:#ff7a5c;
+  --seat-bg:var(--panel-2); --seat-line:var(--line); --board-line:rgba(255,255,255,.06);
   --warn:#ff7a5c; --ok:#4ade80;
   color-scheme:dark;
 }
@@ -50,6 +52,7 @@ img{max-width:100%}
   --table-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 0 0 50px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.35);
   --felt-core:#0f2a22; --center-line:rgba(255,255,255,.07);
   --stick:#f4f1ea; --dealer:#ff8a7a;
+  --seat-bg:rgba(0,0,0,.22); --seat-line:rgba(255,255,255,.08); --board-line:rgba(255,255,255,.06);
   --warn:#e8735f; --ok:#73c69c;
   --f-head:"Noto Serif SC","Songti SC","STSong",serif;
   color-scheme:dark;
@@ -70,7 +73,7 @@ button{font:inherit;color:inherit}
 /* Phone: the main-column wrapper dissolves so the yaku list can come last, after settings and rules. */
 .maincol{display:contents}
 .maincol>.game{grid-area:game}.maincol>.yaku{grid-area:yaku}
-@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 390px)/18.8)}}
+@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 470px)/18.8)}}
 @media (min-width:900px){
   /* Each column stacks on its own, so a tall side column never pushes the yaku list away from the table. */
   .app{grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto auto 1fr;grid-template-areas:"top top" "main coach" "main side"}
@@ -90,7 +93,16 @@ button{font:inherit;color:inherit}
 .logo{width:40px;height:40px;flex:none;display:block}
 .brand h1{margin:0;font:900 22px/1.2 var(--f-head);letter-spacing:.04em;text-wrap:balance}
 .brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
-.status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-variant-numeric:tabular-nums}
+/* Header tools: new game, language, theme. Selects sit invisibly over their pill so the native picker opens. */
+.tools{display:flex;gap:8px;margin-left:auto;align-items:center}
+.tool{position:relative;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:600 13px/1 var(--f-ui);cursor:pointer;white-space:nowrap}
+.tool:hover{border-color:var(--muted)}
+.tool svg{width:16px;height:16px;flex:none}
+.tool select{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer;font-size:16px}
+.tool:focus-within{outline:2px solid var(--gold);outline-offset:2px}
+/* Status strip at the top of the table */
+.status{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-variant-numeric:tabular-nums;padding:0 4px}
+.status .stat:last-child{margin-left:auto}
 .stat{display:flex;flex-direction:column;gap:2px}
 .stat small{color:var(--muted);font-size:11px;letter-spacing:.08em}
 .stat b{font:700 16px/1.1 var(--f-ui)}
@@ -98,11 +110,39 @@ button{font:inherit;color:inherit}
 
 /* game column */
 .game{container-type:inline-size;min-width:0}
-.stage{grid-template-columns:minmax(0,1fr);--pw:clamp(14px,min(calc((100cqi - 30px)/18.9),var(--pwh,99px)),28px);--tw:min(44px,calc((100cqi - 14px)/15.2));display:grid;gap:12px}
+.stage{--side:88px;--tpad:14px;grid-template-columns:minmax(0,1fr);display:grid;gap:12px;
+  /* --pw: pond tile width, sized so the board fits between the side seats (and the viewport height on landscape screens). */
+  --pw:clamp(14px,min(calc((100cqi - 2*var(--side) - 2*var(--tpad) - 40px)/18.8),var(--pwh,99px)),28px);
+  --tw:min(44px,calc((100cqi - 2*var(--tpad) - 14px)/15.2))}
+/* The table: status strip, opponents around the discard area, then your seat and hand. */
+.table{background:var(--table-bg);box-shadow:var(--table-shadow);border-radius:20px;padding:var(--tpad);display:grid;gap:12px;min-width:0}
+.arena{display:grid;grid-template-columns:var(--side) minmax(0,1fr) var(--side);grid-template-areas:". top ." "left board right";gap:8px;align-items:center}
+.opp{min-width:0}.opp.top{grid-area:top;display:flex;justify-content:center}.opp.top .plate{min-width:min(100%,260px)}
+.opp.left{grid-area:left}.opp.right{grid-area:right}
+.board{grid-area:board;display:flex;justify-content:center;min-width:0}
+/* Side seats stand upright when there is room beside the board. */
+@container (min-width:601px){
+  .opp.left .plate,.opp.right .plate{padding:10px 6px;justify-items:center;text-align:center}
+  .opp.left .ph,.opp.right .ph,.opp.left .pb,.opp.right .pb{flex-direction:column;gap:4px}
+  .opp.left .sc,.opp.right .sc{margin:0}
+  .opp.left .backs,.opp.right .backs{flex-direction:column;gap:1px}
+  .opp.left .backs i,.opp.right .backs i{width:18px;height:4px;flex:none}
+  .opp.left .pm,.opp.right .pm{justify-content:center}
+}
+/* Narrow table: the three opponents share one row above the board, which then gets the full width. */
+@container (max-width:600px){
+  .stage{--side:0px;--tpad:8px}
+  .table{border-radius:16px;gap:10px}
+  .arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"left top right" "board board board";gap:6px;align-items:stretch}
+  .opp{display:grid}.opp .plate{align-content:start}
+  .opp.top .plate{min-width:0}
+  .plate{padding:6px 8px;gap:4px}
+  .ph{flex-wrap:wrap;row-gap:2px}.sc{order:9;flex-basis:100%;margin-left:0}
+  .status{gap:6px 12px}.stat b{font-size:14px}.stat .dora{--w:18px}
+}
 
 /* opponent plates */
-.opps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.plate{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:grid;gap:6px;min-width:0;position:relative;transition:border-color .2s,box-shadow .2s}
+.plate{background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:12px;padding:8px 10px;display:grid;gap:6px;min-width:0;position:relative;transition:border-color .2s,box-shadow .2s}
 .plate.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
 .ph{display:flex;align-items:center;gap:6px;min-width:0}
 .wb{width:22px;height:22px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);font:800 14px/20px var(--f-tile);text-align:center;flex:none}
@@ -122,8 +162,7 @@ button{font:inherit;color:inherit}
 .pm:empty{display:none}
 
 /* table */
-.tablewrap{display:flex;justify-content:center}
-.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;border-radius:18px;background:var(--table-bg);box-shadow:var(--table-shadow);overflow:hidden}
+.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;border-radius:16px;box-shadow:inset 0 0 0 1px var(--board-line);overflow:hidden}
 .pond{--w:var(--pw);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 8px);display:flex;flex-wrap:wrap;gap:3px 1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
 .center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.2);height:calc(var(--pw)*6.2);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:12px;border:1px solid var(--center-line)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*1.7));display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:calc(var(--pw)*.58);font-variant-numeric:tabular-nums;color:var(--muted);padding:1px 4px;border-radius:4px}
@@ -169,6 +208,8 @@ button{font:inherit;color:inherit}
 /* my area */
 .me{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .mebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:center;font-size:13px;color:var(--muted)}
+/* Your turn: a dot before your seat info, like the highlight on opponent plates. */
+.mebar.on::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold)}
 .mebar b{color:var(--text);font-variant-numeric:tabular-nums}
 .actions{min-height:48px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;text-align:center}
 .amsg{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:6px}
@@ -268,9 +309,8 @@ button{font:inherit;color:inherit}
   .app{--gut:10px;gap:12px;padding-top:10px}
   .btn{padding:10px 14px;font-size:14px}.btn.win{font-size:16px}
   .brand h1{font-size:19px}.brand p{display:none}.logo{width:34px;height:34px}
-  .top{gap:8px 14px}.status{gap:6px 12px}.stat b{font-size:14px}.stat .dora{--w:18px}
-  /* Opponent plates: score drops to its own line so name, level and score never overflow. */
-  .opps{gap:6px}.plate{padding:6px 8px;gap:4px}
-  .ph{flex-wrap:wrap;row-gap:2px}.sc{order:9;flex-basis:100%;margin-left:0}
+  .top{gap:8px 10px;flex-wrap:nowrap}.brand{min-width:0}.brand h1{font-size:17px}
+  /* Header tools collapse to icon buttons. */
+  .tools{gap:6px}.tool{width:36px;padding:0;justify-content:center}.tool span{display:none}
   .card{padding:12px 14px}
 }

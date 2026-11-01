@@ -570,7 +570,7 @@ function winModal(w,l,winId,res,deltas,before){
 }
 
 // ===================== Rendering =====================
-function render(){if(!G)return;renderStatus();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
+function render(){if(!G)return;updateTools();renderStatus();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
 function renderStatus(){
   const inds=doraInds();
   $('#status').innerHTML=`<div class="stat"><small>${t('stat.round')}</small><b>${t('roundStat',{b:G.bakaze,k:G.kyoku,h:G.honba})}</b></div>
@@ -578,13 +578,14 @@ function renderStatus(){
   <div class="stat"><small>${t('stat.wall')}</small><b>${G.wall.length}</b></div>
   <div class="stat"><small>${t('stat.dora')}</small><div class="dora">${[0,1,2,3,4].map(i=>i<inds.length?tileT(inds[i]):backHTML()).join('')}</div></div>`;
 }
+// Opponents sit around the discard area: 下家 (1) right, 对家 (2) top, 上家 (3) left.
 function renderOpps(){
-  $('#opps').innerHTML=[3,2,1].map(p=>{
+  for(const p of [1,2,3]){
     const pl=G.players[p],sw=seatOf(p);
-    return`<div class="plate${G.turn===p?' on':''}"><div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><span class="sc">${pl.score}</span></div>
+    $('#opp'+p).innerHTML=`<div class="plate${G.turn===p?' on':''}"><div class="ph"><span class="wb${sw===0?' dealer':''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><span class="sc">${pl.score}</span></div>
     <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div>${pl.riichi?`<span class="rtag">${t('riichiTag')}</span>`:''}</div>
     <div class="pm">${pl.melds.map(m=>meldHTML(m,'mini')).join('')}</div></div>`;
-  }).join('');
+  }
 }
 function renderSquare(){
   let h='';
@@ -600,6 +601,7 @@ function renderSquare(){
 function renderMe(){
   const pl=G.players[0],sw=seatOf(0);
   const w0=pl.hand.length%3===1?waitsOf(0):[],fur=w0.length&&isFuriten(0,w0);
+  $('#mebar').classList.toggle('on',G.turn===0);
   $('#mebar').innerHTML=`<span>${t('seat',{w:sw,dealer:sw===0})}</span><span>${t('points')} <b>${pl.score}</b></span>${pl.riichi?`<span class="rtag">${t('riichiOn')}</span>`:''}${fur?`<span class="ftag">${t('furiten')}</span>`:''}`;
   const ids=pl.hand.filter(x=>x!==pl.drawn).sort((a,b)=>a-b);
   if(pl.drawn!=null)ids.push(pl.drawn);
@@ -737,8 +739,14 @@ const bind=(id,key,isBox)=>{const el=$('#'+id);if(isBox)el.checked=S[key];else e
 bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);bind('optLang','lang',false);
 const aiHint=()=>{$('#aiHint').textContent=L('aiHint')[S.ai]||L('aiHint').normal;};
 $('#optAI').addEventListener('change',aiHint);
-$('#btnNew').addEventListener('click',newGame);
+// Starting over throws the current game away, so ask first once anything has been played.
+$('#btnNew').addEventListener('click',()=>{if(G&&G.players.some(p=>p.river.length)&&typeof confirm==='function'&&!confirm(t('confirmNew')))return;newGame();});
 
+// Header buttons show the current language and theme next to their icons.
+function updateTools(){
+  $('#langCur').textContent=LANG_NAMES[LANG];
+  $('#themeCur').textContent=t('opt.'+(['light','dark','classic'].includes(S.theme)?S.theme:'auto'));
+}
 function renderYakuTable(){
   const desc=L('yakuDesc'),head=L('yakuHead');let i=0;
   $('#yakuTable').innerHTML=`<tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>`+YAKU_REF.map((rows,g)=>`<tr class="grp"><td colspan="3">${L('yakuGroups')[g]}</td></tr>`+
@@ -748,6 +756,8 @@ function renderYakuTable(){
 function translatePage(){
   document.querySelectorAll('[data-i18n]').forEach(e=>{e.textContent=t(e.dataset.i18n);});
   document.querySelectorAll('[data-i18n-aria]').forEach(e=>{e.setAttribute('aria-label',t(e.dataset.i18nAria));});
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.setAttribute('title',t(e.dataset.i18nTitle));});
+  updateTools();
   $('#rulesList').innerHTML=L('rules').map(r=>`<li>${r}</li>`).join('');
   renderYakuTable();aiHint();
   const root=document.documentElement;if(!root)return;
