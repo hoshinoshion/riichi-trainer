@@ -15,7 +15,8 @@ img{max-width:100%}
   --ivory:#fffefb; --ivory-2:#e6e3da;
   --back:#14897f; --back-2:#0f6b63;
   --tile-edge:#d8d5cc; --tile-shadow:rgba(0,0,0,.12);
-  --table-bg:#e9e8e2; --table-shadow:inset 0 0 0 1px var(--line);
+  --table-bg:#e6e5df; --table-shadow:inset 0 0 0 1px var(--line);
+  --mat-bg:#efeee9; --mat-shadow:inset 0 1px 3px rgba(0,0,0,.06),inset 0 0 0 1px rgba(0,0,0,.035);
   --felt-core:#f8f8f5; --center-line:var(--line);
   --stick:#3a3a3e; --dealer:#d4380d;
   --seat-bg:var(--panel); --seat-line:var(--line); --board-line:rgba(0,0,0,.07);
@@ -33,7 +34,8 @@ img{max-width:100%}
   --ivory:#f3f1eb; --ivory-2:#d9d5ca;
   --back:#14897f; --back-2:#0f6b63;
   --tile-edge:rgba(0,0,0,.55); --tile-shadow:rgba(0,0,0,.5);
-  --table-bg:#18191c; --table-shadow:inset 0 0 0 1px var(--line);
+  --table-bg:#16171a; --table-shadow:inset 0 0 0 1px var(--line);
+  --mat-bg:#1e2024; --mat-shadow:inset 0 1px 4px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.035);
   --felt-core:#202125; --center-line:var(--line);
   --stick:#e9e7e0; --dealer:#ff7a5c;
   --seat-bg:var(--panel-2); --seat-line:var(--line); --board-line:rgba(255,255,255,.06);
@@ -48,8 +50,10 @@ img{max-width:100%}
   --ivory:#fcf8ee; --ivory-2:#eae1cb;
   --back:#d88a2c; --back-2:#b06614;
   --tile-edge:var(--back); --tile-shadow:rgba(0,0,0,.35);
-  --table-bg:radial-gradient(circle at 50% 46%,#215443 0%,#163b2f 78%);
-  --table-shadow:inset 0 0 0 1px rgba(255,255,255,.05),inset 0 0 50px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.35);
+  --table-bg:linear-gradient(170deg,#143a2e,#0e2a21);
+  --table-shadow:inset 0 0 0 1px rgba(255,255,255,.05),0 10px 30px rgba(0,0,0,.35);
+  --mat-bg:radial-gradient(circle at 50% 46%,#24604c 0%,#1a4537 80%);
+  --mat-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 0 40px rgba(0,0,0,.3);
   --felt-core:#0f2a22; --center-line:rgba(255,255,255,.07);
   --stick:#f4f1ea; --dealer:#ff8a7a;
   --seat-bg:rgba(0,0,0,.22); --seat-line:rgba(255,255,255,.08); --board-line:rgba(255,255,255,.06);
@@ -103,13 +107,13 @@ button{font:inherit;color:inherit}
 
 /* game column */
 .game{container-type:inline-size;min-width:0}
-.stage{--side:88px;--tpad:14px;grid-template-columns:minmax(0,1fr);display:grid;gap:12px;
+.stage{--side:92px;--agap:16px;--tpad:14px;grid-template-columns:minmax(0,1fr);display:grid;gap:12px;
   /* --pw: pond tile width, sized so the board fits between the side seats (and the viewport height on landscape screens). */
-  --pw:clamp(14px,min(calc((100cqi - 2*var(--side) - 2*var(--tpad) - 40px)/18.8),var(--pwh,99px)),28px);
+  --pw:clamp(14px,min(calc((100cqi - 2*var(--side) - 2*var(--tpad) - 2*var(--agap) - 28px)/18.8),var(--pwh,99px)),34px);
   --tw:min(44px,calc((100cqi - 2*var(--tpad) - 14px)/15.2))}
 /* The table: status strip, opponents around the discard area, then your seat and hand. */
 .table{background:var(--table-bg);box-shadow:var(--table-shadow);border-radius:20px;padding:var(--tpad);display:grid;gap:12px;min-width:0}
-.arena{display:grid;grid-template-columns:var(--side) minmax(0,1fr) var(--side);grid-template-areas:". top ." "left board right";gap:8px;align-items:center}
+.arena{display:grid;grid-template-columns:var(--side) auto var(--side);justify-content:center;grid-template-areas:". top ." "left board right";gap:8px var(--agap);align-items:center}
 .opp{min-width:0;display:flex;justify-content:center;align-items:center}
 .opp.top{grid-area:top}.opp.left{grid-area:left}.opp.right{grid-area:right}
 .board{grid-area:board;display:flex;justify-content:center;min-width:0}
@@ -119,14 +123,19 @@ button{font:inherit;color:inherit}
   .opp.left .ph,.opp.right .ph{flex-direction:column;border-radius:14px;padding:8px 6px;gap:4px;text-align:center}
   .opp.left .pb,.opp.right .pb{flex-direction:column}
   .opp.left .backs,.opp.right .backs{flex-direction:column}
-  .opp.left .backs i,.opp.right .backs i{width:14px;height:9px}
+  /* Seat contents scale with the pond tiles so the whole table stays in proportion. */
+  .arena .backs i{width:calc(var(--pw)*.5);height:calc(var(--pw)*.68);border-radius:calc(var(--pw)*.1)}
+  .opp.left .backs i,.opp.right .backs i{width:calc(var(--pw)*.68);height:calc(var(--pw)*.5)}
+  .arena .pm .tile{--w:calc(var(--pw)*.62)}
+  .arena .nm,.arena .sc{font-size:clamp(12px,calc(var(--pw)*.52),15px)}
+  .arena .wb{width:clamp(20px,calc(var(--pw)*.9),26px);height:clamp(20px,calc(var(--pw)*.9),26px);line-height:clamp(18px,calc(var(--pw)*.9 - 2px),24px)}
   .opp.left .pm,.opp.right .pm{flex-direction:column;align-items:center}
 }
 /* Narrow table: the three opponents share one row above the board, which then gets the full width. */
 @container (max-width:600px){
-  .stage{--side:0px;--tpad:8px}
+  .stage{--side:0px;--agap:0px;--tpad:8px}
   .table{border-radius:16px;gap:10px}
-  .arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"left top right" "board board board";gap:6px;align-items:start}
+  .arena{grid-template-columns:repeat(3,minmax(0,1fr));justify-content:stretch;grid-template-areas:"left top right" "board board board";gap:6px;align-items:start}
   /* .table prefix: these must beat the base seat rules that come later in the file. */
   .table .plate{width:100%}
   .table .ph{flex-wrap:wrap;justify-content:center;border-radius:12px;padding:5px 6px;row-gap:3px;width:100%}
@@ -160,7 +169,8 @@ button{font:inherit;color:inherit}
 .pm:empty{display:none}
 
 /* table */
-.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative}
+/* The play mat: where the discards go. */
+.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--mat-bg);box-shadow:var(--mat-shadow);border-radius:calc(var(--pw)*.9)}
 .pond{--w:var(--pw);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 8px);display:flex;flex-wrap:wrap;gap:3px 1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
 .center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:0 1px 3px var(--tile-shadow)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
