@@ -1,5 +1,5 @@
 // ===================== Settings =====================
-const S=(()=>{const d={hints:true,oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
+const S=(()=>{const d={hints:true,oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal',theme:'auto'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
 function saveS(){try{localStorage.setItem('rmj-settings',JSON.stringify(S));}catch(e){}}
 const DELAY={slow:950,mid:560,fast:220};
 const delay=()=>DELAY[S.speed]||560;
@@ -733,7 +733,7 @@ $('#actions').addEventListener('click',e=>{
   }
 });
 const bind=(id,key,isBox)=>{const el=$('#'+id);if(isBox)el.checked=S[key];else el.value=S[key];el.addEventListener('change',()=>{S[key]=isBox?el.checked:el.value;saveS();render();});};
-bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);
+bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);
 const AI_HINT={easy:'入门：只看大致牌效，经常打错，常无役乱鸣，几乎不弃和。适合刚学规则时练手。',
   normal:'普通：按进张数打牌效，有人立直且自己离听牌远时弃和。',
   hard:'困难：多看两步、优先好形，听牌时选打点期望最高的听法，大牌默听，按手牌价值决定押退，会防危险的副露，弃和时用筋、壁、No Chance。',

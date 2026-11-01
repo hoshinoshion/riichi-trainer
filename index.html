@@ -5,14 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>立直麻将练习场</title>
 <meta name="description" content="单机网页日本麻将（立直麻将），与三位电脑对局，带向听数、进张、听牌和防守提示，电脑分入门、普通、困难三档难度。">
-<meta name="theme-color" content="#0d1613">
+<meta name="theme-color" content="#f4f4f1">
+<script>
+// Pick the theme before the stylesheet paints: saved choice, else the system light/dark preference.
+(function(){var t='auto';try{t=JSON.parse(localStorage.getItem('rmj-settings')||'{}').theme||'auto';}catch(e){}
+if(t!=='light'&&t!=='dark'&&t!=='classic')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+document.documentElement.setAttribute('data-theme',t);
+document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'#f4f4f1',dark:'#111214',classic:'#0d1613'}[t]);})();
+</script>
 <link rel="canonical" href="https://riichi.hoshinoshion.com/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="立直麻将">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta property="og:type" content="website">
 <meta property="og:title" content="立直麻将练习场">
 <meta property="og:description" content="单机网页日本麻将，与三位电脑对局，边打边看牌效、听牌和防守提示。">
 <meta property="og:url" content="https://riichi.hoshinoshion.com/">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://riichi.hoshinoshion.com/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&family=Shippori+Mincho+B1:wght@700;800&display=swap" media="print" onload="this.media='all'">
@@ -23,7 +37,7 @@
 
 <div class="app">
   <header class="top">
-    <div class="brand"><div class="seal">雀</div><div><h1>立直麻将练习场</h1><p>单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
+    <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><rect x="19" y="10" width="26" height="36" rx="6" fill="#fbfaf5"/><circle cx="32" cy="28" r="6.5" fill="#e5484d"/><rect x="13" y="51" width="38" height="5" rx="2.5" fill="#fbfaf5" opacity=".85"/></svg><div><h1>立直麻将练习场</h1><p>单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
     <div class="status" id="status"></div>
   </header>
 
@@ -56,6 +70,8 @@
     <section class="card log"><h2>对局记录</h2><ol id="log"></ol></section>
     <section class="card settings">
       <h2>设置</h2>
+      <label class="srow" for="optTheme">外观主题
+        <select id="optTheme"><option value="auto">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="classic">经典牌桌</option></select></label>
       <label class="srow" for="optHints">学习提示（向听 / 进张 / 听牌）<input type="checkbox" id="optHints"></label>
       <label class="srow" for="optOneTap">单击直接出牌<input type="checkbox" id="optOneTap"></label>
       <label class="srow" for="optSkip">自动跳过吃碰杠<input type="checkbox" id="optSkip"></label>
@@ -87,5 +103,6 @@
 
 <script src="js/engine.js"></script>
 <script src="js/game.js"></script>
+<script src="js/shell.js"></script>
 </body>
 </html>
