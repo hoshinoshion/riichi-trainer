@@ -136,12 +136,14 @@ function kanOptions(p){
   pl.melds.forEach((m,i)=>{if(m.type==='pon'&&c[tt(m.ids[0])])o.push({kind:'kakan',t:tt(m.ids[0]),i});});
   return o;
 }
+// A call is only allowed if the caller still has a legal discard afterwards (the called tile type is forbidden).
+function leavesDiscard(c,useT,t){const r=c.slice();for(const u of useT)r[u]--;r[t]=0;return r.some(x=>x>0);}
 function chiPatterns(t,c){
   if(t>=27)return[];const n=t%9,o=[];
   if(n>=2&&c[t-2]&&c[t-1])o.push([t-2,t-1]);
   if(n>=1&&n<=7&&c[t-1]&&c[t+1])o.push([t-1,t+1]);
   if(n<=6&&c[t+1]&&c[t+2])o.push([t+1,t+2]);
-  return o;
+  return o.filter(u=>leavesDiscard(c,u,t));
 }
 
 // ===================== Actions =====================
@@ -195,7 +197,8 @@ function keepValue(t,p){
 function danger(t,r){
   const rp=G.players[r];
   if(rp.river.some(x=>tt(x.id)===t)||rp.safe.has(t))return 0;
-  let vis=0;for(const q of G.players){for(const x of q.river)if(tt(x.id)===t)vis++;for(const m of q.melds)for(const id of m.ids)if(tt(id)===t)vis++;}
+  // Called river tiles are counted once, in the caller's meld.
+  let vis=0;for(const q of G.players){for(const x of q.river)if(!x.called&&tt(x.id)===t)vis++;for(const m of q.melds)for(const id of m.ids)if(tt(id)===t)vis++;}
   if(t>=27)return vis>=3?1:vis===2?3:5;
   const n=t%9,b=t-n,inR=k=>rp.river.some(x=>tt(x.id)===b+k);
   if(n<=2?inR(n+3):n>=6?inR(n-3):(inR(n-3)&&inR(n+3)))return isTerm(t)?2:3;
@@ -241,7 +244,8 @@ function tenpaiEV(p,d,vis,asRiichi){
   const furiten=waits.some(t=>riv.has(t));
   for(const t of waits){
     const rem=Math.max(0,4-vis[t]);left+=rem;
-    let wid=t*4+3;while(hand.includes(wid))wid--;
+    // Use a copy not in hand, and not the red five unless it is the only one left, so aka is not overcounted.
+    const wid=[3,2,1,0].map(k=>t*4+k).filter(id=>!hand.includes(id)).sort((a,b)=>RED_IDS.has(a)-RED_IDS.has(b))[0];
     const sit={riichi:asRiichi,double:false,ippatsu:false,rinshan:false,haitei:false,houtei:false,tenhou:false,chiihou:false};
     const res=evaluate({hand,melds:pl.melds,winId:wid,isTsumo:false,seat:27+seatOf(p),round:27+G.bakaze,isDealer:p===G.dealer,sit,doraInd:doraInds(),uraInd:null});
     if(!res){allYaku=false;if(!asRiichi&&isMenzen(pl))ev+=rem*1000*.35;continue;}
@@ -475,7 +479,7 @@ async function exhaustive(){
   log(`流局：听牌 ${ten.map((x,i)=>x?NAMES[i]:null).filter(Boolean).join('、')||'无人'}`);
   G.turn=-1;render();
   const hands=G.players.map((pl,i)=>ten[i]?`<div class="mrow"><div><b>${NAMES[i]}</b> 听牌：${waitsOf(i).map(t=>tName(t)).join(' ')}</div><div class="mhand">${pl.hand.map(id=>tileHTML(id)).join('')}${pl.melds.length?'<span class="gap"></span>':''}${pl.melds.map(m=>meldHTML(m)).join('')}</div></div>`:'').join('');
-  await showModal(`<div><span class="mkind draw">流局</span><h2>牌山摸完了</h2></div>${hands||'<p class="note">四家都没听牌，不用付点。</p>'}<p class="note">流局时没听牌的人向听牌的人共付 3000 点。庄家听牌则连庄，${n?'':''}本场数 +1。</p>${deltasHTML(deltas,before)}`,'下一局');
+  await showModal(`<div><span class="mkind draw">流局</span><h2>牌山摸完了</h2></div>${hands||'<p class="note">四家都没听牌，不用付点。</p>'}<p class="note">流局时没听牌的人向听牌的人共付 3000 点。庄家听牌则连庄，本场数 +1。</p>${deltasHTML(deltas,before)}`,'下一局');
   return{draw:true,dealerTenpai:ten[G.dealer]};
 }
 async function gameLoop(){
