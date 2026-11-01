@@ -39,11 +39,14 @@
     </div>
   </main>
 
-  <aside class="side">
+  <aside class="coachcol" aria-label="牌效助手">
     <section class="card coach">
       <div class="chead"><h2>牌效助手</h2><span class="tag" id="coachTag"></span></div>
       <div id="coachBody"></div>
     </section>
+  </aside>
+
+  <aside class="side">
     <section class="card log"><h2>对局记录</h2><ol id="log"></ol></section>
     <section class="card settings">
       <h2>设置</h2>
@@ -59,6 +62,9 @@
         <select id="optLen"><option value="east">东风战</option><option value="south">半庄战</option></select></label>
       <button class="btn ghost" id="btnNew" type="button">重新开始一局游戏</button>
     </section>
+  </aside>
+
+  <section class="refs" aria-label="规则参考">
     <details class="card ref" open>
       <summary>规则速成</summary>
       <ol>
@@ -71,11 +77,11 @@
         <li><b>本作规则</b>：25000 点起、每色一张红五、食断有、头跳（无双响）、无抢杠和、无途中流局。鸣牌后不能打现物和筋（食替）；立直后可暗杠摸到的牌，但不能改变听牌；明杠、加杠的新宝牌在打牌后才翻。</li>
       </ol>
     </details>
-    <details class="card ref">
+    <details class="card ref" open>
       <summary>役种一览</summary>
       <div class="tbl-wrap"><table class="ytable" id="yakuTable"></table></div>
     </details>
-  </aside>
+  </section>
 </div>
 <div class="modal" id="modal" hidden></div>
 
