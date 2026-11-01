@@ -95,3 +95,28 @@ test('役满', () => {
   assert.ok(score('111m222p333s444m5z', '5z', { tsumo: true }).yakuman);  // 四暗刻
   assert.strictEqual(score('1112345678999m', '5m', { dealer: true }).ron, 48000); // 九莲宝灯（庄）
 });
+
+test('四暗刻形但双碰荣和：只算三暗刻', () => {
+  const r = score('111m222p333s44m55z', '5z');
+  assert.ok(!r.yakuman);
+  assert.deepStrictEqual(names(r), ['役牌 白', '对对和', '三暗刻']);
+});
+
+test('七对子 + 混老头 25符4番', () => {
+  const r = score('1199m1199p11s155z', '1z');
+  assert.deepStrictEqual(names(r), ['七对子', '混老头']);
+  assert.strictEqual(r.ron, 6400);
+});
+
+test('暗杠幺九 32符 + 单骑：70符', () => {
+  const kan = parse('1111z');
+  const r = score('234m456p678s8p', '8p', { seat: 27, melds: [{ type: 'ankan', ids: kan, called: null, from: 0 }] });
+  assert.strictEqual(r.fu, 70);
+  assert.strictEqual(r.ron, 4500);
+});
+
+test('连风雀头 +4符', () => {
+  const r = score('234m456p678s23s11z', '1s', { seat: 27, dealer: true, sit: { riichi: true } });
+  assert.strictEqual(r.fu, 40);
+  assert.strictEqual(r.ron, 2000);
+});
