@@ -1,9 +1,14 @@
 {
   "name": "riichi-trainer",
   "version": "0.2.0",
-  "description": "单机网页日本麻将（立直麻将）练习游戏，带牌效提示",
+  "description": "单机网页日本麻将（立直麻将）练习游戏，带牌效提示和三档电脑难度",
   "private": true,
   "license": "MIT",
+  "homepage": "https://riichi.hoshinoshion.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hoshinoshion/riichi-trainer.git"
+  },
   "scripts": {
     "start": "npx --yes serve .",
     "test": "node --test",

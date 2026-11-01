@@ -2,9 +2,11 @@
 
 English | [简体中文](README.zh-CN.md)
 
+**Play online: [riichi.hoshinoshion.com](https://riichi.hoshinoshion.com/)**
+
 A single-player riichi (Japanese) mahjong game for the browser. You play against three computer opponents while a coach panel explains tile efficiency as you go. It is built for beginners learning the game, and for playing just for fun.
 
-Plain HTML, CSS and JavaScript: no build step and no backend. Open it in a browser and play.
+Plain HTML, CSS and JavaScript: no build step and no backend. Play it online, or open `index.html` locally.
 
 The interface is in Simplified Chinese.
 
@@ -55,6 +57,7 @@ node tools/sim.js 60 normal,normal,hard east # custom game count, levels and len
 
 ```
 index.html          Page structure
+favicon.svg         Site icon
 css/style.css       Styles for tiles, table and panels
 js/engine.js        UI-independent rules engine: shanten, hand decomposition, yaku, fu and points
 js/game.js          Game flow, computer AI, player actions, rendering and coach panel
@@ -66,7 +69,7 @@ tools/sim.js        Headless AI-vs-AI simulator for tuning difficulty
 
 This is a static site with no build step.
 
-**Cloudflare Workers** (the repository includes `wrangler.jsonc`): in the Cloudflare dashboard go to Workers & Pages → Create application → GitHub, pick this repository, leave the build command empty and keep the deploy command `npx wrangler deploy`, then select Save and Deploy. The Worker name must match `name` in `wrangler.jsonc`. Every push to `main` redeploys. The site is served as static assets only, so visits do not count toward Worker request usage. `.assetsignore` keeps tests, tools and docs out of the upload.
+**Cloudflare Workers** (the repository includes `wrangler.jsonc`): in the Cloudflare dashboard go to Workers & Pages → Create application → GitHub, pick this repository, leave the build command empty and keep the deploy command `npx wrangler deploy`, then select Save and Deploy. The Worker name must match `name` in `wrangler.jsonc`. Every push to `main` redeploys. The official instance runs at `riichi.hoshinoshion.com` on a custom domain. The site is served as static assets only, so visits do not count toward Worker request usage. `.assetsignore` keeps tests, tools and docs out of the upload.
 
 **GitHub Pages**: in the repository go to Settings → Pages, set the source to `Deploy from a branch`, and choose branch `main` with folder `/ (root)`. After a few minutes it is available at `https://hoshinoshion.github.io/riichi-trainer/`. Vercel and Netlify also work with no build command.
 
