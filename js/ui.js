@@ -36,6 +36,7 @@ const bind=(id,key,isBox)=>{const el=$('#'+id);if(isBox)el.checked=S[key];else e
 bind('optHint','hint',false);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);bind('optLang','lang',false);
 const aiHint=()=>{$('#aiHint').textContent=L('aiHint')[S.ai]||L('aiHint').normal;};
 $('#optAI').addEventListener('change',aiHint);
+$('#btnClearStats').addEventListener('click',()=>{if(typeof confirm==='function'&&!confirm(t('stats.confirmClear')))return;clearHistory();renderStats();});
 // Starting over throws the current game away, so ask first once anything has been played.
 $('#btnNew').addEventListener('click',()=>{if(G&&G.players.some(p=>p.river.length)&&typeof confirm==='function'&&!confirm(t('confirmNew')))return;newGame();});
 
@@ -56,7 +57,7 @@ function translatePage(){
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.setAttribute('title',t(e.dataset.i18nTitle));});
   updateTools();
   $('#rulesList').innerHTML=L('rules').map(r=>`<li>${r}</li>`).join('');
-  renderYakuTable();aiHint();
+  renderYakuTable();aiHint();renderStats();
   const root=document.documentElement;if(!root)return;
   root.lang=LANG;document.title=t('title');
   const meta=(sel,v)=>{const m=document.querySelector(sel);if(m)m.setAttribute('content',v);};

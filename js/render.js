@@ -98,6 +98,25 @@ function dealInHTML(x){
 }
 // Challenge link: a friend opening it plays the same deals.
 function challengeHTML(){return`<div class="share"><button class="btn" type="button" data-share="challenge">${t('shareChallenge')}</button><small>${t('shareNote',{seed:G.seed})}</small></div>`;}
+// Stats card: totals over finished games (review.js history) and a sparkline of the coach match rate.
+function renderStats(){
+  const h=loadHistory(),x=historySummary(h);
+  $('#btnClearStats').hidden=!h.length;
+  if(!h.length){$('#statsBody').innerHTML=`<p class="note">${t('stats.empty')}</p>`;return;}
+  const pct=v=>v==null?'–':Math.round(100*v)+'%';
+  const cells=[[t('stats.games'),x.games],[t('stats.avgRank'),x.avgRank.toFixed(2)],[t('stats.first'),pct(x.first)],[t('stats.win'),pct(x.win)],
+    [t('stats.dealIn'),pct(x.dealIn)],[t('stats.riichi'),pct(x.riichi)],[t('stats.calls'),pct(x.calls)],[t('stats.match'),pct(x.match)]];
+  let spark='';
+  if(x.trend.length){
+    const n=x.trend.length,X=i=>n===1?100:4+i*192/(n-1),Y=v=>36-v*.32,pts=x.trend.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`);
+    const last=x.trend[n-1];
+    spark=`<figure class="spark"><svg viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" y1="${Y(50)}" x2="200" y2="${Y(50)}" class="grid"/><polygon points="${X(0)},36 ${pts.join(' ')} ${X(n-1)},36" class="area"/>
+      <polyline points="${pts.join(' ')}" class="line"/><circle cx="${X(n-1)}" cy="${Y(last)}" r="2.6" class="dot"/></svg>
+      <figcaption>${t('stats.trend',{n,last})}</figcaption></figure>`;
+  }
+  $('#statsBody').innerHTML=`<dl class="sgrid">${cells.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${spark}`;
+}
 // End-of-game summary from G.stats.
 function summaryHTML(){
   const st=G.stats;if(!st||!st.decisions)return'';

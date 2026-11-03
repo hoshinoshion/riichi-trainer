@@ -98,7 +98,7 @@ function doDiscard(p,id,riichi){
   flushDora();
   const pl=G.players[p];pl.hand.splice(pl.hand.indexOf(id),1);
   const tsumogiri=id===pl.drawn;pl.drawn=null;pl.hand.sort((a,b)=>a-b);
-  if(riichi){pl.doubleRiichi=G.noCalls&&pl.river.length===0;pl.riichi=true;pl.ippatsu=true;pl.riichiPending=true;log('riichi',{p,dbl:pl.doubleRiichi,t:tt(id)});}
+  if(riichi){if(p===0&&G.stats)G.stats.riichi++;pl.doubleRiichi=G.noCalls&&pl.river.length===0;pl.riichi=true;pl.ippatsu=true;pl.riichiPending=true;log('riichi',{p,dbl:pl.doubleRiichi,t:tt(id)});}
   else{pl.ippatsu=false;log('discard',{p,t:tt(id),tg:tsumogiri});}
   pl.river.push({id,riichi,tsumogiri,fresh:true});
   pl.tempFuriten=false;
@@ -118,6 +118,7 @@ function doSelfKan(p,o){
 }
 function applyCall(call,d,id){
   const pl=G.players[call.q],use=[];
+  if(call.q===0&&G.stats&&!pl.melds.some(m=>m.type!=='ankan'))G.stats.calls++;   // hands in which you called
   for(const t of call.useT){const x=pl.hand.find(h=>tt(h)===t&&!use.includes(h));use.push(x);}
   pl.hand=pl.hand.filter(h=>!use.includes(h));
   const dr=G.players[d].river;dr[dr.length-1].called=true;
