@@ -317,6 +317,25 @@ button{font:inherit;color:inherit}
 .rank div{display:flex;gap:12px;align-items:center;background:var(--panel-2);padding:10px 12px;border-radius:10px;font-variant-numeric:tabular-nums}
 .rank b{font:900 20px/1 var(--f-head);width:26px;color:var(--gold)}
 .rank span:last-child{margin-left:auto;font-weight:700}
+/* Post-round review, deal-in analysis and game summary in the result screens. */
+.review{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:8px}
+.review summary{cursor:pointer;font:700 14px/1.4 var(--f-ui);list-style:none;display:flex;justify-content:space-between;gap:8px}
+.review summary::-webkit-details-marker{display:none}
+.review summary::after{content:"＋";color:var(--muted)}
+.review[open] summary::after{content:"－"}
+.review .note{margin:6px 0 0}
+.rv{display:grid;gap:6px;padding:8px 10px;border-radius:10px;background:var(--panel-2);margin-top:6px}
+.rvh{font-size:13px}.rvh b{color:var(--gold);margin-right:4px}
+.rvhand{display:flex;flex-wrap:wrap;gap:2px;align-items:flex-end;padding-bottom:7px}
+.rvhand .tile{--w:clamp(16px,5vw,24px)}
+.rvhand .tile.mine{outline:2px solid var(--warn);outline-offset:1px}
+.rvhand .tile.recd::after{content:"";position:absolute;left:50%;bottom:calc(var(--w)*-.32);width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--gold)}
+.dealin{border-left:3px solid var(--warn);padding:4px 0 4px 12px;display:grid;gap:6px;font-size:13.5px}
+.dealin h3,.summary h3{margin:0;font:700 14px/1.4 var(--f-ui)}
+.dealin p{margin:0}
+.dirow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.summary{border-top:1px solid var(--line);padding-top:10px}
+.summary ul{margin:6px 0 0;padding-left:1.2em;display:grid;gap:3px;font-size:13.5px}
 @media (prefers-reduced-motion:reduce){.pond .tile.fresh{animation:none}.hand .tile{transition:none}}
 @media (max-width:520px){
   .app{--gut:10px;gap:12px;padding-top:10px}

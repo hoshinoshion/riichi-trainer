@@ -34,7 +34,7 @@ const newSeed=()=>Math.floor(Math.random()*4294967296);
 // Save and resume. roundLoop() stores G (with G.flow = whose turn and how it starts) at the start of every
 // turn, so reopening the page continues from the turn that was in progress. Sets are stored as {$set:[…]}.
 // Bump SAVE_V when the shape of G changes; older saves are then ignored.
-const SAVE_KEY='rmj-game',SAVE_V=1;
+const SAVE_KEY='rmj-game',SAVE_V=2;
 function saveGame(){if(!G)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,G},(k,v)=>v instanceof Set?{$set:[...v]}:v));}catch(e){}}
 function loadSave(){
   try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null',(k,v)=>v&&typeof v==='object'&&Array.isArray(v.$set)?new Set(v.$set):v);

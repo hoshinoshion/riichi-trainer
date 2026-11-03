@@ -19,6 +19,9 @@ The interface is available in Japanese, English, Simplified Chinese and Traditio
   - Before each discard, lists every option with its shanten count and effective draws, and marks the recommended tile
   - When you are tenpai, shows your waits, how many of each are left, and roughly what a ron would score; warns you when the hand has no yaku
   - When someone declares riichi, shows which tiles in your hand are safe (genbutsu) and which are relatively safe
+  - After each hand, a review shows how many of your discards matched the coach and the three costliest ones, with your hand as it was, your discard and the coach's pick
+  - When you deal in, explains whether the tile was dangerous, which safe tiles you were holding, and whether folding was the better play
+  - At the end of the game, a summary: how often you matched the coach, shanten steps back, effective draws given up and deal-ins
   - Built-in rules primer and yaku reference
 - **Computer opponents with three difficulty levels** (set in Settings, takes effect immediately; each opponent's level is shown on its name plate)
   - **Easy (入门)**: plays roughly by tile efficiency with frequent slips, calls without a yaku plan, and almost never folds
@@ -81,11 +84,12 @@ js/engine.js        UI-independent rules engine: shanten, hand decomposition, ya
 js/state.js         Settings, game state, seeded random numbers, save and resume
 js/rules.js         Table rules on the game state: waits, furiten, legal calls, draw / discard / kan
 js/ai.js            Computer opponents for the three difficulty levels
+js/review.js        Post-hand review: judges your discards against the coach, explains deal-ins
 js/flow.js          Game and round flow: dealing, turns, calls, wins and draws
 js/render.js        Tiles, table, hand, action buttons, coach panel and result screens
 js/ui.js            Clicks, keyboard and settings controls, page text, start-up
 js/shell.js         Browser-only shell: theme switching and service worker registration
-tests/              Engine, game-rule, save / resume, page layout and translation tests
+tests/              Engine, game-rule, review, save / resume, page layout and translation tests
 tools/load.js       Loads the game scripts into Node for tests and the simulator
 tools/sim.js        Headless AI-vs-AI simulator for tuning difficulty
 tools/smoke.js      Browser smoke test (headless Chromium)

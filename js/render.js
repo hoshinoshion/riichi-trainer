@@ -72,6 +72,40 @@ function winModal(w,l,winId,res,deltas,before){
   ${deltasHTML(deltas,before)}`;
 }
 
+// Post-round review (review.js): agreement with the coach, then the costliest discards with the hand as it was.
+function reviewHTML(){
+  const R=G.review||[];if(!R.length)return'';
+  const a=R.filter(r=>r.kind==='match').length,d=R.filter(r=>r.kind==='defend').length,list=reviewMistakes();
+  const items=list.map(r=>{
+    const v={t:tt(r.id),s:r.mine.s,n:r.mine.n,b:r.best.d,bs:r.best.s,bn:r.best.n};
+    const hand=r.hand.map(id=>tileHTML(id,[id===r.id?'mine':'',r.recs.includes(tt(id))&&id!==r.id?'recd':''].join(' '))).join('');
+    return`<div class="rv"><div class="rvh"><b>${t('rv.turn',{n:r.turn})}</b> ${t(r.kind==='back'?'rv.back':'rv.slow',v)}</div><div class="rvhand">${hand}</div></div>`;
+  }).join('');
+  return`<details class="review"${list.length?' open':''}><summary>${t('rv.title')} · ${t('rv.agree',{a,n:R.length,d})}</summary>
+  ${list.length?`<p class="note">${t('rv.legend')}</p>${items}`:`<p class="note">${t('rv.none')}</p>`}</details>`;
+}
+// Deal-in analysis from dealInInfo(): what you could have known when the tile went out.
+function dealInHTML(x){
+  let h;
+  if(x.locked)h=`<p>${t('di.locked')}</p>`;
+  else if(!x.riichi||x.dg==null)h=`<p>${t('di.dama',{p:x.w,m:x.melds})}</p>`;
+  else{
+    h=`<p>${t(x.dg<=3?'di.semi':'di.danger',{t:x.t,p:x.w})}</p>`;
+    h+=x.safe.length?`<div class="dirow">${t('di.hadSafe')}<span class="chips">${x.safe.map(k=>tileT(k,'xs')).join('')}</span></div>`:`<p>${t('di.noSafe')}</p>`;
+    if(x.safe.length)h+=`<p>${t(x.s>=1?'di.fold':'di.push',{s:x.s})}</p>`;
+  }
+  return`<div class="dealin"><h3>${t('di.title')}</h3>${h}</div>`;
+}
+// End-of-game summary from G.stats.
+function summaryHTML(){
+  const st=G.stats;if(!st||!st.decisions)return'';
+  const ok=st.match+st.defend,pct=Math.round(100*ok/st.decisions);
+  const li=[t('sum.agree',{pct,a:ok,n:st.decisions})];
+  if(st.defend)li.push(t('sum.defend',{n:st.defend}));
+  li.push(t('sum.back',{n:st.back}),t('sum.lost',{n:st.lost}),t('sum.dealIn',{n:st.dealIn}));
+  return`<div class="summary"><h3>${t('sum.title')}</h3><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+}
+
 // ===================== Rendering =====================
 function render(){if(!G)return;updateTools();renderOpps();renderSquare();renderMe();renderActions();renderCoach();renderLog();}
 // Opponents sit around the discard area: 下家 (1) right, 对家 (2) top, 上家 (3) left.

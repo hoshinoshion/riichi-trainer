@@ -3,7 +3,7 @@
 function newGame(seed){
   GEN++;give({type:'abort'});
   seed=seed??newSeed();
-  G={seed,rng:seed,flow:null,players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
+  G={seed,rng:seed,flow:null,stats:newStats(),review:[],players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
      dealer:0,kyoku:0,bakaze:0,honba:0,kyotaku:0,lastWind:S.len==='south'?1:0,log:[],turn:0,wall:[],dead:[],kanCount:0,doraCount:1,pendingDora:0,noCalls:true,last:null};
   $('#modal').hidden=true;
   gameLoop(false);
@@ -20,7 +20,7 @@ function startRound(){
   const w=[...Array(136).keys()];
   for(let i=w.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
   G.dead=w.splice(0,14);G.wall=w;
-  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];G.flow=null;
+  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];G.flow=null;G.review=[];
   for(const p of G.players)Object.assign(p,{hand:[],melds:[],river:[],drawn:null,riichi:false,doubleRiichi:false,ippatsu:false,riichiPending:false,tempFuriten:false,riichiFuriten:false,safe:new Set()});
   for(let i=0;i<13;i++)for(let k=0;k<4;k++)G.players[(G.dealer+k)%4].hand.push(G.wall.pop());
   G.players.forEach(p=>p.hand.sort((a,b)=>a-b));
@@ -44,6 +44,7 @@ async function humanTurn(p,info){
   const v=await input();
   Object.assign(UI,{mode:'idle',opts:null,selected:null,riichiMode:false});
   if(v.type==='tsumo')return{type:'tsumo',res:opts.tsumo};
+  if(v.type==='discard')recordDiscard(v.id,opts.forbid);
   return v;
 }
 
@@ -107,8 +108,10 @@ async function finishWin(w,l,winId,res){
   const before=G.players.map(x=>x.score);
   G.players.forEach((x,i)=>x.score+=deltas[i]);G.kyotaku=0;
   log('win',{w,l,ym:res.yakuman,label:res.label,han:res.han});
+  const dealIn=l===0?dealInInfo(w,winId):null;
+  if(dealIn)G.stats.dealIn++;
   G.turn=-1;render();
-  await showModal(winModal(w,l,winId,res,deltas,before),t('next'));
+  await showModal(winModal(w,l,winId,res,deltas,before)+(dealIn?dealInHTML(dealIn):'')+reviewHTML(),t('next'));
   return{winner:w};
 }
 async function exhaustive(){
@@ -119,7 +122,7 @@ async function exhaustive(){
   log('draw',{ten:ten.map((x,i)=>x?i:-1).filter(i=>i>=0)});
   G.turn=-1;render();
   const hands=G.players.map((pl,i)=>ten[i]?`<div class="mrow"><div>${t('tenpaiLine',{p:P(i),waits:waitsOf(i).map(TN).join(' ')})}</div><div class="mhand">${pl.hand.map(id=>tileHTML(id)).join('')}${pl.melds.length?'<span class="gap"></span>':''}${pl.melds.map(m=>meldHTML(m)).join('')}</div></div>`:'').join('');
-  await showModal(`<div><span class="mkind draw">${t('drawKind')}</span><h2>${t('drawTitle')}</h2></div>${hands||`<p class="note">${t('noTenpai')}</p>`}<p class="note">${t('drawNote')}</p>${deltasHTML(deltas,before)}`,t('next'));
+  await showModal(`<div><span class="mkind draw">${t('drawKind')}</span><h2>${t('drawTitle')}</h2></div>${hands||`<p class="note">${t('noTenpai')}</p>`}<p class="note">${t('drawNote')}</p>${deltasHTML(deltas,before)}${reviewHTML()}`,t('next'));
   return{draw:true,dealerTenpai:ten[G.dealer]};
 }
 // resume: the first round is already in G (from a save), so it is not dealt again.
@@ -145,7 +148,7 @@ async function showFinal(){
   const order=[0,1,2,3].sort((a,b)=>G.players[b].score-G.players[a].score||a-b);
   G.players[order[0]].score+=G.kyotaku*1000;G.kyotaku=0;
   render();
-  const html=`<div><span class="mkind">${t('endKind')}</span><h2>${order[0]===0?t('firstPlace'):t('gameOver')}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${P(p)}</span><span>${G.players[p].score}</span></div>`).join('')}</div>`;
+  const html=`<div><span class="mkind">${t('endKind')}</span><h2>${order[0]===0?t('firstPlace'):t('gameOver')}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${P(p)}</span><span>${G.players[p].score}</span></div>`).join('')}</div>${summaryHTML()}`;
   await showModal(html,t('again'));
   newGame();
 }
