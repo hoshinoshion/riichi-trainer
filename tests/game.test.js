@@ -1,22 +1,10 @@
-// Game-flow rules that live in game.js (kuikae, kan after riichi, kan dora timing, ukeire cache).
-// game.js expects a browser, so it is loaded into a VM with a stub document, like tools/sim.js does.
+// Game-flow rules that live in rules.js (kuikae, kan after riichi, kan dora timing, ukeire cache).
+// The game scripts are loaded into a VM with a stub document (tools/load.js), like tools/sim.js does.
 const test = require('node:test');
 const assert = require('node:assert');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
+const { load } = require('../tools/load.js');
 
-const root = path.join(__dirname, '..');
-const el = () => ({ innerHTML: '', textContent: '', hidden: true, value: '', checked: false, addEventListener() {}, focus() {} });
-const els = {};
-const ctx = { console, Math, setTimeout, Promise, Set, Map, Array, JSON, Object, Infinity,
-  document: { querySelector: s => els[s] || (els[s] = el()), querySelectorAll: () => [] } };
-vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8') + '\n' +
-  fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8') + '\n' +
-  fs.readFileSync(path.join(root, 'js/game.js'), 'utf8').replace(/\nnewGame\(\);\s*$/, '\n') +
-  '\nthis.setG = g => { G = g; }; this.getG = () => G;', ctx);
-const run = src => vm.runInContext(src, ctx);
+const { ctx, run } = load('this.setG = g => { G = g; }; this.getG = () => G;');
 
 // "234m55z" → tile ids, using copies 3,2,1,0 so red fives only appear when four copies are used.
 function parse(str) {
