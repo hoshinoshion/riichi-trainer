@@ -12,6 +12,7 @@
   "scripts": {
     "start": "npx --yes serve .",
     "test": "node --test",
-    "sim": "node tools/sim.js"
+    "sim": "node tools/sim.js",
+    "smoke": "node tools/smoke.js"
   }
 }

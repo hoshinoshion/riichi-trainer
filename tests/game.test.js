@@ -1,22 +1,10 @@
-// Game-flow rules that live in game.js (kuikae, kan after riichi, kan dora timing, ukeire cache).
-// game.js expects a browser, so it is loaded into a VM with a stub document, like tools/sim.js does.
+// Game-flow rules that live in rules.js (kuikae, kan after riichi, kan dora timing, ukeire cache).
+// The game scripts are loaded into a VM with a stub document (tools/load.js), like tools/sim.js does.
 const test = require('node:test');
 const assert = require('node:assert');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
+const { load } = require('../tools/load.js');
 
-const root = path.join(__dirname, '..');
-const el = () => ({ innerHTML: '', textContent: '', hidden: true, value: '', checked: false, addEventListener() {}, focus() {} });
-const els = {};
-const ctx = { console, Math, setTimeout, Promise, Set, Map, Array, JSON, Object, Infinity,
-  document: { querySelector: s => els[s] || (els[s] = el()), querySelectorAll: () => [] } };
-vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(root, 'js/engine.js'), 'utf8') + '\n' +
-  fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8') + '\n' +
-  fs.readFileSync(path.join(root, 'js/game.js'), 'utf8').replace(/\nnewGame\(\);\s*$/, '\n') +
-  '\nthis.setG = g => { G = g; }; this.getG = () => G;', ctx);
-const run = src => vm.runInContext(src, ctx);
+const { ctx, run } = load('this.setG = g => { G = g; }; this.getG = () => G;');
 
 // "234m55z" → tile ids, using copies 3,2,1,0 so red fives only appear when four copies are used.
 function parse(str) {
@@ -90,4 +78,44 @@ test('进张表缓存随场面更新', () => {
   const b = ctx.ukeireTable(0);
   assert.notStrictEqual(b, a);
   assert.deepStrictEqual(plain(b), plain(ctx.ukeireCompute(0)));
+});
+
+test('复盘：判断出牌是一致、少进张、退向听', () => {
+  const rows = [{ d: 1, s: 1, n: 20 }, { d: 2, s: 1, n: 20 }, { d: 3, s: 1, n: 12 }, { d: 4, s: 2, n: 30 }];
+  assert.deepStrictEqual(plain(ctx.judgeDiscard(rows, 2, [])), { kind: 'match', loss: 0 });
+  assert.deepStrictEqual(plain(ctx.judgeDiscard(rows, 3, [])), { kind: 'slow', loss: 8 });
+  assert.deepStrictEqual(plain(ctx.judgeDiscard(rows, 4, [])), { kind: 'back', loss: 0 });
+});
+
+test('复盘：对立直打现物算防守，不算失误；记录手牌、推荐和现物', () => {
+  // 123m 456p 789s 东东 + 孤张 4m 9p 1s：牌效上 4m 最该留，但下家立直后 4m 是现物。
+  const hand = parse('1234m4569p789s1s11z');
+  table(player(hand));
+  const G = ctx.getG();
+  G.players[1] = player([], { riichi: true, river: [{ id: parse('4m')[0] }] });
+  G.review = []; G.stats = run('newStats()');
+  const four = hand.find(id => id >> 2 === 3);
+  run(`recordDiscard(${four}, [])`);
+  const r = G.review[0];
+  assert.strictEqual(r.kind, 'defend');
+  assert.strictEqual(r.hand.length, 14);
+  assert.ok(!r.recs.includes(3), 'recommended tiles are the efficient ones, not 4m');
+  assert.deepStrictEqual(plain(r.th), [{ p: 1, dg: 0, safe: [3] }]);
+  assert.deepStrictEqual(plain(G.stats), { decisions: 1, match: 0, defend: 1, slow: 0, back: 0, lost: 0, dealIn: 0 });
+  // Without the riichi the same discard is just less efficient.
+  table(player(hand));
+  const G2 = ctx.getG(); G2.review = []; G2.stats = run('newStats()');
+  run(`recordDiscard(${four}, [])`);
+  assert.strictEqual(G2.review[0].kind, 'slow');
+  assert.ok(G2.review[0].loss > 0);
+});
+
+test('放铳分析：立直后摸切没有可选的出牌', () => {
+  table(player(parse('123m456p789s11z23s'), { riichi: true }));
+  const G = ctx.getG();
+  G.players[1] = player([], { riichi: true });
+  G.review = [{ id: 999, mine: { s: 0 }, th: [] }];
+  const info = run(`dealInInfo(1, ${parse('4s')[0]})`);
+  assert.strictEqual(info.locked, true);
+  assert.strictEqual(info.riichi, true);
 });
