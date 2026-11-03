@@ -9,9 +9,9 @@
 <script>
 // Pick the theme before the stylesheet paints: saved choice, else the system light/dark preference.
 (function(){var t='auto';try{t=JSON.parse(localStorage.getItem('rmj-settings')||'{}').theme||'auto';}catch(e){}
-if(t!=='light'&&t!=='dark'&&t!=='classic')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+if(['light','dark','classic','parlor','tatami'].indexOf(t)<0)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);
-document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'#f4f4f1',dark:'#111214',classic:'#0d1613'}[t]);})();
+document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'#f4f4f1',dark:'#111214',classic:'#0d1613',parlor:'#120f1c',tatami:'#efe6d2'}[t]);})();
 </script>
 <link rel="canonical" href="https://riichi.hoshinoshion.com/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -39,20 +39,21 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
   <header class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><g transform="rotate(-14 24 33)"><rect x="12" y="16" width="24" height="33" rx="5" fill="#fbfaf5" fill-opacity=".42"/></g><g transform="rotate(9 40 32)"><rect x="27" y="14" width="25" height="35" rx="5.5" fill="#fbfaf5"/><circle cx="39.5" cy="31.5" r="6" fill="#e5484d"/></g></svg><div><h1 data-i18n="title">立直麻将练习场</h1><p data-i18n="subtitle">单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
     <div class="tools">
+      <button class="tool menu" id="btnMenu" type="button" aria-controls="drawer" aria-expanded="false" data-i18n-title="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span data-i18n="menu">菜单</span></button>
       <button class="tool" id="btnPractice" type="button" data-i18n-title="pr.open"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg><span data-i18n="pr.open">练习</span></button>
       <button class="tool" id="btnNew" type="button" data-i18n-title="newGame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="newGame">新对局</span></button>
       <label class="tool sel" data-i18n-title="set.lang"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="langCur"></span>
         <select id="optLang" data-i18n-aria="set.lang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
       <label class="tool sel" data-i18n-title="set.theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg><span id="themeCur"></span>
-        <select id="optTheme" data-i18n-aria="set.theme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option></select></label>
+        <select id="optTheme" data-i18n-aria="set.theme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option><option value="parlor" data-i18n="opt.parlor">深夜雀庄</option><option value="tatami" data-i18n="opt.tatami">和室</option></select></label>
     </div>
   </header>
 
-  <div class="maincol">
   <main class="game">
     <div class="stage">
       <!-- One table surface: the four seats around the play mat (round info in its centre). -->
       <section class="table">
+        <p class="ticker" id="ticker" aria-live="polite"></p>
         <div class="arena" aria-label="对手" data-i18n-aria="oppsLabel">
           <div class="opp top" id="opp2"></div>
           <div class="opp left" id="opp3"></div>
@@ -63,25 +64,19 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
       </section>
       <!-- Your hand sits just below the table, like the tiles in front of you. -->
       <div class="me">
+        <div class="ctip" id="coachTip"></div>
         <div class="actions" id="actions" aria-live="polite"></div>
         <div class="handrow"><div class="hand" id="hand"></div><div class="mymelds" id="mymelds"></div></div>
       </div>
     </div>
   </main>
-    <details class="card ref yaku" open>
-      <summary data-i18n="yakuTitle">役种一览</summary>
-      <div class="tbl-wrap"><table class="ytable" id="yakuTable"></table></div>
-    </details>
-  </div>
 
-  <aside class="coachcol" aria-label="牌效助手" data-i18n-aria="coach">
+  <aside class="drawer" id="drawer" aria-label="菜单" data-i18n-aria="menu">
+    <div class="dtop"><h2 data-i18n="menu">菜单</h2><button class="tool dclose" id="drawerClose" type="button" data-i18n-aria="menuClose"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
     <section class="card coach">
       <div class="chead"><h2 data-i18n="coach">牌效助手</h2><span class="tag" id="coachTag"></span></div>
       <div id="coachBody"></div>
     </section>
-  </aside>
-
-  <aside class="side">
     <section class="card log"><h2 data-i18n="log">对局记录</h2><ol id="log"></ol></section>
     <section class="card stats"><div class="chead"><h2 data-i18n="stats.title">我的统计</h2><button class="linkbtn" id="btnClearStats" type="button" data-i18n="stats.clear">清除记录</button></div><div id="statsBody"></div></section>
     <section class="card settings">
@@ -90,6 +85,9 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <select id="optHint"><option value="full" data-i18n="opt.hintFull">全部显示</option><option value="mistakes" data-i18n="opt.hintMistakes">只在打错时提醒</option><option value="off" data-i18n="opt.hintOff">关闭（考试模式）</option></select></label>
       <label class="srow" for="optOneTap"><span data-i18n="set.oneTap">单击直接出牌</span><input type="checkbox" id="optOneTap"></label>
       <label class="srow" for="optSkip"><span data-i18n="set.skip">自动跳过吃碰杠</span><input type="checkbox" id="optSkip"></label>
+      <label class="srow" for="optStyles"><span data-i18n="set.styles">角色对手（性格与台词）</span><input type="checkbox" id="optStyles"></label>
+      <label class="srow" for="optFx"><span data-i18n="set.fx">演出效果</span><input type="checkbox" id="optFx"></label>
+      <label class="srow" for="optSound"><span data-i18n="set.sound">音效</span><input type="checkbox" id="optSound"></label>
       <label class="srow" for="optAI"><span data-i18n="set.ai">电脑难度</span>
         <select id="optAI"><option value="easy" data-i18n="lv.easy">入门</option><option value="normal" data-i18n="lv.normal">普通</option><option value="hard" data-i18n="lv.hard">困难</option><option value="mixed" data-i18n="opt.mixed">混合（三档各一家）</option></select></label>
       <p class="shint" id="aiHint"></p>
@@ -97,6 +95,10 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <select id="optSpeed"><option value="slow" data-i18n="opt.slow">慢</option><option value="mid" data-i18n="opt.mid">中</option><option value="fast" data-i18n="opt.fast">快</option></select></label>
       <label class="srow" for="optLen"><span data-i18n="set.len">对局长度（新游戏生效）</span>
         <select id="optLen"><option value="east" data-i18n="opt.east">东风战</option><option value="south" data-i18n="opt.south">半庄战</option></select></label>
+      <label class="srow" for="optRules"><span data-i18n="set.rules">规则（新对局生效）</span>
+        <select id="optRules"><option value="standard" data-i18n="opt.rStandard">标准</option><option value="basic" data-i18n="opt.rBasic">入门（规则少）</option><option value="noaka" data-i18n="opt.rNoaka">无赤宝牌</option><option value="custom" data-i18n="opt.rCustom">自定义</option></select></label>
+      <div class="srow"><span data-i18n="kb.title">键盘快捷键</span><button class="linkbtn" id="btnKeys" type="button" data-i18n="kb.show">查看</button></div>
+      <details class="rdetails"><summary data-i18n="set.rulesDetail">规则细节</summary><div class="rlist" id="ruleList"></div></details>
     </section>
     <details class="card ref rules" open>
       <summary data-i18n="rulesTitle">规则速成</summary>
@@ -110,9 +112,14 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <li><b>本作规则</b>：25000 点起、每色一张红五、食断有、头跳（无双响）、无抢杠和、无途中流局。鸣牌后不能打现物和筋（食替）；立直后可暗杠摸到的牌，但不能改变听牌；明杠、加杠的新宝牌在打牌后才翻。</li>
       </ol>
     </details>
+    <details class="card ref yaku" open>
+      <summary data-i18n="yakuTitle">役种一览</summary>
+      <div class="tbl-wrap"><table class="ytable" id="yakuTable"></table></div>
+    </details>
   </aside>
 
 </div>
+<div class="scrim" id="drawerScrim" hidden></div>
 <div class="modal" id="modal" hidden></div>
 <div class="practice" id="practice" hidden>
   <div class="pbox" role="dialog" aria-modal="true" aria-labelledby="prTitle">

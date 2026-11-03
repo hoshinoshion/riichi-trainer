@@ -5,10 +5,14 @@ const { tt, counts, shanten, evaluate } = require('../js/engine.js');
 
 // Parse a hand like "234m456p678s34s88p". z: 1-7 = 东 南 西 北 白 发 中.
 function parse(str) {
-  const ids = [], used = {};
+  const ids = [],
+    used = {};
   let buf = [];
   for (const ch of str) {
-    if (/\d/.test(ch)) { buf.push(+ch); continue; }
+    if (/\d/.test(ch)) {
+      buf.push(+ch);
+      continue;
+    }
     const base = { m: 0, p: 9, s: 18, z: 27 }[ch];
     for (const n of buf) {
       const t = base + n - 1;
@@ -37,7 +41,7 @@ function score(hand, win, opt = {}) {
     isDealer: !!opt.dealer,
     sit: opt.sit || {},
     doraInd: [],
-    uraInd: null,
+    uraInd: null
   });
 }
 const names = r => r.yaku.map(y => y[0]);
@@ -90,9 +94,9 @@ test('二杯口 单骑 40符3番 5200', () => {
 });
 
 test('役满', () => {
-  assert.ok(score('19m19p19s1234567z', '1m').yakuman);                    // 国士无双
-  assert.ok(score('555z666z777z23m99p', '1m').yakuman);                   // 大三元
-  assert.ok(score('111m222p333s444m5z', '5z', { tsumo: true }).yakuman);  // 四暗刻
+  assert.ok(score('19m19p19s1234567z', '1m').yakuman); // 国士无双
+  assert.ok(score('555z666z777z23m99p', '1m').yakuman); // 大三元
+  assert.ok(score('111m222p333s444m5z', '5z', { tsumo: true }).yakuman); // 四暗刻
   assert.strictEqual(score('1112345678999m', '5m', { dealer: true }).ron, 48000); // 九莲宝灯（庄）
 });
 
@@ -119,4 +123,46 @@ test('连风雀头 +4符', () => {
   const r = score('234m456p678s23s11z', '1s', { seat: 27, dealer: true, sit: { riichi: true } });
   assert.strictEqual(r.fu, 40);
   assert.strictEqual(r.ron, 2000);
+});
+
+test('规则选项：无赤宝牌、无食断、抢杠', () => {
+  const E = require('../js/engine.js');
+  // 234m 5(赤)55p 678s 22m + 34m 中的 5p 是红五（id 52）
+  const hand = [4, 8, 12, 52, 53, 54, 76, 80, 84, 5, 6, 13, 17];
+  const base = {
+    hand,
+    melds: [],
+    winId: 21,
+    isTsumo: false,
+    seat: 28,
+    round: 27,
+    isDealer: false,
+    sit: { riichi: true },
+    doraInd: [33],
+    uraInd: null
+  };
+  const withAka = E.evaluate(base),
+    noAka = E.evaluate({ ...base, aka: false });
+  assert.strictEqual(withAka.aka, 1);
+  assert.strictEqual(noAka.aka, 0);
+  assert.strictEqual(withAka.han - noAka.han, 1);
+  // 抢杠: +1 番, only on ron
+  const robbed = E.evaluate({ ...base, sit: { riichi: true, chankan: true } });
+  assert.ok(robbed.yaku.some(([n]) => n === '抢杠'));
+  assert.strictEqual(robbed.han, withAka.han + 1);
+  // 食断 off: an open all-simples hand has no yaku
+  const open = {
+    hand: [4, 8, 12, 5, 6, 13, 17, 76, 80, 84],
+    melds: [{ type: 'pon', ids: [56, 57, 58], called: 58, from: 3 }],
+    winId: 21,
+    isTsumo: false,
+    seat: 28,
+    round: 27,
+    isDealer: false,
+    sit: {},
+    doraInd: [33],
+    uraInd: null
+  };
+  assert.ok(E.evaluate(open).yaku.some(([n]) => n === '断幺九'));
+  assert.strictEqual(E.evaluate({ ...open, kuitan: false }), null);
 });

@@ -27,7 +27,9 @@ const settle = () => new Promise(r => setTimeout(r, 0));
 test('the same seed deals the same hands, another seed does not', () => {
   const deal = seed => {
     const { run } = load(harness);
-    run(`GEN++; G = { seed: ${seed}, rng: ${seed}, dealt: 0, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`);
+    run(
+      `GEN++; G = { seed: ${seed}, rng: ${seed}, dealt: 0, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`
+    );
     return JSON.stringify(run('G.players.map(p => p.hand)'));
   };
   assert.strictEqual(deal(42), deal(42));
@@ -37,10 +39,12 @@ test('the same seed deals the same hands, another seed does not', () => {
 test('a round is dealt the same whatever randomness was used before it', () => {
   const deal = (rng, dealt) => {
     const { run } = load(harness);
-    run(`GEN++; G = { seed: 99, rng: ${rng}, dealt: ${dealt}, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`);
+    run(
+      `GEN++; G = { seed: 99, rng: ${rng}, dealt: ${dealt}, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`
+    );
     return JSON.stringify(run('[G.wall, G.dead]'));
   };
-  assert.strictEqual(deal(1, 3), deal(123456, 3));   // the AI drew different amounts of rand() before hand 4
+  assert.strictEqual(deal(1, 3), deal(123456, 3)); // the AI drew different amounts of rand() before hand 4
   assert.notStrictEqual(deal(1, 3), deal(1, 4));
 });
 
@@ -67,7 +71,10 @@ test('a save is ignored when it has no turn in progress or an old version', () =
 test('a game resumed from its save finishes exactly like the uninterrupted game', async () => {
   const seed = 2024;
   const full = JSON.stringify(await load(harness).run(`play(${seed})`));
-  assert.strictEqual(JSON.parse(full).reduce((a, b) => a + b, 0), 100000);
+  assert.strictEqual(
+    JSON.parse(full).reduce((a, b) => a + b, 0),
+    100000
+  );
 
   for (const stopAfter of [1, 23, 90, 200]) {
     const first = load(harness);
@@ -80,5 +87,20 @@ test('a game resumed from its save finishes exactly like the uninterrupted game'
     const scores = await second.run('resume()');
     assert.strictEqual(JSON.stringify(scores), full, `resumed after save ${stopAfter}`);
     assert.strictEqual(second.storage['rmj-game'], undefined, 'finished game clears its save');
+  }
+});
+
+test('whole computer games finish under every rule set without points appearing or vanishing', async () => {
+  for (const rules of ['standard', 'basic', 'noaka', 'triple']) {
+    for (const seed of [11, 12]) {
+      const { run } = load(harness);
+      const r =
+        rules === 'triple'
+          ? '{ ...RULE_PRESETS.standard, ron: "triple", west: true, tobi: false }'
+          : `RULE_PRESETS.${rules}`;
+      const scores = await run(`new Promise(res => { DONE = res; newGame(${seed}, ${r}); })`);
+      const total = scores.reduce((a, b) => a + b, 0) + run('G.kyotaku') * 1000;
+      assert.strictEqual(total, 100000, `${rules} seed ${seed}: ${JSON.stringify(scores)}`);
+    }
   }
 });
