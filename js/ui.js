@@ -164,6 +164,28 @@ $('#optLang').addEventListener('change', () => {
 });
 translatePage();
 
+// The drawer (coach, log, stats, settings, rules, yaku list): slides in from the menu button below 1240px wide,
+// docked beside the table above that (where these controls are hidden by CSS).
+const drawerIsOverlay = () => getComputedStyle($('#drawer')).position === 'fixed';
+function setDrawer(open) {
+  $('#drawer').classList.toggle('open', open);
+  $('#drawerScrim').hidden = !open;
+  $('#btnMenu').setAttribute('aria-expanded', open);
+  if (open) $('#drawerClose').focus();
+  else $('#btnMenu').focus();
+}
+$('#btnMenu').addEventListener('click', () => setDrawer(!$('#drawer').classList.contains('open')));
+$('#drawerClose').addEventListener('click', () => setDrawer(false));
+$('#drawerScrim').addEventListener('click', () => setDrawer(false));
+$('#drawer').addEventListener('keydown', e => {
+  if (e.key === 'Escape' && drawerIsOverlay()) setDrawer(false);
+});
+$('#coachTip').addEventListener('click', e => {
+  if (!e.target.closest('[data-open-coach]')) return;
+  if (drawerIsOverlay()) setDrawer(true);
+  $('.card.coach').scrollIntoView({ block: 'start', behavior: 'smooth' });
+});
+
 // Rules: a preset, or custom values; changing any single rule switches to custom with the others kept.
 function shownRules() {
   return S.rules.preset === 'custom' ? S.rules.custom : RULE_PRESETS[S.rules.preset];

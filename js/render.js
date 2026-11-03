@@ -437,6 +437,7 @@ function render() {
   renderMe();
   renderActions();
   renderCoach();
+  renderTip();
   renderLog();
 }
 // Opponents sit around the discard area: 下家 (1) right, 对家 (2) top, 上家 (3) left.
@@ -712,4 +713,35 @@ function renderLog() {
     .reverse()
     .map(e => `<li>${t('log.' + e.k, e.v)}</li>`)
     .join('');
+  const last = G.log[G.log.length - 1];
+  $('#ticker').textContent = last ? t('log.' + last.k, last.v) : '';
+}
+// The one-line coach by your hand: the best discard (hints on), a warning for a costly selected tile (mistakes
+// only), your waits when tenpai, and how many safe tiles you hold against a riichi. "More" opens the full coach.
+function renderTip() {
+  const el = $('#coachTip'),
+    pl = G.players[0],
+    parts = [];
+  if (S.hint !== 'off' && pl.hand.length) {
+    if (pl.hand.length % 3 === 2 && UI.mode === 'discard' && !UI.riichiMode) {
+      if (S.hint === 'full') {
+        const b = ukeireTable(0).filter(r => !UI.opts.forbid.includes(r.d))[0];
+        if (b) parts.push(t('tip.best', { t: b.d, s: b.s, n: b.n }));
+      } else if (UI.selected != null) {
+        const w = discardWarning(UI.selected);
+        if (w) parts.push(`<span class="warn">${w}</span>`);
+      }
+    } else if (pl.hand.length % 3 === 1) {
+      const w = waitsOf(0);
+      if (w.length) parts.push(t('tip.waits', { list: w.map(TN).join(t('pr.sep')), fur: isFuriten(0, w) }));
+    }
+    const th = [1, 2, 3].filter(i => G.players[i].riichi);
+    if (S.hint === 'full' && th.length && !pl.riichi && pl.hand.length % 3 === 2) {
+      const safe = [...new Set(pl.hand.map(tt))].filter(x => th.every(r => danger(x, r) === 0));
+      parts.push(t('tip.safe', { n: safe.length }));
+    }
+  }
+  el.innerHTML = parts.length
+    ? gloss(parts.join(' · ')) + ` <button class="linkbtn" type="button" data-open-coach>${t('tip.more')}</button>`
+    : '';
 }
