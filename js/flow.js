@@ -1,16 +1,26 @@
 // Game and round flow: new game, dealing, turns for the human and the AI, call resolution, wins and draws.
-function newGame(){
+// seed: optional, for a reproducible game (tests, the simulator); otherwise a fresh random one.
+function newGame(seed){
   GEN++;give({type:'abort'});
-  G={players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
+  seed=seed??newSeed();
+  G={seed,rng:seed,flow:null,players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
      dealer:0,kyoku:0,bakaze:0,honba:0,kyotaku:0,lastWind:S.len==='south'?1:0,log:[],turn:0,wall:[],dead:[],kanCount:0,doraCount:1,pendingDora:0,noCalls:true,last:null};
   $('#modal').hidden=true;
-  gameLoop();
+  gameLoop(false);
+}
+// Continue a game from loadSave(): the round picks up at the start of the saved turn.
+function resumeGame(saved){
+  GEN++;give({type:'abort'});
+  G=saved;Object.assign(UI,{mode:'idle',selected:null,riichiMode:false,opts:null,call:null});
+  $('#modal').hidden=true;
+  log('resume',{});
+  gameLoop(true);
 }
 function startRound(){
   const w=[...Array(136).keys()];
-  for(let i=w.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
+  for(let i=w.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
   G.dead=w.splice(0,14);G.wall=w;
-  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];
+  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];G.flow=null;
   for(const p of G.players)Object.assign(p,{hand:[],melds:[],river:[],drawn:null,riichi:false,doubleRiichi:false,ippatsu:false,riichiPending:false,tempFuriten:false,riichiFuriten:false,safe:new Set()});
   for(let i=0;i<13;i++)for(let k=0;k<4;k++)G.players[(G.dealer+k)%4].hand.push(G.wall.pop());
   G.players.forEach(p=>p.hand.sort((a,b)=>a-b));
@@ -67,8 +77,9 @@ async function resolveCalls(d,id){
   return{};
 }
 async function roundLoop(){
-  let p=G.dealer,mode='draw',forbid=[];
+  let {p,mode,forbid}=G.flow||{p:G.dealer,mode:'draw',forbid:[]};
   while(true){
+    G.flow={p,mode,forbid};saveGame();
     const pl=G.players[p];let rinshan=false;G.turn=p;
     if(mode==='draw'){if(!G.wall.length)return await exhaustive();drawTile(p,G.wall.pop());}
     else if(mode==='rinshan'){drawTile(p,G.dead[G.kanCount-1]);rinshan=true;}
@@ -111,11 +122,13 @@ async function exhaustive(){
   await showModal(`<div><span class="mkind draw">${t('drawKind')}</span><h2>${t('drawTitle')}</h2></div>${hands||`<p class="note">${t('noTenpai')}</p>`}<p class="note">${t('drawNote')}</p>${deltasHTML(deltas,before)}`,t('next'));
   return{draw:true,dealerTenpai:ten[G.dealer]};
 }
-async function gameLoop(){
+// resume: the first round is already in G (from a save), so it is not dealt again.
+async function gameLoop(resume){
   const g=GEN;
   try{
     while(true){
-      startRound();render();
+      if(resume)resume=false;else startRound();
+      render();
       const r=await roundLoop();
       if(g!==GEN)return;
       let rotate=false;
@@ -128,6 +141,7 @@ async function gameLoop(){
   }catch(e){if(e!==ABORT)console.error(e);}
 }
 async function showFinal(){
+  clearSave();
   const order=[0,1,2,3].sort((a,b)=>G.players[b].score-G.players[a].score||a-b);
   G.players[order[0]].score+=G.kyotaku*1000;G.kyotaku=0;
   render();

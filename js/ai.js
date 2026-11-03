@@ -6,7 +6,7 @@
 // reads dangerous open hands as threats, uses suji / kabe / no-chance when folding, avoids kan into a riichi.
 const MIXED=[null,'easy','normal','hard'];
 function lvl(p){return S.ai==='mixed'?MIXED[p]:(['easy','normal','hard'].includes(S.ai)?S.ai:'normal');}
-const rnd=Math.random;
+const rnd=rand;
 function keepValue(t,p){
   const pl=G.players[p],c=counts(pl.hand);let v;
   const seat=27+seatOf(p),round=27+G.bakaze;

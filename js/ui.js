@@ -66,4 +66,5 @@ function translatePage(){
 $('#optLang').addEventListener('change',()=>{setLang(S.lang);translatePage();render();});
 translatePage();
 
-newGame();
+// Pick up an unfinished game if there is one, else deal a new one.
+{const saved=loadSave();if(saved)resumeGame(saved);else newGame();}
