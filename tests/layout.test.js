@@ -16,13 +16,16 @@ test('index.html loads the game scripts in the order tools/load.js uses', () => 
 test('every script is in the service worker offline cache', () => {
   const sw = read('sw.js');
   for (const f of pageScripts) assert.ok(sw.includes(`'js/${f}'`), `sw.js SHELL is missing js/${f}`);
-  for (const f of fs.readdirSync(path.join(root, 'js'))) assert.ok(pageScripts.includes(f), `js/${f} is not loaded by index.html`);
+  for (const f of fs.readdirSync(path.join(root, 'js')))
+    assert.ok(pageScripts.includes(f), `js/${f} is not loaded by index.html`);
 });
 
 test('game code draws random numbers from the seeded rand(), not Math.random', () => {
   for (const f of pageScripts) {
-    const lines = read('js/' + f).split('\n').filter(l => l.includes('Math.random') && !l.trim().startsWith('//'));
-    const allowed = f === 'state.js' ? lines.filter(l => l.startsWith('const newSeed=')) : [];
+    const lines = read('js/' + f)
+      .split('\n')
+      .filter(l => l.includes('Math.random') && !l.trim().startsWith('//'));
+    const allowed = f === 'state.js' ? lines.filter(l => /^const newSeed\s*=/.test(l)) : [];
     assert.deepStrictEqual(lines, allowed, `${f} uses Math.random`);
   }
 });

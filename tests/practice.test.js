@@ -36,10 +36,26 @@ test('wait puzzles: 13-tile tenpai, two or more waits, all in the shown suit, as
 test('scoring puzzles: the marked option is what the engine pays, the other three differ', () => {
   for (const seed of SEEDS) {
     const p = run(`makePuzzle('score', ${seed})`);
-    const res = run(`evaluate(${JSON.stringify({ hand: p.hand, melds: [], winId: p.winId, isTsumo: p.isTsumo, seat: 27 + p.seat, round: 27 + p.round,
-      isDealer: p.isDealer, sit: { riichi: p.riichi }, doraInd: p.doraInd, uraInd: null })})`);
+    const res = run(
+      `evaluate(${JSON.stringify({
+        hand: p.hand,
+        melds: [],
+        winId: p.winId,
+        isTsumo: p.isTsumo,
+        seat: 27 + p.seat,
+        round: 27 + p.round,
+        isDealer: p.isDealer,
+        sit: { riichi: p.riichi },
+        doraInd: p.doraInd,
+        uraInd: null
+      })})`
+    );
     assert.ok(res && !res.yakuman);
-    const want = !p.isTsumo ? { ron: res.ron } : res.isDealer ? { all: res.tsumoAll } : { n: res.tsumoN, d: res.tsumoD };
+    const want = !p.isTsumo
+      ? { ron: res.ron }
+      : res.isDealer
+        ? { all: res.tsumoAll }
+        : { n: res.tsumoN, d: res.tsumoD };
     assert.deepStrictEqual(plain(p.options[p.answer]), want);
     assert.strictEqual(new Set(p.options.map(o => JSON.stringify(o))).size, 4);
     assert.strictEqual(p.hand.length, p.isTsumo ? 14 : 13);
@@ -50,8 +66,10 @@ test('defence puzzles: the answer is the lowest-risk tile by the AI danger rules
   for (const seed of SEEDS) {
     const p = run(`makePuzzle('defense', ${seed})`);
     const riv = p.river.map(id => id >> 2);
-    const risk = t => run(`tileRisk(${t}, new Set(${JSON.stringify(riv)}), new Set(), ${riv.filter(x => x === t).length})`).d;
-    const types = [...new Set(p.hand.map(id => id >> 2))], min = Math.min(...types.map(risk));
+    const risk = t =>
+      run(`tileRisk(${t}, new Set(${JSON.stringify(riv)}), new Set(), ${riv.filter(x => x === t).length})`).d;
+    const types = [...new Set(p.hand.map(id => id >> 2))],
+      min = Math.min(...types.map(risk));
     assert.deepStrictEqual([...p.best].sort(), types.filter(t => risk(t) === min).sort());
     assert.ok(min <= 3);
   }
@@ -59,7 +77,10 @@ test('defence puzzles: the answer is the lowest-risk tile by the AI danger rules
 
 test('the same seed gives the same puzzle', () => {
   for (const k of ['eff', 'waits', 'score', 'defense'])
-    assert.strictEqual(JSON.stringify(run(`makePuzzle('${k}', 4242)`)), JSON.stringify(run(`makePuzzle('${k}', 4242)`)));
+    assert.strictEqual(
+      JSON.stringify(run(`makePuzzle('${k}', 4242)`)),
+      JSON.stringify(run(`makePuzzle('${k}', 4242)`))
+    );
 });
 
 test('daily puzzle rotates through the kinds by date and is fixed for a date', () => {

@@ -5,10 +5,14 @@ const { tt, counts, shanten, evaluate } = require('../js/engine.js');
 
 // Parse a hand like "234m456p678s34s88p". z: 1-7 = 东 南 西 北 白 发 中.
 function parse(str) {
-  const ids = [], used = {};
+  const ids = [],
+    used = {};
   let buf = [];
   for (const ch of str) {
-    if (/\d/.test(ch)) { buf.push(+ch); continue; }
+    if (/\d/.test(ch)) {
+      buf.push(+ch);
+      continue;
+    }
     const base = { m: 0, p: 9, s: 18, z: 27 }[ch];
     for (const n of buf) {
       const t = base + n - 1;
@@ -37,7 +41,7 @@ function score(hand, win, opt = {}) {
     isDealer: !!opt.dealer,
     sit: opt.sit || {},
     doraInd: [],
-    uraInd: null,
+    uraInd: null
   });
 }
 const names = r => r.yaku.map(y => y[0]);
@@ -90,9 +94,9 @@ test('二杯口 单骑 40符3番 5200', () => {
 });
 
 test('役满', () => {
-  assert.ok(score('19m19p19s1234567z', '1m').yakuman);                    // 国士无双
-  assert.ok(score('555z666z777z23m99p', '1m').yakuman);                   // 大三元
-  assert.ok(score('111m222p333s444m5z', '5z', { tsumo: true }).yakuman);  // 四暗刻
+  assert.ok(score('19m19p19s1234567z', '1m').yakuman); // 国士无双
+  assert.ok(score('555z666z777z23m99p', '1m').yakuman); // 大三元
+  assert.ok(score('111m222p333s444m5z', '5z', { tsumo: true }).yakuman); // 四暗刻
   assert.strictEqual(score('1112345678999m', '5m', { dealer: true }).ron, 48000); // 九莲宝灯（庄）
 });
 

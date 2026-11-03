@@ -1,6 +1,8 @@
 # Files that are not uploaded as public static assets on Cloudflare Workers
 .git
 .github
+.prettierrc.json
+.prettierignore
 .gitignore
 .assetsignore
 .DS_Store
