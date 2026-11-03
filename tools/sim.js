@@ -5,6 +5,7 @@
 //
 // Seats 1–3 play the given levels, rotated across games so no level keeps the same seat.
 // Seat 0 (the human seat) is a stand-in normal AI that takes ron but never calls.
+// STYLES=off in the environment turns the seat characters off.
 // Game g is dealt from seed + g (default seed 1), so the same arguments always give the same table.
 // Reports per level: average final score, average rank, share of 1st / 4th, win rate and deal-in rate per hand.
 const { load } = require('./load.js');
@@ -37,6 +38,7 @@ async function showFinal() {
 }
 function simGame(lv, seed) { SIMLV = ['normal', ...lv]; EV = []; HANDS = 0; return new Promise(r => { DONE = r; newGame(seed); }); }
 S.len = '${len}';
+S.styles = ${process.env.STYLES !== 'off'};
 `;
 const { run } = load(src);
 
