@@ -41,7 +41,19 @@ The interface is available in Japanese, English, Simplified Chinese and Traditio
 
 ## Rules
 
-Each player starts with 25,000 points. One red five per suit, open tanyao allowed. Not implemented yet: double and triple ron (head bump is used instead), robbing a kan (chankan), abortive draws such as nine terminals, nagashi mangan and pao.
+Each player starts with 25,000 points. Rules are chosen in Settings → Rules and apply from the next game:
+
+| Rule | Standard | Basic | No red fives |
+|---|---|---|---|
+| Red fives (one per suit) | yes | yes | no |
+| Open tanyao, ippatsu, robbing a kan (chankan) | yes | yes | yes |
+| Several rons on one tile | double ron (a triple ron aborts) | head bump | head bump |
+| Abortive draws: nine terminals, four winds, four kans, four riichi | yes | no | yes |
+| Nagashi mangan, pao (big three dragons, big four winds) | yes | no | yes |
+| Bust-out below zero | yes | yes | yes |
+| West entry (play on until someone has 30,000) | no | no | yes |
+
+Every rule can also be set on its own (Custom). With double or triple ron each winner is paid the honba and the riichi sticks go to the winner closest to the discarder. Nagashi mangan is paid like a mangan tsumo instead of the noten payments.
 
 ## Running locally
 

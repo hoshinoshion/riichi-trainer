@@ -58,6 +58,9 @@ $('#actions').addEventListener('click', e => {
       const o = UI.opts.kans[+i];
       UI.mode = 'idle';
       submit({ type: 'kan', opt: o });
+    } else if (a === 'kyuushu') {
+      UI.mode = 'idle';
+      submit({ type: 'kyuushu' });
     }
   } else if (UI.mode === 'riichiTsumo') {
     if (a === 'kan') submit({ type: 'kan', opt: UI.opts.kans[+i] });
@@ -138,6 +141,7 @@ function translatePage() {
     .map(r => `<li>${r}</li>`)
     .join('');
   renderYakuTable();
+  renderRules();
   aiHint();
   renderStats();
   const root = document.documentElement;
@@ -160,6 +164,44 @@ $('#optLang').addEventListener('change', () => {
 });
 translatePage();
 
+// Rules: a preset, or custom values; changing any single rule switches to custom with the others kept.
+function shownRules() {
+  return S.rules.preset === 'custom' ? S.rules.custom : RULE_PRESETS[S.rules.preset];
+}
+function renderRules() {
+  const r = shownRules();
+  $('#optRules').value = S.rules.preset;
+  $('#ruleList').innerHTML = RULE_KEYS.map(k =>
+    k === 'ron'
+      ? `<label class="srow" for="rule-ron"><span>${t('rule.ron')}</span><select id="rule-ron" data-rule="ron">${[
+          'head',
+          'double',
+          'triple'
+        ]
+          .map(
+            v =>
+              `<option value="${v}"${r.ron === v ? ' selected' : ''}>${t('opt.ron' + v[0].toUpperCase() + v.slice(1))}</option>`
+          )
+          .join('')}</select></label>`
+      : `<label class="srow" for="rule-${k}"><span>${t('rule.' + k)}</span><input type="checkbox" id="rule-${k}" data-rule="${k}"${r[k] ? ' checked' : ''}></label>`
+  ).join('');
+}
+$('#optRules').addEventListener('change', e => {
+  S.rules.preset = e.target.value;
+  saveS();
+  renderRules();
+});
+$('#ruleList').addEventListener('change', e => {
+  const el = e.target,
+    k = el.dataset.rule;
+  if (!k) return;
+  const r = { ...shownRules(), [k]: el.type === 'checkbox' ? el.checked : el.value };
+  S.rules = { preset: 'custom', custom: r };
+  saveS();
+  renderRules();
+  $('#rule-' + k).focus();
+});
+
 // Challenge links: ?seed=…&len=…&ai=… starts a game with the same deals as the one that was shared.
 function challengeFromURL() {
   const q = new URLSearchParams(location.search),
@@ -170,12 +212,18 @@ function challengeFromURL() {
   return {
     seed: +seed >>> 0,
     len: pick('len', ['east', 'south']),
-    ai: pick('ai', ['easy', 'normal', 'hard', 'mixed'])
+    ai: pick('ai', ['easy', 'normal', 'hard', 'mixed']),
+    rules: decodeRules(q.get('r'))
   };
 }
 function challengeURL() {
   const u = new URL(location.pathname, location.href);
-  u.search = new URLSearchParams({ seed: G.seed, len: G.lastWind ? 'south' : 'east', ai: S.ai }).toString();
+  u.search = new URLSearchParams({
+    seed: G.seed,
+    len: G.lastWind ? 'south' : 'east',
+    ai: S.ai,
+    r: encodeRules(G.rules)
+  }).toString();
   return u.href;
 }
 // Share buttons in the result screens copy a link or a result line; if the clipboard is refused, show the text.
@@ -208,7 +256,7 @@ $('#modal').addEventListener('click', e => {
     $('#optLen').value = S.len;
     $('#optAI').value = S.ai;
     aiHint();
-    newGame(ch.seed);
+    newGame(ch.seed, ch.rules);
     log('challenge', { seed: ch.seed });
     render();
   } else if (saved) resumeGame(saved);

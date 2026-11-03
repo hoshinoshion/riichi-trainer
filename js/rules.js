@@ -12,7 +12,9 @@ function ctxFor(p, winId, isTsumo, sit, withUra) {
     isDealer: p === G.dealer,
     sit,
     doraInd: doraInds(),
-    uraInd: withUra ? uraInds() : null
+    uraInd: withUra ? uraInds() : null,
+    aka: rule('aka'),
+    kuitan: rule('kuitan')
   };
 }
 function sitFor(p, isTsumo, rinshan) {
@@ -21,7 +23,7 @@ function sitFor(p, isTsumo, rinshan) {
   return {
     riichi: pl.riichi,
     double: pl.doubleRiichi,
-    ippatsu: pl.ippatsu,
+    ippatsu: pl.ippatsu && rule('ippatsu'),
     rinshan,
     haitei: isTsumo && !rinshan && G.wall.length === 0,
     houtei: !isTsumo && G.wall.length === 0,
@@ -55,11 +57,53 @@ function markMissed(p) {
   pl.tempFuriten = true;
   if (pl.riichi) pl.riichiFuriten = true;
 }
-function ronCheck(q, id) {
+// rob: the tile is being added to a pon (chankan), not discarded.
+function ronCheck(q, id, rob) {
   const w = waitsOf(q);
   if (!w.includes(tt(id))) return { inWait: false, res: null };
   if (isFuriten(q, w)) return { inWait: true, res: null, furiten: true };
-  return { inWait: true, res: evaluate(ctxFor(q, id, false, sitFor(q, false, false), true)) };
+  const sit = sitFor(q, false, false);
+  if (rob) Object.assign(sit, { chankan: true, houtei: false });
+  return { inWait: true, res: evaluate(ctxFor(q, id, false, sit, true)) };
+}
+// Players who declared ron on one tile, closest to the discarder first, filtered by the multiple-ron rule.
+// Returns {rons:[{q,res}]}, {abort:'sancha'} (three rons when only two may win), or null.
+function ronsFrom(list) {
+  if (!list.length) return null;
+  const mode = rule('ron');
+  if (mode === 'head') return { rons: list.slice(0, 1) };
+  if (mode === 'double' && list.length === 3) return rule('abort') ? { abort: 'sancha' } : { rons: list.slice(0, 1) };
+  return { rons: list };
+}
+// Abortive draws (rule abort). Nine terminals: the player's first draw, no calls yet, nine or more different
+// terminal and honour types in hand.
+const kyuushuKinds = hand => new Set(hand.map(tt).filter(isYao)).size;
+const canKyuushu = p =>
+  rule('abort') && G.noCalls && G.players[p].river.length === 0 && kyuushuKinds(G.players[p].hand) >= 9;
+// After a discard has gone round without a ron: four winds, four riichi, or four kans by more than one player.
+function abortAfterDiscard() {
+  if (!rule('abort')) return null;
+  const P4 = G.players;
+  if (G.noCalls && P4.every(x => x.river.length === 1)) {
+    const t0 = tt(P4[0].river[0].id);
+    if (t0 >= 27 && t0 <= 30 && P4.every(x => tt(x.river[0].id) === t0)) return 'winds';
+  }
+  if (P4.every(x => x.riichi)) return 'riichi4';
+  if (G.kanCount >= 4 && new Set(G.kanBy || []).size > 1) return 'kan4';
+  return null;
+}
+// Nagashi mangan at an exhaustive draw: every discard a terminal or honour, and none of them called.
+const nagashiPlayers = () =>
+  rule('nagashi')
+    ? [0, 1, 2, 3].filter(p => G.players[p].river.length && G.players[p].river.every(r => isYao(tt(r.id)) && !r.called))
+    : [];
+// Pao: calling the tile that completes your third dragon set or fourth wind set makes its discarder liable.
+function checkPao(q, d) {
+  if (!rule('pao')) return;
+  const pl = G.players[q],
+    sets = pl.melds.filter(m => m.type !== 'chi').map(m => tt(m.ids[0]));
+  if (sets.filter(t => t >= 31).length === 3) Object.assign(pl, { pao: d, paoYaku: '大三元' });
+  else if (sets.filter(t => t >= 27 && t <= 30).length === 4) Object.assign(pl, { pao: d, paoYaku: '大四喜' });
 }
 function visibleTo(p) {
   const v = new Array(34).fill(0);
@@ -251,6 +295,7 @@ function doSelfKan(p, o) {
   pl.drawn = null;
   pl.hand.sort((a, b) => a - b);
   brokeFlow();
+  (G.kanBy || (G.kanBy = [])).push(p);
   revealKan(o.kind !== 'ankan');
 }
 function applyCall(call, d, id) {
@@ -271,6 +316,38 @@ function applyCall(call, d, id) {
     from: (d - call.q + 4) % 4
   });
   brokeFlow();
-  if (call.type === 'kan') revealKan(true);
+  if (call.type === 'kan') {
+    (G.kanBy || (G.kanBy = [])).push(call.q);
+    revealKan(true);
+  }
+  if (call.type !== 'chi') checkPao(call.q, d);
   log('call', { p: call.q, type: call.type, t: tt(id) });
+}
+
+// Score changes for one win. l: who dealt in (null for tsumo). pao: the liable player or null; share: the part of
+// the hand's value that is the pao yakuman (1 when it is the only yakuman). On tsumo the liable player pays that
+// part, and the honba; on ron by someone else the two split that part. Kyotaku are added by the caller.
+function winDeltas(w, l, res, { honba = 0, dealer, pao = null, share = 1 }) {
+  const d = [0, 0, 0, 0],
+    pay = (q, n) => {
+      d[q] -= n;
+      d[w] += n;
+    },
+    r100 = x => Math.round(x / 100) * 100;
+  if (l === null) {
+    const normal = q => (w === dealer ? res.tsumoAll : q === dealer ? res.tsumoD : res.tsumoN),
+      others = [0, 1, 2, 3].filter(q => q !== w);
+    if (pao !== null && pao !== w) {
+      pay(pao, r100(others.reduce((a, q) => a + normal(q), 0) * share) + 300 * honba);
+      if (share < 1) others.forEach(q => pay(q, r100(normal(q) * (1 - share))));
+    } else others.forEach(q => pay(q, normal(q) + 100 * honba));
+  } else {
+    const total = res.ron + 300 * honba;
+    if (pao !== null && pao !== l && pao !== w) {
+      const half = r100((res.ron * share) / 2);
+      pay(pao, half);
+      pay(l, total - half);
+    } else pay(l, total);
+  }
+  return d;
 }

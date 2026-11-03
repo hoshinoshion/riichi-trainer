@@ -40,6 +40,7 @@ test('every engine yaku name is translated', () => {
     '役牌 场风',
     '海底摸月',
     '河底捞鱼',
+    '抢杠',
     '岭上开花',
     '七对子',
     '三色同顺',

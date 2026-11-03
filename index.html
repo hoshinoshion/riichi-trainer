@@ -97,6 +97,9 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <select id="optSpeed"><option value="slow" data-i18n="opt.slow">慢</option><option value="mid" data-i18n="opt.mid">中</option><option value="fast" data-i18n="opt.fast">快</option></select></label>
       <label class="srow" for="optLen"><span data-i18n="set.len">对局长度（新游戏生效）</span>
         <select id="optLen"><option value="east" data-i18n="opt.east">东风战</option><option value="south" data-i18n="opt.south">半庄战</option></select></label>
+      <label class="srow" for="optRules"><span data-i18n="set.rules">规则（新对局生效）</span>
+        <select id="optRules"><option value="standard" data-i18n="opt.rStandard">标准</option><option value="basic" data-i18n="opt.rBasic">入门（规则少）</option><option value="noaka" data-i18n="opt.rNoaka">无赤宝牌</option><option value="custom" data-i18n="opt.rCustom">自定义</option></select></label>
+      <details class="rdetails"><summary data-i18n="set.rulesDetail">规则细节</summary><div class="rlist" id="ruleList"></div></details>
     </section>
     <details class="card ref rules" open>
       <summary data-i18n="rulesTitle">规则速成</summary>

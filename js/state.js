@@ -18,6 +18,76 @@ function saveS() {
     localStorage.setItem('rmj-settings', JSON.stringify(S));
   } catch (e) {}
 }
+// ===================== Table rules =====================
+// A game keeps the rules it started with (G.rules); settings change the next game. S.rules = {preset, custom}:
+// a preset fixes every rule, "custom" uses S.rules.custom.
+//   aka: red fives count as dora · kuitan: open tanyao · ippatsu · ron: 'head' (only the first player in turn order
+//   wins), 'double' (two may win; three rons abort the hand), 'triple' · chankan: rob an added kan · abort: abortive
+//   draws (nine terminals, four winds, four kans, four riichi, triple ron) · nagashi: nagashi mangan · pao: liability
+//   for big three dragons / big four winds · tobi: the game ends when someone goes below zero · west: if nobody has
+//   30000 at the end, play on into the next wind until someone does.
+const RULE_KEYS = ['aka', 'kuitan', 'ippatsu', 'ron', 'chankan', 'abort', 'nagashi', 'pao', 'tobi', 'west'];
+const RULE_PRESETS = {
+  standard: {
+    aka: true,
+    kuitan: true,
+    ippatsu: true,
+    ron: 'double',
+    chankan: true,
+    abort: true,
+    nagashi: true,
+    pao: true,
+    tobi: true,
+    west: false
+  },
+  basic: {
+    aka: true,
+    kuitan: true,
+    ippatsu: true,
+    ron: 'head',
+    chankan: true,
+    abort: false,
+    nagashi: false,
+    pao: false,
+    tobi: true,
+    west: false
+  },
+  noaka: {
+    aka: false,
+    kuitan: true,
+    ippatsu: true,
+    ron: 'head',
+    chankan: true,
+    abort: true,
+    nagashi: true,
+    pao: true,
+    tobi: true,
+    west: true
+  }
+};
+if (!S.rules || (!RULE_PRESETS[S.rules.preset] && S.rules.preset !== 'custom'))
+  S.rules = { preset: 'standard', custom: { ...RULE_PRESETS.standard } };
+S.rules.custom = { ...RULE_PRESETS.standard, ...S.rules.custom };
+const rulesFromSettings = () => ({ ...(S.rules.preset === 'custom' ? S.rules.custom : RULE_PRESETS[S.rules.preset]) });
+const rule = k => ((G && G.rules) || RULE_PRESETS.standard)[k];
+const isAka = id => RED_IDS.has(id) && rule('aka') !== false;
+// Compact form for challenge links: one digit per on/off rule in RULE_KEYS order, ron as h / d / t.
+const encodeRules = r => RULE_KEYS.map(k => (k === 'ron' ? r.ron[0] : r[k] ? 1 : 0)).join('');
+function decodeRules(s) {
+  if (typeof s !== 'string' || s.length !== RULE_KEYS.length) return null;
+  const r = {};
+  for (let i = 0; i < s.length; i++) {
+    const k = RULE_KEYS[i],
+      c = s[i];
+    if (k === 'ron') {
+      r.ron = { h: 'head', d: 'double', t: 'triple' }[c];
+      if (!r.ron) return null;
+    } else if (c === '0' || c === '1') r[k] = c === '1';
+    else return null;
+  }
+  return r;
+}
+
 const DELAY = { slow: 950, mid: 560, fast: 220 };
 const delay = () => DELAY[S.speed] || 560;
 const $ = s => document.querySelector(s);
@@ -91,7 +161,7 @@ const newSeed = () => Math.floor(Math.random() * 4294967296);
 // turn, so reopening the page continues from the turn that was in progress. Sets are stored as {$set:[…]}.
 // Bump SAVE_V when the shape of G changes; older saves are then ignored.
 const SAVE_KEY = 'rmj-game',
-  SAVE_V = 3;
+  SAVE_V = 4;
 function saveGame() {
   if (!G) return;
   try {

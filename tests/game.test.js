@@ -197,3 +197,119 @@ test('统计：对局记录最多保留 200 场，汇总和了率、放铳率和
   assert.deepStrictEqual(plain(x.trend), new Array(20).fill(80));
   assert.strictEqual(run('historySummary([])').avgRank, null);
 });
+
+test('规则：一张牌多家荣和按设定处理', () => {
+  const list = n => [1, 2, 3].slice(0, n).map(q => ({ q, res: {} }));
+  const withRules = (r, n) => {
+    table(player([]));
+    ctx.getG().rules = { ...run('RULE_PRESETS.standard'), ...r };
+    return plain(run(`ronsFrom(${JSON.stringify(list(n))})`));
+  };
+  assert.deepStrictEqual(
+    withRules({ ron: 'head' }, 2).rons.map(x => x.q),
+    [1]
+  );
+  assert.deepStrictEqual(
+    withRules({ ron: 'double' }, 2).rons.map(x => x.q),
+    [1, 2]
+  );
+  assert.deepStrictEqual(withRules({ ron: 'double' }, 3), { abort: 'sancha' });
+  assert.deepStrictEqual(
+    withRules({ ron: 'double', abort: false }, 3).rons.map(x => x.q),
+    [1]
+  );
+  assert.deepStrictEqual(
+    withRules({ ron: 'triple' }, 3).rons.map(x => x.q),
+    [1, 2, 3]
+  );
+  assert.strictEqual(withRules({}, 0), null);
+});
+
+test('规则：途中流局（四风连打、四家立直、四杠散了、九种九牌）', () => {
+  const east = parse('1111z');
+  table(player([]));
+  const G = ctx.getG();
+  G.rules = run('({ ...RULE_PRESETS.standard })');
+  G.players.forEach((p, i) => {
+    p.river = [{ id: east[i] }];
+  });
+  assert.strictEqual(run('abortAfterDiscard()'), 'winds');
+  G.rules.abort = false;
+  assert.strictEqual(run('abortAfterDiscard()'), null);
+  G.rules.abort = true;
+  G.players[3].river = [{ id: parse('2z')[0] }];
+  assert.strictEqual(run('abortAfterDiscard()'), null);
+  G.players.forEach(p => {
+    p.riichi = true;
+  });
+  assert.strictEqual(run('abortAfterDiscard()'), 'riichi4');
+  G.players.forEach(p => {
+    p.riichi = false;
+  });
+  G.kanCount = 4;
+  G.kanBy = [1, 1, 1, 1];
+  assert.strictEqual(run('abortAfterDiscard()'), null); // one player's four kans: play on (suukantsu chance)
+  G.kanBy = [1, 2, 1, 1];
+  assert.strictEqual(run('abortAfterDiscard()'), 'kan4');
+  // Nine terminals: first draw, no calls, nine kinds
+  table(player(parse('19m19p19s1234z5m5p5s')));
+  ctx.getG().rules = run('({ ...RULE_PRESETS.standard })');
+  assert.strictEqual(run('kyuushuKinds(G.players[0].hand)'), 10);
+  assert.strictEqual(run('canKyuushu(0)'), true);
+  ctx.getG().players[0].river = [{ id: 0 }];
+  assert.strictEqual(run('canKyuushu(0)'), false);
+});
+
+test('规则：流局满贯只看全幺九且没被鸣走的牌河', () => {
+  table(player([]));
+  const G = ctx.getG();
+  G.rules = run('({ ...RULE_PRESETS.standard })');
+  G.players[1].river = parse('19m1z7z').map(id => ({ id }));
+  G.players[2].river = parse('19m5z').map(id => ({ id }));
+  G.players[2].river[1].called = true;
+  G.players[3].river = parse('19m5p').map(id => ({ id }));
+  assert.deepStrictEqual(plain(run('nagashiPlayers()')), [1]);
+  G.rules.nagashi = false;
+  assert.deepStrictEqual(plain(run('nagashiPlayers()')), []);
+});
+
+test('规则：包牌的支付', () => {
+  const ym = { tsumoAll: 16000, tsumoD: 16000, tsumoN: 8000, ron: 32000 };
+  const d = (w, l, o) => plain(run(`winDeltas(${w}, ${l}, ${JSON.stringify(ym)}, ${JSON.stringify(o)})`));
+  // Non-dealer tsumo, player 3 liable: pays the whole 32000 (and the honba)
+  assert.deepStrictEqual(d(1, null, { dealer: 0, pao: 3, honba: 1 }), [0, 32300, 0, -32300]);
+  // Ron off player 2, player 3 liable: they split the 32000
+  assert.deepStrictEqual(d(1, 2, { dealer: 0, pao: 3 }), [0, 32000, -16000, -16000]);
+  // Ron off the liable player: they pay it all
+  assert.deepStrictEqual(d(1, 3, { dealer: 0, pao: 3 }), [0, 32000, 0, -32000]);
+  // Without pao: an ordinary tsumo
+  assert.deepStrictEqual(d(1, null, { dealer: 0, pao: null }), [-16000, 32000, -8000, -8000]);
+  // Pao for one of two yakuman: the liable player pays half the tsumo, the rest is paid as usual at half
+  const two = { tsumoAll: 32000, tsumoD: 32000, tsumoN: 16000 };
+  assert.deepStrictEqual(
+    plain(run(`winDeltas(1, null, ${JSON.stringify(two)}, { dealer: 0, pao: 3, share: 0.5 })`)),
+    [-16000, 64000, -8000, -40000]
+  );
+  // checkPao: the call that completes the third dragon set
+  table(player([]));
+  const G = ctx.getG();
+  G.rules = run('({ ...RULE_PRESETS.standard })');
+  const q = G.players[1];
+  q.melds = [
+    { type: 'pon', ids: parse('555z') },
+    { type: 'pon', ids: parse('666z') },
+    { type: 'pon', ids: parse('777z') }
+  ];
+  run('checkPao(1, 2)');
+  assert.strictEqual(q.pao, 2);
+  assert.strictEqual(q.paoYaku, '大三元');
+});
+
+test('规则：挑战链接里的规则编码可以还原', () => {
+  for (const k of ['standard', 'basic', 'noaka']) {
+    const r = run(`RULE_PRESETS.${k}`);
+    assert.deepStrictEqual(plain(run(`decodeRules(encodeRules(RULE_PRESETS.${k}))`)), plain(r));
+  }
+  assert.strictEqual(run(`decodeRules('11d')`), null);
+  assert.strictEqual(run(`decodeRules('1111x11111')`), null);
+});

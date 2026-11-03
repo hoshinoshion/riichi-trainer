@@ -124,3 +124,45 @@ test('连风雀头 +4符', () => {
   assert.strictEqual(r.fu, 40);
   assert.strictEqual(r.ron, 2000);
 });
+
+test('规则选项：无赤宝牌、无食断、抢杠', () => {
+  const E = require('../js/engine.js');
+  // 234m 5(赤)55p 678s 22m + 34m 中的 5p 是红五（id 52）
+  const hand = [4, 8, 12, 52, 53, 54, 76, 80, 84, 5, 6, 13, 17];
+  const base = {
+    hand,
+    melds: [],
+    winId: 21,
+    isTsumo: false,
+    seat: 28,
+    round: 27,
+    isDealer: false,
+    sit: { riichi: true },
+    doraInd: [33],
+    uraInd: null
+  };
+  const withAka = E.evaluate(base),
+    noAka = E.evaluate({ ...base, aka: false });
+  assert.strictEqual(withAka.aka, 1);
+  assert.strictEqual(noAka.aka, 0);
+  assert.strictEqual(withAka.han - noAka.han, 1);
+  // 抢杠: +1 番, only on ron
+  const robbed = E.evaluate({ ...base, sit: { riichi: true, chankan: true } });
+  assert.ok(robbed.yaku.some(([n]) => n === '抢杠'));
+  assert.strictEqual(robbed.han, withAka.han + 1);
+  // 食断 off: an open all-simples hand has no yaku
+  const open = {
+    hand: [4, 8, 12, 5, 6, 13, 17, 76, 80, 84],
+    melds: [{ type: 'pon', ids: [56, 57, 58], called: 58, from: 3 }],
+    winId: 21,
+    isTsumo: false,
+    seat: 28,
+    round: 27,
+    isDealer: false,
+    sit: {},
+    doraInd: [33],
+    uraInd: null
+  };
+  assert.ok(E.evaluate(open).yaku.some(([n]) => n === '断幺九'));
+  assert.strictEqual(E.evaluate({ ...open, kuitan: false }), null);
+});

@@ -89,3 +89,18 @@ test('a game resumed from its save finishes exactly like the uninterrupted game'
     assert.strictEqual(second.storage['rmj-game'], undefined, 'finished game clears its save');
   }
 });
+
+test('whole computer games finish under every rule set without points appearing or vanishing', async () => {
+  for (const rules of ['standard', 'basic', 'noaka', 'triple']) {
+    for (const seed of [11, 12]) {
+      const { run } = load(harness);
+      const r =
+        rules === 'triple'
+          ? '{ ...RULE_PRESETS.standard, ron: "triple", west: true, tobi: false }'
+          : `RULE_PRESETS.${rules}`;
+      const scores = await run(`new Promise(res => { DONE = res; newGame(${seed}, ${r}); })`);
+      const total = scores.reduce((a, b) => a + b, 0) + run('G.kyotaku') * 1000;
+      assert.strictEqual(total, 100000, `${rules} seed ${seed}: ${JSON.stringify(scores)}`);
+    }
+  }
+});

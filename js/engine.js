@@ -191,7 +191,8 @@ function basePoints(han, fu, ym) {
 }
 
 // ===================== Yaku evaluation =====================
-// ctx: {hand, melds, winId, isTsumo, seat, round, isDealer, sit:{riichi,double,ippatsu,haitei,houtei,rinshan,tenhou,chiihou}, doraInd:[], uraInd:[]|null}
+// ctx: {hand, melds, winId, isTsumo, seat, round, isDealer, sit:{riichi,double,ippatsu,haitei,houtei,rinshan,chankan,tenhou,chiihou},
+//       doraInd:[], uraInd:[]|null, aka (default true: red fives count as dora), kuitan (default true: open tanyao)}
 function evaluate(ctx) {
   const { melds, winId, isTsumo, seat, round, isDealer } = ctx,
     sit = ctx.sit || {};
@@ -212,6 +213,7 @@ function evaluate(ctx) {
   if (sit.rinshan) sitY.push(['岭上开花', 1]);
   else if (sit.haitei && isTsumo) sitY.push(['海底摸月', 1]);
   if (sit.houtei && !isTsumo) sitY.push(['河底捞鱼', 1]);
+  if (sit.chankan && !isTsumo) sitY.push(['抢杠', 1]);
   if (sit.tenhou) sitYM.push('天和');
   if (sit.chiihou) sitYM.push('地和');
   const types = [];
@@ -220,7 +222,7 @@ function evaluate(ctx) {
   const hasHon = types.some(t => t >= 27);
   const colorY = [],
     colorYM = [];
-  if (types.every(t => !isYao(t))) colorY.push(['断幺九', 1]);
+  if (types.every(t => !isYao(t)) && (menzen || ctx.kuitan !== false)) colorY.push(['断幺九', 1]);
   if (suits.size === 1) {
     if (hasHon) colorY.push(['混一色', menzen ? 3 : 2]);
     else colorY.push(['清一色', menzen ? 6 : 5]);
@@ -350,7 +352,7 @@ function evaluate(ctx) {
   }
   let dora = 0;
   for (const i of ctx.doraInd) dora += allC[doraOf(i)];
-  const aka = allIds.filter(id => RED_IDS.has(id)).length;
+  const aka = ctx.aka === false ? 0 : allIds.filter(id => RED_IDS.has(id)).length;
   let ura = 0;
   if (ctx.uraInd && (sit.riichi || sit.double)) for (const i of ctx.uraInd) ura += allC[doraOf(i)];
   let best = null;

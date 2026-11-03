@@ -85,9 +85,7 @@ function threatsFor(p) {
     return (
       q.melds.length >= 3 ||
       (q.melds.length >= 2 &&
-        q.melds.some(
-          m => (m.type !== 'chi' && yh(tt(m.ids[0]))) || m.ids.some(id => RED_IDS.has(id) || di.includes(tt(id)))
-        ))
+        q.melds.some(m => (m.type !== 'chi' && yh(tt(m.ids[0]))) || m.ids.some(id => isAka(id) || di.includes(tt(id)))))
     );
   });
 }
@@ -99,7 +97,7 @@ function handValue(p) {
     di = doraInds();
   let v = 0;
   for (const id of ids) {
-    if (RED_IDS.has(id)) v++;
+    if (isAka(id)) v++;
     for (const i of di) if (doraOf(i) === tt(id)) v++;
   }
   for (const t of [31, 32, 33, 27 + seatOf(p), 27 + G.bakaze])
@@ -156,7 +154,9 @@ function tenpaiEV(p, d, vis, asRiichi) {
       isDealer: p === G.dealer,
       sit,
       doraInd: doraInds(),
-      uraInd: null
+      uraInd: null,
+      aka: rule('aka'),
+      kuitan: rule('kuitan')
     });
     if (!res) {
       allYaku = false;
@@ -294,7 +294,7 @@ function yakuPathOpen(q, newT) {
   const c = counts(pl.hand);
   if ([31, 32, 33, seat, round].some(t => c[t] >= 3)) return true;
   const simple = pl.melds.every(m => m.ids.every(id => !isYao(tt(id)))) && newT.every(t => !isYao(t));
-  return simple && pl.hand.filter(id => isYao(tt(id))).length <= 1;
+  return rule('kuitan') && simple && pl.hand.filter(id => isYao(tt(id))).length <= 1;
 }
 function aiPon(q, id) {
   const pl = G.players[q],
@@ -371,6 +371,8 @@ async function aiTurn(p, info) {
     const res = evaluate(ctxFor(p, pl.drawn, true, sitFor(p, true, info.rinshan), true));
     if (res) return { type: 'tsumo', res };
   }
+  // Nine terminals: easy and normal take the abortive draw; hard keeps a hand with 11+ kinds for kokushi.
+  if (!info.afterCall && canKyuushu(p) && !(L === 'hard' && kyuushuKinds(pl.hand) >= 11)) return { type: 'kyuushu' };
   if (pl.riichi) {
     const k = kanOptions(p);
     if (k.length) return { type: 'kan', opt: k[0] };

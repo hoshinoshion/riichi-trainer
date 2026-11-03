@@ -199,7 +199,8 @@ function face(t, red) {
   return (faceCache[k] = h);
 }
 function tileHTML(id, cls = '', attr = '') {
-  return `<div class="tile ${cls}" ${attr} title="${TN(tt(id))}${RED_IDS.has(id) ? t('red') : ''}"><div class="face">${face(tt(id), RED_IDS.has(id))}</div></div>`;
+  const red = isAka(id); // with red fives off (rule aka) they are drawn as ordinary fives
+  return `<div class="tile ${cls}" ${attr} title="${TN(tt(id))}${red ? t('red') : ''}"><div class="face">${face(tt(id), red)}</div></div>`;
 }
 function tileT(t, cls = '') {
   return tileHTML(t * 4 + 3, cls);
@@ -477,6 +478,7 @@ function renderActions() {
         (k, i) =>
           (h += `<button class="btn" data-act="kan:${i}" type="button">${k.kind === 'ankan' ? t('ankan') : t('kakan')} ${tileT(k.t)}</button>`)
       );
+      if (o.kyuushu) h += `<button class="btn ghost" data-act="kyuushu" type="button">${t('kyuushu')}</button>`;
     }
   } else if (UI.mode === 'riichiTsumo') {
     const o = UI.opts;
@@ -488,7 +490,7 @@ function renderActions() {
     h += `<button class="btn ghost" data-act="pass" type="button">${o.tsumo ? t('passNoWin') : t('passNoKan')}</button>`;
   } else if (UI.mode === 'call') {
     const c = UI.call;
-    h = `<span class="amsg">${t('discardedBy', { p: P(c.d) })} ${tileHTML(c.id, 'chip')}</span>`;
+    h = `<span class="amsg">${t(c.rob ? 'kakanBy' : 'discardedBy', { p: P(c.d) })} ${tileHTML(c.id, 'chip')}</span>`;
     if (c.ron) h += `<button class="btn win" data-act="ron" type="button">${t('ron')}</button>`;
     if (c.pon) h += `<button class="btn gold" data-act="pon" type="button">${t('pon')}</button>`;
     if (c.kan) h += `<button class="btn" data-act="kan" type="button">${t('kan')}</button>`;
