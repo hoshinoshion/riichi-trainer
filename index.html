@@ -53,7 +53,7 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
     <div class="stage">
       <!-- One table surface: the four seats around the play mat (round info in its centre). -->
       <section class="table">
-        <p class="ticker" id="ticker"></p>
+        <p class="ticker" id="ticker" aria-live="polite"></p>
         <div class="arena" aria-label="对手" data-i18n-aria="oppsLabel">
           <div class="opp top" id="opp2"></div>
           <div class="opp left" id="opp3"></div>
@@ -97,6 +97,7 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
         <select id="optLen"><option value="east" data-i18n="opt.east">东风战</option><option value="south" data-i18n="opt.south">半庄战</option></select></label>
       <label class="srow" for="optRules"><span data-i18n="set.rules">规则（新对局生效）</span>
         <select id="optRules"><option value="standard" data-i18n="opt.rStandard">标准</option><option value="basic" data-i18n="opt.rBasic">入门（规则少）</option><option value="noaka" data-i18n="opt.rNoaka">无赤宝牌</option><option value="custom" data-i18n="opt.rCustom">自定义</option></select></label>
+      <div class="srow"><span data-i18n="kb.title">键盘快捷键</span><button class="linkbtn" id="btnKeys" type="button" data-i18n="kb.show">查看</button></div>
       <details class="rdetails"><summary data-i18n="set.rulesDetail">规则细节</summary><div class="rlist" id="ruleList"></div></details>
     </section>
     <details class="card ref rules" open>

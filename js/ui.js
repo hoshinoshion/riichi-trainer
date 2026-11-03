@@ -169,6 +169,56 @@ $('#optLang').addEventListener('change', () => {
 });
 translatePage();
 
+// Keyboard play. Outside text fields and dialogs: arrows choose a tile, Enter / Space discards it (handled on the
+// hand above), D discards the drawn tile, R riichi, T tsumo or ron, P pon, C chi, K kan, Esc skips a call,
+// M the menu, L practice, ? the list of keys.
+const KEYS = { r: 'riichi', t: ['tsumo', 'ron'], p: 'pon', c: 'chi', k: 'kan', escape: 'pass' };
+function pressAct(names) {
+  for (const n of [].concat(names)) {
+    const b = $(`#actions [data-act="${n}"]`) || $(`#actions [data-act^="${n}:"]`);
+    if (b) {
+      b.click();
+      return true;
+    }
+  }
+  return false;
+}
+function showKeys() {
+  showModal(
+    `<div><h2>${t('kb.title')}</h2></div><dl class="kblist">${L('kb.list')
+      .map(([k, v]) => `<div><dt><kbd>${k}</kbd></dt><dd>${v}</dd></div>`)
+      .join('')}</dl>`,
+    t('close')
+  ).catch(() => {});
+}
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input,select,textarea')) return;
+  if (!$('#modal').hidden || !$('#practice').hidden) return;
+  const k = e.key.toLowerCase();
+  if (k === '?') return showKeys();
+  if (k === 'm') return $('#btnMenu').click();
+  if (k === 'l') return $('#btnPractice').click();
+  if (k === 'escape' && UI.mode === 'riichiTsumo') return pressAct('pass');
+  if (KEYS[k] && pressAct(UI.riichiMode && k === 'r' ? 'riichi-cancel' : KEYS[k])) return e.preventDefault();
+  if (k === 'd' && UI.mode === 'discard') {
+    const last = [...document.querySelectorAll('#hand .tile[data-id]:not(.dim)')].pop();
+    if (last && last.classList.contains('drawn')) {
+      UI.selected = +last.dataset.id;
+      last.click();
+    }
+    return;
+  }
+  // Arrows from anywhere bring focus into the hand.
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.target.closest('#hand')) {
+    const tiles = [...document.querySelectorAll('#hand .tile[data-id]')];
+    if (tiles.length) {
+      e.preventDefault();
+      (e.key === 'ArrowLeft' ? tiles[tiles.length - 1] : tiles[0]).focus();
+    }
+  }
+});
+$('#btnKeys').addEventListener('click', showKeys);
+
 // The drawer (coach, log, stats, settings, rules, yaku list): slides in from the menu button below 1240px wide,
 // docked beside the table above that (where these controls are hidden by CSS).
 const drawerIsOverlay = () => getComputedStyle($('#drawer')).position === 'fixed';

@@ -560,15 +560,20 @@ function renderMe() {
     fid = ae && ae.closest && ae.closest('#hand') ? ae.dataset.id : null;
   $('#hand').innerHTML = ids
     .map(id => {
-      const t = tt(id),
+      const ty = tt(id),
         cls = [];
       if (id === pl.drawn && pl.hand.length % 3 === 2) cls.push('drawn');
       if (UI.selected === id) cls.push('sel');
-      if (UI.mode === 'discard' && (UI.opts.forbid.includes(t) || (UI.riichiMode && !UI.opts.riichi.has(t))))
+      if (UI.mode === 'discard' && (UI.opts.forbid.includes(ty) || (UI.riichiMode && !UI.opts.riichi.has(ty))))
         cls.push('dim');
-      if (rec.has(t) && (id === pl.drawn || ids.filter(x => tt(x) === t)[0] === id)) cls.push('rec');
-      if (dset.has(t)) cls.push('dora');
-      return tileHTML(id, cls.join(' '), `data-id="${id}" role="button" tabindex="0"`);
+      if (rec.has(ty) && (id === pl.drawn || ids.filter(x => tt(x) === ty)[0] === id)) cls.push('rec');
+      if (dset.has(ty)) cls.push('dora');
+      // Spoken label: the tile, then what the marks show (recommended, drawn, dora, not allowed).
+      const label = [TN(ty) + (isAka(id) ? t('red') : '')]
+        .concat(cls.includes('rec') ? t('a11y.rec') : [], cls.includes('drawn') ? t('a11y.drawn') : [])
+        .concat(cls.includes('dora') ? t('a11y.dora') : [], cls.includes('dim') ? t('a11y.blocked') : [])
+        .join(t('pr.sep'));
+      return tileHTML(id, cls.join(' '), `data-id="${id}" role="button" tabindex="0" aria-label="${label}"`);
     })
     .join('');
   if (fid != null) {

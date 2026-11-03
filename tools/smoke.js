@@ -100,6 +100,26 @@ const check = (ok, msg) => {
     `reload resumes the game: hand ${before === after ? 'unchanged' : 'changed'}, log ${/Resumed/.test(logText) ? 'says resumed' : 'has no resume line'}`
   );
 
+  // Keyboard: an arrow key brings focus into the hand, Enter twice discards; ? opens the list of keys.
+  {
+    const { page, errors } = await open({ width: 1280, height: 900 }, { lang: 'en' });
+    const river = () => page.evaluate(() => G.players[0].river.length);
+    const before = await river();
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(n => G.players[0].river.length > n, before, { timeout: 5000 }).catch(() => {});
+    const after = await river();
+    const label = await page.locator('#hand .tile[data-id]').first().getAttribute('aria-label');
+    await page.waitForFunction(() => UI.mode === 'discard', null, { timeout: 15000 }).catch(() => {});
+    await page.keyboard.press('?');
+    const help = await page.locator('#modal:not([hidden]) .kblist').count();
+    check(
+      after === before + 1 && !!label && help === 1 && errors.length === 0,
+      `keyboard: ${after === before + 1 ? 'discarded with Enter' : 'no discard'}, tiles ${label ? 'labelled' : 'unlabelled'}, ${help ? 'key list opens' : 'no key list'}`
+    );
+  }
+
   // Practice: every tab produces a puzzle that can be answered without errors.
   {
     const { page, errors } = await open({ width: 390, height: 844 }, { lang: 'en' });

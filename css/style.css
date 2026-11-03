@@ -283,7 +283,13 @@ button{font:inherit;color:inherit}
 :root[data-theme="classic"] .hand .tile.sel{box-shadow:0 0 0 2px var(--gold),0 calc(var(--w)*.07) 0 var(--tile-edge),0 6px 10px rgba(0,0,0,.45)}
 .hand .tile.drawn{margin-left:calc(var(--w)*.4)}
 .hand .tile.dim{filter:brightness(.45) saturate(.6);cursor:not-allowed}
-.hand .tile.rec::after{content:"";position:absolute;left:50%;bottom:calc(var(--w)*-.32);width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--gold)}
+/* Recommended tile: a small triangle (a shape, not only a colour) under it. */
+.hand .tile.rec::after{content:"";position:absolute;left:50%;bottom:calc(var(--w)*-.34);margin-left:-5px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid var(--gold)}
+.kblist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 16px;margin:0}
+.kblist div{display:flex;gap:10px;align-items:center}
+.kblist dt{min-width:4.5em}
+.kblist dd{margin:0;font-size:13.5px}
+kbd{font:600 12px/1 var(--f-ui);padding:3px 6px;border-radius:6px;border:1px solid var(--line);border-bottom-width:2px;background:var(--panel-2)}
 .mymelds{display:flex;flex-wrap:wrap;gap:6px;--w:calc(var(--tw)*.82)}
 .mymelds .tile{--w:calc(var(--tw)*.82)}
 
