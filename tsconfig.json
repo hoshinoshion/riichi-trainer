@@ -1,0 +1,28 @@
+{
+  // Type-checks the plain scripts as one global program, the way the browser loads them. No build output.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "es2022",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "strict": false,
+    "types": [],
+    "moduleDetection": "legacy"
+  },
+  "files": [
+    "types/globals.d.ts",
+    "js/engine.js",
+    "js/i18n.js",
+    "js/state.js",
+    "js/rules.js",
+    "js/ai.js",
+    "js/review.js",
+    "js/practice.js",
+    "js/flow.js",
+    "js/render.js",
+    "js/ui.js",
+    "js/practice-ui.js",
+    "js/shell.js"
+  ]
+}

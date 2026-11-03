@@ -100,11 +100,15 @@ function decodeRules(s) {
 }
 
 // Sound effects; shell.js replaces this with the Web Audio version in the browser.
+/** @type {(kind: string) => void} */
 let sfx = () => {};
 
 const DELAY = { slow: 950, mid: 560, fast: 220 };
 const delay = () => DELAY[S.speed] || 560;
+/** @type {(s: string) => any} */
 const $ = s => document.querySelector(s);
+/** @type {(s: string) => HTMLElement[]} */
+const $$ = s => /** @type {HTMLElement[]} */ ([...document.querySelectorAll(s)]);
 setLang(S.lang);
 
 // ===================== Game state =====================

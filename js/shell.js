@@ -60,7 +60,7 @@ function click(freq) {
 sfx = kind => {
   if (!S.sound) return;
   try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    actx = actx || new (window.AudioContext || /** @type {any} */ (window).webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
     const pitch = { tatami: 0.7, parlor: 1.25 }[document.documentElement.dataset.theme] || 1;
     if (kind === 'discard') click(1800 * pitch);

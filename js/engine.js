@@ -193,6 +193,27 @@ function basePoints(han, fu, ym) {
 // ===================== Yaku evaluation =====================
 // ctx: {hand, melds, winId, isTsumo, seat, round, isDealer, sit:{riichi,double,ippatsu,haitei,houtei,rinshan,chankan,tenhou,chiihou},
 //       doraInd:[], uraInd:[]|null, aka (default true: red fives count as dora), kuitan (default true: open tanyao)}
+/**
+ * @typedef {Object} WinResult
+ * @property {boolean} yakuman
+ * @property {Array<[string, number|string]>} yaku  [name, han] (han is '役满' for yakuman)
+ * @property {number} han
+ * @property {number} fu
+ * @property {number} base
+ * @property {string} label  limit name (满贯 …) or ''
+ * @property {number} dora
+ * @property {number} aka
+ * @property {number} ura
+ * @property {number} [yakuHan]
+ * @property {string} [wait]
+ * @property {any[][]} [fuParts]
+ * @property {boolean} [isDealer]
+ * @property {number} [ron]
+ * @property {number} [tsumoAll]
+ * @property {number} [tsumoD]
+ * @property {number} [tsumoN]
+ */
+/** @returns {WinResult|null} */
 function evaluate(ctx) {
   const { melds, winId, isTsumo, seat, round, isDealer } = ctx,
     sit = ctx.sit || {};
@@ -233,6 +254,7 @@ function evaluate(ctx) {
   if (types.every(isYao) && hasHon && suits.size > 0) colorY.push(['混老头', 2]);
   const yh = t => isDragon(t) || t === seat || t === round;
 
+  /** @type {any[]} */
   const forms = [];
   if (mc === 0 && kokushiSh(c) === -1) forms.push({ ym: ['国士无双'], fu: 0 });
   if (mc === 0 && c.filter(x => x === 2).length === 7)
@@ -332,6 +354,7 @@ function evaluate(ctx) {
     }
     // fuParts explains the fu: [kind, fu] pairs (sets as ['set', fu, tile, open, kan]), before rounding up.
     let fu;
+    /** @type {any[][]} */
     const fuParts = [];
     if (pinfu) {
       fu = isTsumo ? 20 : 30;
@@ -364,9 +387,11 @@ function evaluate(ctx) {
   const aka = ctx.aka === false ? 0 : allIds.filter(id => RED_IDS.has(id)).length;
   let ura = 0;
   if (ctx.uraInd && (sit.riichi || sit.double)) for (const i of ctx.uraInd) ura += allC[doraOf(i)];
+  /** @type {WinResult|null} */
   let best = null;
   for (const f of forms) {
     const ym = [...sitYM, ...(f.ym || []), ...colorYM];
+    /** @type {WinResult} */
     let r;
     if (ym.length) {
       const bp = basePoints(0, 0, ym.length);
@@ -417,6 +442,7 @@ function evaluate(ctx) {
 }
 
 // Allow the engine to be loaded by Node for tests.
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tt, isTerm, isYao, doraOf, counts, shanten, decompositions, basePoints, evaluate, tName };
-}
+// Node (tests, tools) loads this file as a module. The alias keeps type checkers treating it as a plain script.
+const engineModule = typeof module !== 'undefined' ? module : null;
+if (engineModule && engineModule.exports)
+  engineModule.exports = { tt, isTerm, isYao, doraOf, counts, shanten, decompositions, basePoints, evaluate, tName };

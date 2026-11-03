@@ -149,7 +149,8 @@ async function resolveCalls(d, id, rob) {
   const t = tt(id),
     order = [1, 2, 3].map(k => (d + k) % 4),
     ronRes = {};
-  let hOpts = { ron: null, inWait: false };
+  /** @type {{ inWait: boolean, res: any, furiten?: boolean }} */
+  let hOpts = { inWait: false, res: null };
   for (const q of order) {
     const rc = ronCheck(q, id, rob);
     if (q === 0) hOpts = rc;

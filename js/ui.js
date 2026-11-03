@@ -30,7 +30,7 @@ $('#hand').addEventListener('keydown', e => {
   }
   // Arrow keys move focus along the hand.
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-    const tiles = [...document.querySelectorAll('#hand .tile[data-id]')],
+    const tiles = $$('#hand .tile[data-id]'),
       i = tiles.indexOf(e.target);
     if (i < 0) return;
     e.preventDefault();
@@ -132,13 +132,13 @@ function renderYakuTable() {
 }
 // Static page text: elements carry data-i18n (text) or data-i18n-html (markup) keys.
 function translatePage() {
-  document.querySelectorAll('[data-i18n]').forEach(e => {
+  $$('[data-i18n]').forEach(e => {
     e.textContent = t(e.dataset.i18n);
   });
-  document.querySelectorAll('[data-i18n-aria]').forEach(e => {
+  $$('[data-i18n-aria]').forEach(e => {
     e.setAttribute('aria-label', t(e.dataset.i18nAria));
   });
-  document.querySelectorAll('[data-i18n-title]').forEach(e => {
+  $$('[data-i18n-title]').forEach(e => {
     e.setAttribute('title', t(e.dataset.i18nTitle));
   });
   updateTools();
@@ -192,7 +192,8 @@ function showKeys() {
   ).catch(() => {});
 }
 document.addEventListener('keydown', e => {
-  if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input,select,textarea')) return;
+  const tgt = /** @type {HTMLElement} */ (e.target);
+  if (e.ctrlKey || e.metaKey || e.altKey || tgt.closest('input,select,textarea')) return;
   if (!$('#modal').hidden || !$('#practice').hidden) return;
   const k = e.key.toLowerCase();
   if (k === '?') return showKeys();
@@ -201,7 +202,7 @@ document.addEventListener('keydown', e => {
   if (k === 'escape' && UI.mode === 'riichiTsumo') return pressAct('pass');
   if (KEYS[k] && pressAct(UI.riichiMode && k === 'r' ? 'riichi-cancel' : KEYS[k])) return e.preventDefault();
   if (k === 'd' && UI.mode === 'discard') {
-    const last = [...document.querySelectorAll('#hand .tile[data-id]:not(.dim)')].pop();
+    const last = $$('#hand .tile[data-id]:not(.dim)').pop();
     if (last && last.classList.contains('drawn')) {
       UI.selected = +last.dataset.id;
       last.click();
@@ -209,8 +210,8 @@ document.addEventListener('keydown', e => {
     return;
   }
   // Arrows from anywhere bring focus into the hand.
-  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.target.closest('#hand')) {
-    const tiles = [...document.querySelectorAll('#hand .tile[data-id]')];
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !tgt.closest('#hand')) {
+    const tiles = $$('#hand .tile[data-id]');
     if (tiles.length) {
       e.preventDefault();
       (e.key === 'ArrowLeft' ? tiles[tiles.length - 1] : tiles[0]).focus();

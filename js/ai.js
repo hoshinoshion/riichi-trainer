@@ -135,7 +135,7 @@ function tenpaiEV(p, d, vis, asRiichi) {
     const wid = [3, 2, 1, 0]
       .map(k => t * 4 + k)
       .filter(id => !hand.includes(id))
-      .sort((a, b) => RED_IDS.has(a) - RED_IDS.has(b))[0];
+      .sort((a, b) => Number(RED_IDS.has(a)) - Number(RED_IDS.has(b)))[0];
     const sit = {
       riichi: asRiichi,
       double: false,

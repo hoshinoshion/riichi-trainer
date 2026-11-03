@@ -15,6 +15,7 @@
     "sim": "node tools/sim.js",
     "smoke": "node tools/smoke.js",
     "format": "npx --yes prettier@3.3.3 --write \"js/**/*.js\" \"tests/**/*.js\" \"tools/**/*.js\" sw.js",
-    "format:check": "npx --yes prettier@3.3.3 --check \"js/**/*.js\" \"tests/**/*.js\" \"tools/**/*.js\" sw.js"
+    "format:check": "npx --yes prettier@3.3.3 --check \"js/**/*.js\" \"tests/**/*.js\" \"tools/**/*.js\" sw.js",
+    "typecheck": "npx --yes -p typescript@5.6.3 tsc -p tsconfig.json"
   }
 }

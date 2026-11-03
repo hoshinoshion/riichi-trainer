@@ -556,7 +556,7 @@ function renderMe() {
     }
   }
   // Re-rendering replaces the tiles, so put keyboard focus back on the same tile (or the first one).
-  const ae = document.activeElement,
+  const ae = /** @type {HTMLElement} */ (document.activeElement),
     fid = ae && ae.closest && ae.closest('#hand') ? ae.dataset.id : null;
   $('#hand').innerHTML = ids
     .map(id => {
@@ -585,7 +585,7 @@ function renderMe() {
 function renderActions() {
   const el = $('#actions');
   let h = '';
-  const ae = document.activeElement,
+  const ae = /** @type {HTMLElement} */ (document.activeElement),
     act = ae && ae.closest && ae.closest('#actions') ? ae.dataset.act : null;
   if (UI.mode === 'discard') {
     const o = UI.opts;

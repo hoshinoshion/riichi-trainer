@@ -454,7 +454,7 @@ STR['zh-CN'] = {
   aiHint: {
     easy: '入门：只看大致牌效，经常打错，常无役乱鸣，几乎不弃和。适合刚学规则时练手。',
     normal: '普通：按进张数打牌效，有人立直且自己离听牌远时弃和。',
-    hard: '困难：多看两步、优先好形，听牌时选打点期望最高的听法，大牌默听，按手牌价值决定押退，会防危险的副露，弃和时用筋、壁、No Chance。',
+    hard: '困难：按进张打牌，弃和比普通更会读牌：听牌时选打点期望最高的听法，已有役且满贯以上时默听，会防危险的副露，弃和时用筋、壁、No Chance，有人立直时不乱杠，幺九多时会做国士。',
     mixed: '混合：下家入门、对家普通、上家困难，方便比较三种打法。'
   },
   rulesTitle: '规则速成',
@@ -899,7 +899,7 @@ STR['zh-TW'] = {
   aiHint: {
     easy: '入門：只看大致牌效，常打錯，常無役亂鳴，幾乎不棄和。適合剛學規則時練手。',
     normal: '普通：依進張數打牌效，有人立直且自己離聽牌遠時棄和。',
-    hard: '困難：多看兩步、優先好形，聽牌時選打點期望最高的聽法，大牌默聽，依手牌價值決定攻守，會防危險的副露，棄和時用筋、壁、No Chance。',
+    hard: '困難：按進張打牌，棄和比普通更會讀牌：聽牌時選打點期望最高的聽法，已有役且滿貫以上時默聽，會防危險的副露，棄和時用筋、壁、No Chance，有人立直時不亂槓，么九多時會做國士。',
     mixed: '混合：下家入門、對家普通、上家困難，方便比較三種打法。'
   },
   rulesTitle: '規則速成',
@@ -1391,7 +1391,7 @@ STR.ja = {
   aiHint: {
     easy: '初級：おおまかな牌効率だけで打ち、ミスが多く、役なしでもよく鳴き、ほとんどオリません。ルールを覚えたての練習に。',
     normal: '中級：受け入れ枚数で牌効率どおりに打ち、リーチを受けて聴牌から遠いとオリます。',
-    hard: '上級：2手先まで見て好形を優先、聴牌時は打点期待値の高い待ちを選び、高い手はダマ、手の価値で押し引きを判断し、危険な副露にも警戒、オリはスジ・壁・ノーチャンスを使います。',
+    hard: '上級：受け入れ重視で打ち、読みが鋭い：聴牌時は打点期待値の高い待ちを選び、役があり満貫以上ならダマ、危険な副露も警戒し、オリではスジ・壁・ノーチャンスを使い、リーチ者がいればむやみにカンせず、么九牌が多ければ国士も狙います。',
     mixed: 'ミックス：下家が初級、対面が中級、上家が上級。打ち方を比べられます。'
   },
   rulesTitle: 'ルール早わかり',
@@ -1903,7 +1903,7 @@ STR.en = {
   aiHint: {
     easy: 'Easy: plays rough tile efficiency, makes frequent mistakes, calls without a yaku and almost never folds. Good for learning the rules.',
     normal: 'Normal: plays by tile acceptance and folds against riichi when far from tenpai.',
-    hard: 'Hard: looks two draws ahead for good shapes, picks the wait with the best expected score, stays dama on big hands, pushes or folds by hand value, respects dangerous open hands, and folds using suji, kabe and no-chance.',
+    hard: 'Hard: plays for effective draws like normal and reads the table better: picks the wait with the best expected score, stays damaten on hands already worth a mangan, respects dangerous open hands, folds with suji, kabe and no-chance reads, avoids kan into a riichi, and tries kokushi with many terminals.',
     mixed: 'Mixed: Right is easy, Across is normal, Left is hard, so you can compare the three styles.'
   },
   rulesTitle: 'Rules in brief',
@@ -2044,6 +2044,6 @@ const YAKU_REF = [
   ]
 ];
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { STR, t, setLang, detectLang, YAKU_REF };
-}
+// Node (tests, tools) loads this file as a module. The alias keeps type checkers treating it as a plain script.
+const i18nModule = typeof module !== 'undefined' ? module : null;
+if (i18nModule && i18nModule.exports) i18nModule.exports = { STR, t, setLang, detectLang, YAKU_REF };
