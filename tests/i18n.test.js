@@ -118,3 +118,18 @@ test('language detection: first supported browser language wins, otherwise Japan
     else delete globalThis.navigator;
   }
 });
+
+test('glossary tooltips mark the first use of each term, outside tags', () => {
+  const { load } = require('../tools/load.js');
+  const { run } = load(
+    'STR["zh-CN"].gloss = { 向听: "离听牌还差几步", 进张: "能让向听减少的牌" }; STR.en.gloss = { shanten: "steps from tenpai" };'
+  );
+  run('setLang("zh-CN")');
+  const out = run(`gloss('<b title="向听">一向听</b>，进张 5 张，向听')`);
+  assert.strictEqual((out.match(/class="term"/g) || []).length, 2);
+  assert.ok(out.startsWith('<b title="向听">一<span class="term"'), out);
+  run('setLang("en")');
+  const en = run(`gloss('1-Shanten, then shanten again')`);
+  assert.strictEqual((en.match(/class="term"/g) || []).length, 1);
+  assert.ok(en.includes('>Shanten</span>'));
+});

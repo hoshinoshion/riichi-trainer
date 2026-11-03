@@ -337,7 +337,7 @@ function reviewHTML() {
       .map(n => `<li>${t('ai.' + n.why, { p: n.p, n: n.turn, t: n.t })}</li>`)
       .join('')}</ul>`;
   body += `<div class="rpbar"><button class="btn" type="button" data-replay="0">${t('rp.open')}</button></div><div class="replay" id="replayBox"></div>`;
-  return `<details class="review"${list.length || choices.length ? ' open' : ''}><summary>${t('rv.title')} · ${t('rv.agree', { a, n: disc.length, d })}</summary>${body}</details>`;
+  return `<details class="review"${list.length || choices.length ? ' open' : ''}><summary>${t('rv.title')} · ${t('rv.agree', { a, n: disc.length, d })}</summary>${gloss(body)}</details>`;
 }
 // Replay: the table at your i-th recorded decision, from its snapshot, with buttons to step through them.
 function replayHTML(i) {
@@ -375,7 +375,7 @@ function dealInHTML(x) {
       : `<p>${t('di.noSafe')}</p>`;
     if (x.safe.length) h += `<p>${t(x.s >= 1 ? 'di.fold' : 'di.push', { s: x.s })}</p>`;
   }
-  return `<div class="dealin"><h3>${t('di.title')}</h3>${h}</div>`;
+  return gloss(`<div class="dealin"><h3>${t('di.title')}</h3>${h}</div>`);
 }
 // Challenge link: a friend opening it plays the same deals.
 function challengeHTML() {
@@ -587,16 +587,58 @@ function lastMistakeHTML() {
   const v = { t: tt(r.id), s: r.mine.s, n: r.mine.n, b: r.best.d, bs: r.best.s, bn: r.best.n };
   return `<h3>${t('lastMove')}</h3><p class="note">${t(r.kind === 'back' ? 'rv.back' : 'rv.slow', v)}</p>`;
 }
+// Terms in the coach, review and practice text get a tooltip (i18n 'gloss'): the first use of each term in a piece
+// of HTML, outside tags. English terms match whole words, any case.
+let glossRe = null,
+  glossFor = null;
+function gloss(html) {
+  const raw = L('gloss');
+  if (!raw) return html;
+  // [term, explanation] pairs (an object also works); English terms are matched in lower case
+  const g = Object.fromEntries(
+    (Array.isArray(raw) ? raw : Object.entries(raw)).map(([k, v]) => [LANG === 'en' ? k.toLowerCase() : k, v])
+  );
+  if (glossFor !== LANG) {
+    const keys = Object.keys(g)
+      .sort((a, b) => b.length - a.length)
+      .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    glossRe = new RegExp(
+      LANG === 'en' ? `\\b(${keys.join('|')})\\b` : `(${keys.join('|')})`,
+      LANG === 'en' ? 'gi' : 'g'
+    );
+    glossFor = LANG;
+  }
+  const used = new Set(),
+    esc = x => x.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  return html
+    .split(/(<[^>]*>)/)
+    .map(seg =>
+      seg.startsWith('<')
+        ? seg
+        : seg.replace(glossRe, m => {
+            const k = LANG === 'en' ? m.toLowerCase() : m;
+            if (used.has(k) || !g[k]) return m;
+            used.add(k);
+            return `<span class="term" tabindex="0" data-tip="${esc(g[k])}">${m}</span>`;
+          })
+    )
+    .join('');
+}
+// First-time players (no finished game, no tutorial lesson done) are offered the tutorial in the coach panel.
+function tutorialPrompt() {
+  if (tutDone().length || loadHistory().length) return '';
+  return `<p class="tutnote">${t('tut.prompt')} <button class="linkbtn" type="button" data-tutorial>${t('tut.open')}</button></p>`;
+}
 function renderCoach() {
   const body = $('#coachBody'),
     tag = $('#coachTag');
   if (S.hint === 'off') {
-    body.innerHTML = `<p class="note">${t('hintsOff')}</p>`;
+    body.innerHTML = tutorialPrompt() + `<p class="note">${t('hintsOff')}</p>`;
     tag.textContent = '';
     return;
   }
   if (S.hint === 'mistakes') {
-    body.innerHTML = lastMistakeHTML();
+    body.innerHTML = tutorialPrompt() + gloss(lastMistakeHTML());
     tag.textContent = t('opt.hintMistakes');
     return;
   }
@@ -662,7 +704,7 @@ function renderCoach() {
     <div class="note" style="margin:0 0 4px">${t('genbutsu')}</div><div class="chips">${safe.map(x => tileT(x, 'xs')).join('') || none}</div>
     <div class="note" style="margin:8px 0 4px">${t('semiSafe')}</div><div class="chips">${semi.map(x => tileT(x, 'xs')).join('') || none}</div></div>`;
   }
-  body.innerHTML = h;
+  body.innerHTML = tutorialPrompt() + gloss(h);
 }
 function renderLog() {
   $('#log').innerHTML = G.log

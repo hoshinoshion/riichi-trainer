@@ -420,6 +420,19 @@ body.noscroll{overflow:hidden}
 .prisk .tile.mine{outline:2px solid var(--warn);outline-offset:1px}
 .rk{width:12px;height:4px;border-radius:2px;flex:none}
 .rk.g{background:var(--ok)}.rk.a{background:var(--gold)}.rk.r{background:var(--warn)}
+/* Glossary tooltips: a dotted term shows its explanation on hover, or when focused (tap on phones). */
+.term{border-bottom:1px dotted var(--muted);cursor:help;position:relative;outline-offset:1px}
+.term:hover::after,.term:focus::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 4px);z-index:30;width:max-content;max-width:min(240px,70vw);white-space:normal;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:400 12px/1.5 var(--f-ui);box-shadow:0 6px 18px rgba(0,0,0,.18);pointer-events:none}
+/* Tutorial and practice extras */
+.tutnote{margin:0 0 10px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--gold) 12%,var(--panel));font-size:13px}
+.tut{margin:0;font-size:14px;line-height:1.7}
+.tdots{display:flex;gap:4px;align-items:center}
+.tdots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.tdots i.on{background:var(--gold)}
+.tdots i.cur{box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--gold)}
+.pdiff{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.pdiff select{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:4px 6px;color:var(--text);font:inherit}
+.myaku.fu li b{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.pond .tile.fresh{animation:none}.hand .tile{transition:none}}
 @media (max-width:520px){
   .app{--gut:10px;gap:12px;padding-top:10px}

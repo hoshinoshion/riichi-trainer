@@ -105,19 +105,20 @@ const check = (ok, msg) => {
     const { page, errors } = await open({ width: 390, height: 844 }, { lang: 'en' });
     await page.click('#btnPractice');
     const answered = [];
-    for (const tab of ['eff', 'waits', 'score', 'defense', 'daily']) {
+    const tabs = ['eff', 'waits', 'score', 'fu', 'defense', 'daily', 'learn'];
+    for (const tab of tabs) {
       await page.click(`[data-tab="${tab}"]`);
       const kind = await page.evaluate(() => PR.p.kind);
       if (kind === 'waits') {
         await page.locator('[data-wait]').first().click();
         await page.click('[data-act="confirm"]');
-      } else if (kind === 'score') await page.locator('[data-opt]').first().click();
+      } else if (['score', 'fu', 'choice'].includes(kind)) await page.locator('[data-opt]').first().click();
       else await page.locator('[data-pick]').first().click();
       if (await page.locator('.pverdict').count()) answered.push(tab);
     }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     check(
-      answered.length === 5 && errors.length === 0 && overflow <= 0,
+      answered.length === tabs.length && errors.length === 0 && overflow <= 0,
       `practice: answered ${answered.join(', ') || 'nothing'}${overflow > 0 ? ', sideways scroll' : ''}${errors.length ? ', errors: ' + errors.join(' | ') : ''}`
     );
   }

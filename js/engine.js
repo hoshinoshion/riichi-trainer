@@ -235,7 +235,8 @@ function evaluate(ctx) {
 
   const forms = [];
   if (mc === 0 && kokushiSh(c) === -1) forms.push({ ym: ['国士无双'], fu: 0 });
-  if (mc === 0 && c.filter(x => x === 2).length === 7) forms.push({ y: [['七对子', 2]], fu: 25 });
+  if (mc === 0 && c.filter(x => x === 2).length === 7)
+    forms.push({ y: [['七对子', 2]], fu: 25, fuParts: [['chiitoi', 25]] });
   const mg = melds.map(m => ({
     k: m.type === 'chi' ? 's' : 't',
     t: Math.min(...m.ids.map(tt)),
@@ -329,26 +330,34 @@ function evaluate(ctx) {
         need = [3, 1, 1, 1, 1, 1, 1, 1, 3];
       if (need.every((v, i) => a[i] >= v)) ym.push('九莲宝灯');
     }
+    // fuParts explains the fu: [kind, fu] pairs (sets as ['set', fu, tile, open, kan]), before rounding up.
     let fu;
-    if (pinfu) fu = isTsumo ? 20 : 30;
-    else {
+    const fuParts = [];
+    if (pinfu) {
+      fu = isTsumo ? 20 : 30;
+      fuParts.push([isTsumo ? 'pinfuTsumo' : 'pinfuRon', fu]);
+    } else {
       fu = 20;
-      if (menzen && !isTsumo) fu += 10;
-      if (isTsumo) fu += 2;
+      fuParts.push(['base', 20]);
+      if (menzen && !isTsumo) fuParts.push(['menzenRon', 10]);
+      if (isTsumo) fuParts.push(['tsumo', 2]);
       for (const g of trips) {
         let f = isYao(g.t) ? 4 : 2;
         if (!g.open) f *= 2;
         if (g.kan) f *= 4;
-        fu += f;
+        fuParts.push(['set', f, g.t, !!g.open, !!g.kan]);
       }
-      if (isDragon(pair)) fu += 2;
-      if (pair === seat) fu += 2;
-      if (pair === round) fu += 2;
-      if (wait === 'kanchan' || wait === 'penchan' || wait === 'tanki') fu += 2;
-      if (fu === 20) fu = 30;
+      if (isDragon(pair) || pair === seat || pair === round)
+        fuParts.push(['pair', (isDragon(pair) ? 2 : 0) + (pair === seat ? 2 : 0) + (pair === round ? 2 : 0), pair]);
+      if (wait === 'kanchan' || wait === 'penchan' || wait === 'tanki') fuParts.push(['wait', 2, wait]);
+      fu = fuParts.reduce((a, p) => a + p[1], 0);
+      if (fu === 20) {
+        fu = 30;
+        fuParts.push(['openMin', 10]);
+      }
       fu = Math.ceil(fu / 10) * 10;
     }
-    return { y, ym, fu, wait };
+    return { y, ym, fu, wait, fuParts };
   }
   let dora = 0;
   for (const i of ctx.doraInd) dora += allC[doraOf(i)];
@@ -389,7 +398,8 @@ function evaluate(ctx) {
         dora,
         aka,
         ura,
-        wait: f.wait
+        wait: f.wait,
+        fuParts: f.fuParts || []
       };
     }
     if (!best || r.base > best.base || (r.base === best.base && r.han > best.han)) best = r;

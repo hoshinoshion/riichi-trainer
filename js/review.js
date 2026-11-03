@@ -66,6 +66,8 @@ function recordDiscard(id, forbid) {
     th: threats.map(p => ({ p, dg: danger(d, p), safe: kinds.filter(t => danger(t, p) === 0) })),
     snap: tableSnap()
   });
+  if (j.kind === 'slow' || j.kind === 'back')
+    addToBook(G.review[G.review.length - 1].hand, rows, G.review[G.review.length - 1].recs, d);
   if (!G.stats) G.stats = newStats();
   G.stats.decisions++;
   G.stats[j.kind]++;
