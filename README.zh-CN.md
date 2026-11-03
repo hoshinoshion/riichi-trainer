@@ -20,7 +20,8 @@
   - 内置规则速成和役种一览
 - **多语言**：日语、英语、简体中文、繁体中文，按浏览器语言自动选择（都不匹配时用日语），可在「设置」里切换
 - **主题**：现代浅色和深色（默认跟随系统），以及经典牌桌风格，可在「设置」里切换
-- **可安装（PWA）**：添加到手机主屏幕后像 App 一样全屏打开，离线也能玩。iPhone 用 Safari 打开网站，点「分享」→「添加到主屏幕」；安卓 Chrome 点菜单 →「安装应用」或「添加到主屏幕」
+- **可安装（PWA）**：添加到手机主屏幕后像 App 一样全屏打开，离线也能玩。
+- **接着上次打**：每一巡自动保存进行中的对局，关掉页面或 App 再打开会继续同一局。iPhone 用 Safari 打开网站，点「分享」→「添加到主屏幕」；安卓 Chrome 点菜单 →「安装应用」或「添加到主屏幕」
 - **电脑对手，三档难度**（在「设置」里切换，立即生效；对手名牌上会标出难度）
   - **入门**：只看大致牌效，经常打错，常无役乱鸣，几乎不弃和
   - **普通**：按有效进张出牌，会立直、碰役牌、走断幺路线鸣牌，有人立直且自己离听牌远时弃和
@@ -41,18 +42,29 @@ npm start          # 等同于 npx serve .
 
 ## 测试
 
-算分引擎有单元测试，需要 Node.js 18 及以上：
+单元测试覆盖算分引擎、对局规则、翻译，以及对局的保存和恢复，需要 Node.js 18 及以上：
 
 ```bash
 npm test
 ```
 
+`tools/smoke.js` 用无界面的 Chromium 打开网站，在每套主题、手机和桌面宽度下检查报错和横向滚动，并确认刷新后会接着原来的对局。需要 `playwright` 包和它的 Chromium：
+
+```bash
+npm run smoke
+```
+
+每个 Pull Request 都会由 GitHub Actions 跑单元测试、一小段模拟和浏览器冒烟测试。
+
 调整 AI 时可以用 `tools/sim.js` 在命令行里让电脑互打，统计各难度的平均点数、顺位、和了率和放铳率：
 
 ```bash
-npm run sim                                  # 默认 30 场半庄，入门 / 普通 / 困难各一家
-node tools/sim.js 60 normal,normal,hard east # 自定场数、难度组合和长度
+npm run sim                                    # 默认 30 场半庄，入门 / 普通 / 困难各一家
+node tools/sim.js 60 normal,normal,hard east   # 自定场数、难度组合和长度
+node tools/sim.js 60 easy,normal,hard south 7  # 换一组牌（第 g 场用种子 7 + g）
 ```
+
+发牌由种子决定，同样的参数总是得到同样的结果。
 
 ## 项目结构
 
@@ -64,10 +76,17 @@ icons/              Logo 和 App 图标（PNG 由 tools/icons.js 生成）
 css/style.css       样式和主题配色变量
 js/i18n.js          四种语言的界面文字和 t() 查找函数
 js/engine.js        与界面无关的规则引擎：向听数、和牌拆解、役种、符数、点数
-js/game.js          对局流程、电脑 AI、玩家操作、界面渲染、学习提示
+js/state.js         设置、对局状态、带种子的随机数、存档与恢复
+js/rules.js         基于对局状态的规则：听牌、振听、能否鸣牌、摸打和杠
+js/ai.js            三档难度的电脑对手
+js/flow.js          对局与每一局的流程：发牌、轮转、鸣牌、和牌与流局
+js/render.js        牌面、牌桌、手牌、操作按钮、学习提示和结算画面
+js/ui.js            点击、键盘和设置控件，页面文字，启动
 js/shell.js         只在浏览器里运行的外壳：主题切换、注册 Service Worker
-tests/              引擎、对局规则和翻译测试
+tests/              引擎、对局规则、存档恢复、页面结构和翻译测试
+tools/load.js       把游戏脚本加载进 Node，供测试和模拟器使用
 tools/sim.js        无界面的电脑互打模拟器，用来调难度
+tools/smoke.js      浏览器冒烟测试（无界面 Chromium）
 tools/icons.js      从 icons/logo.svg 生成 PNG 图标
 ```
 
