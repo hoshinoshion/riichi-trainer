@@ -66,5 +66,36 @@ function translatePage(){
 $('#optLang').addEventListener('change',()=>{setLang(S.lang);translatePage();render();});
 translatePage();
 
-// Pick up an unfinished game if there is one, else deal a new one.
-{const saved=loadSave();if(saved)resumeGame(saved);else newGame();}
+// Challenge links: ?seed=…&len=…&ai=… starts a game with the same deals as the one that was shared.
+function challengeFromURL(){
+  const q=new URLSearchParams(location.search),seed=q.get('seed');
+  if(seed===null||!/^\d{1,10}$/.test(seed))return null;
+  history.replaceState(null,'',location.pathname+location.hash);   // so a reload resumes instead of restarting
+  const pick=(k,ok)=>ok.includes(q.get(k))?q.get(k):null;
+  return{seed:+seed>>>0,len:pick('len',['east','south']),ai:pick('ai',['easy','normal','hard','mixed'])};
+}
+function challengeURL(){
+  const u=new URL(location.pathname,location.href);
+  u.search=new URLSearchParams({seed:G.seed,len:G.lastWind?'south':'east',ai:S.ai}).toString();
+  return u.href;
+}
+// Share buttons in the result screens copy a link or a result line; if the clipboard is refused, show the text.
+$('#modal').addEventListener('click',e=>{
+  const b=e.target.closest('[data-share]');if(!b)return;
+  const text=b.dataset.share==='challenge'?challengeURL():b.dataset.text;
+  copyText(text).then(ok=>{
+    b.textContent=t(ok?'copied':'copyFailed');
+    if(!ok&&!b.nextElementSibling?.matches('input')){const i=document.createElement('input');i.className='copybox';i.readOnly=true;i.value=text;b.after(i);i.select();}
+  });
+});
+
+// Start-up: a challenge link starts its game (asking first if it would replace an unfinished one); otherwise
+// pick up an unfinished game if there is one, else deal a new one.
+{
+  const ch=challengeFromURL(),saved=loadSave();
+  if(ch&&(!saved||typeof confirm!=='function'||confirm(t('confirmChallenge')))){
+    if(ch.len)S.len=ch.len;if(ch.ai)S.ai=ch.ai;saveS();
+    $('#optLen').value=S.len;$('#optAI').value=S.ai;aiHint();
+    newGame(ch.seed);log('challenge',{seed:ch.seed});render();
+  }else if(saved)resumeGame(saved);else newGame();
+}

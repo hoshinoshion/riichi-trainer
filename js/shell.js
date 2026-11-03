@@ -12,6 +12,9 @@ $('#optTheme').addEventListener('change',applyTheme);
 darkMQ.addEventListener('change',()=>{if(!['light','dark','classic'].includes(S.theme))applyTheme();});
 applyTheme();
 
+// Copy text for the share buttons; resolves false when the clipboard is not available or refused.
+function copyText(s){try{return navigator.clipboard.writeText(s).then(()=>true,()=>false);}catch(e){return Promise.resolve(false);}}
+
 // Offline support and "add to home screen". Service workers need http(s), so skip file:// previews.
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));

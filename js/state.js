@@ -28,13 +28,19 @@ const shName=SH;
 // Seeded random numbers (mulberry32). The generator state lives in G.rng, so a game is fully determined by
 // its seed and the human's choices, and a saved game resumes with the same shuffles and AI decisions.
 // Use rand() for anything random in the game; only newSeed() may call Math.random.
-function rand(){let a=G.rng=(G.rng+0x6D2B79F5)|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296;}
+// Each round's wall is shuffled by its own generator (dealRng), so the n-th hand of a seed is the same deal
+// whatever happened before it; that is what makes a challenge link replay the same tiles.
+function mbStep(s){s=(s+0x6D2B79F5)|0;let x=Math.imul(s^s>>>15,1|s);x=x+Math.imul(x^x>>>7,61|x)^x;return[s,((x^x>>>14)>>>0)/4294967296];}
+function rand(){const r=mbStep(G.rng);G.rng=r[0];return r[1];}
+// A stand-alone generator, for things that must not depend on G.rng (round deals, practice puzzles).
+function seeded(seed){let s=seed|0;return()=>{const r=mbStep(s);s=r[0];return r[1];};}
+const dealRng=(seed,n)=>seeded((seed^Math.imul(n+1,0x9E3779B1))|0);
 const newSeed=()=>Math.floor(Math.random()*4294967296);
 
 // Save and resume. roundLoop() stores G (with G.flow = whose turn and how it starts) at the start of every
 // turn, so reopening the page continues from the turn that was in progress. Sets are stored as {$set:[…]}.
 // Bump SAVE_V when the shape of G changes; older saves are then ignored.
-const SAVE_KEY='rmj-game',SAVE_V=2;
+const SAVE_KEY='rmj-game',SAVE_V=3;
 function saveGame(){if(!G)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,G},(k,v)=>v instanceof Set?{$set:[...v]}:v));}catch(e){}}
 function loadSave(){
   try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null',(k,v)=>v&&typeof v==='object'&&Array.isArray(v.$set)?new Set(v.$set):v);

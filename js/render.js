@@ -96,6 +96,8 @@ function dealInHTML(x){
   }
   return`<div class="dealin"><h3>${t('di.title')}</h3>${h}</div>`;
 }
+// Challenge link: a friend opening it plays the same deals.
+function challengeHTML(){return`<div class="share"><button class="btn" type="button" data-share="challenge">${t('shareChallenge')}</button><small>${t('shareNote',{seed:G.seed})}</small></div>`;}
 // End-of-game summary from G.stats.
 function summaryHTML(){
   const st=G.stats;if(!st||!st.decisions)return'';
