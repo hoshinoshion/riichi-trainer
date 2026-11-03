@@ -18,7 +18,8 @@ function judgeDiscard(rows,d,threats){
   return{kind:'slow',loss:best.n-mine.n};
 }
 const reviewCost=r=>r.kind==='back'?1000+(r.mine.s-r.best.s)*100+r.best.n:r.kind==='slow'?r.loss:0;
-const newStats=()=>({decisions:0,match:0,defend:0,slow:0,back:0,lost:0,dealIn:0});
+// Per game. hands: hands dealt; wins / riichi / calls (hands in which you called) / dealIn: your counts.
+const newStats=()=>({decisions:0,match:0,defend:0,slow:0,back:0,lost:0,dealIn:0,hands:0,wins:0,riichi:0,calls:0});
 
 // Called with your 14-tile hand just before the discard goes out. forbid: tile types kuikae rules out.
 function recordDiscard(id,forbid){
@@ -48,4 +49,25 @@ function dealInInfo(w,winId){
   const vsW=rec&&rec.th.find(x=>x.p===w);
   return{w,t:tt(winId),locked:!rec,riichi:wp.riichi,melds:wp.melds.length,
     s:rec?rec.mine.s:null,dg:vsW?vsW.dg:null,safe:vsW?vsW.safe:[]};
+}
+
+// ===================== History across games =====================
+// One entry per finished game in localStorage['rmj-history'] (the newest 200), for the stats card.
+const HIST_KEY='rmj-history',HIST_MAX=200;
+function loadHistory(){try{const h=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');return Array.isArray(h)?h:[];}catch(e){return[];}}
+function clearHistory(){try{localStorage.removeItem(HIST_KEY);}catch(e){}}
+function recordGame(rank,score){
+  const h=loadHistory();
+  h.push({at:Date.now(),len:G.lastWind?'south':'east',ai:S.ai,rank,score,...(G.stats||newStats())});
+  if(h.length>HIST_MAX)h.splice(0,h.length-HIST_MAX);
+  try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}
+}
+// Totals and rates over a history list; trend = coach match rate (%) of the last 20 games that had decisions.
+function historySummary(h){
+  const sum=k=>h.reduce((a,g)=>a+(g[k]||0),0),hands=sum('hands'),dec=sum('decisions');
+  const rate=(a,b)=>b?a/b:null;
+  return{games:h.length,hands,avgRank:rate(sum('rank'),h.length),first:rate(h.filter(g=>g.rank===1).length,h.length),
+    win:rate(sum('wins'),hands),dealIn:rate(sum('dealIn'),hands),riichi:rate(sum('riichi'),hands),calls:rate(sum('calls'),hands),
+    match:rate(sum('match')+sum('defend'),dec),
+    trend:h.filter(g=>g.decisions).slice(-20).map(g=>Math.round(100*(g.match+g.defend)/g.decisions))};
 }

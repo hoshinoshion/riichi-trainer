@@ -3,7 +3,8 @@
 //   node tools/smoke.js            (needs the playwright package and its Chromium; CI installs both)
 //
 // Checks, at phone and desktop width in each theme: the page starts a game with no errors and nothing
-// scrolls sideways. Then checks that reloading the page resumes the game instead of dealing a new one.
+// scrolls sideways. Then checks that reloading the page resumes the game instead of dealing a new one, and that
+// every practice tab gives a puzzle that can be answered.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -63,6 +64,24 @@ const check = (ok, msg) => { if (!ok) failures.push(msg); console.log(`${ok ? 'o
   const logText = await page.locator('#log').innerText();
   check(before === after && /Resumed/.test(logText) && errors.length === 0,
     `reload resumes the game: hand ${before === after ? 'unchanged' : 'changed'}, log ${/Resumed/.test(logText) ? 'says resumed' : 'has no resume line'}`);
+
+  // Practice: every tab produces a puzzle that can be answered without errors.
+  {
+    const { page, errors } = await open({ width: 390, height: 844 }, { lang: 'en' });
+    await page.click('#btnPractice');
+    const answered = [];
+    for (const tab of ['eff', 'waits', 'score', 'defense', 'daily']) {
+      await page.click(`[data-tab="${tab}"]`);
+      const kind = await page.evaluate(() => PR.p.kind);
+      if (kind === 'waits') { await page.locator('[data-wait]').first().click(); await page.click('[data-act="confirm"]'); }
+      else if (kind === 'score') await page.locator('[data-opt]').first().click();
+      else await page.locator('[data-pick]').first().click();
+      if (await page.locator('.pverdict').count()) answered.push(tab);
+    }
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    check(answered.length === 5 && errors.length === 0 && overflow <= 0,
+      `practice: answered ${answered.join(', ') || 'nothing'}${overflow > 0 ? ', sideways scroll' : ''}${errors.length ? ', errors: ' + errors.join(' | ') : ''}`);
+  }
 
   await browser.close();
   server.close();

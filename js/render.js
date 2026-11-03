@@ -96,6 +96,27 @@ function dealInHTML(x){
   }
   return`<div class="dealin"><h3>${t('di.title')}</h3>${h}</div>`;
 }
+// Challenge link: a friend opening it plays the same deals.
+function challengeHTML(){return`<div class="share"><button class="btn" type="button" data-share="challenge">${t('shareChallenge')}</button><small>${t('shareNote',{seed:G.seed})}</small></div>`;}
+// Stats card: totals over finished games (review.js history) and a sparkline of the coach match rate.
+function renderStats(){
+  const h=loadHistory(),x=historySummary(h);
+  $('#btnClearStats').hidden=!h.length;
+  if(!h.length){$('#statsBody').innerHTML=`<p class="note">${t('stats.empty')}</p>`;return;}
+  const pct=v=>v==null?'–':Math.round(100*v)+'%';
+  const cells=[[t('stats.games'),x.games],[t('stats.avgRank'),x.avgRank.toFixed(2)],[t('stats.first'),pct(x.first)],[t('stats.win'),pct(x.win)],
+    [t('stats.dealIn'),pct(x.dealIn)],[t('stats.riichi'),pct(x.riichi)],[t('stats.calls'),pct(x.calls)],[t('stats.match'),pct(x.match)]];
+  let spark='';
+  if(x.trend.length){
+    const n=x.trend.length,X=i=>n===1?100:4+i*192/(n-1),Y=v=>36-v*.32,pts=x.trend.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`);
+    const last=x.trend[n-1];
+    spark=`<figure class="spark"><svg viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" y1="${Y(50)}" x2="200" y2="${Y(50)}" class="grid"/><polygon points="${X(0)},36 ${pts.join(' ')} ${X(n-1)},36" class="area"/>
+      <polyline points="${pts.join(' ')}" class="line"/><circle cx="${X(n-1)}" cy="${Y(last)}" r="2.6" class="dot"/></svg>
+      <figcaption>${t('stats.trend',{n,last})}</figcaption></figure>`;
+  }
+  $('#statsBody').innerHTML=`<dl class="sgrid">${cells.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${spark}`;
+}
 // End-of-game summary from G.stats.
 function summaryHTML(){
   const st=G.stats;if(!st||!st.decisions)return'';
@@ -142,7 +163,7 @@ function renderMe(){
   if(pl.drawn!=null)ids.push(pl.drawn);
   const dset=new Set(doraInds().map(doraOf));
   let rec=new Set();
-  if(S.hints&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d));if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
+  if(S.hint==='full'&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d));if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
   // Re-rendering replaces the tiles, so put keyboard focus back on the same tile (or the first one).
   const ae=document.activeElement,fid=ae&&ae.closest&&ae.closest('#hand')?ae.dataset.id:null;
   $('#hand').innerHTML=ids.map(id=>{
@@ -165,6 +186,7 @@ function renderActions(){
     if(UI.riichiMode)h+=`<span class="amsg">${t('pickRiichi')}</span><button class="btn ghost" data-act="riichi-cancel" type="button">${t('cancel')}</button>`;
     else{
       h+=`<span class="amsg">${UI.selected!=null?t('tapAgain',{t:TN(tt(UI.selected))}):t('yourTurn',{one:S.oneTap})}</span>`;
+      if(UI.selected!=null&&S.hint==='mistakes'){const w=discardWarning(UI.selected);if(w)h+=`<span class="amsg warn">${w}</span>`;}
       if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">${t('tsumo')}</button>`;
       if(o.riichi.size)h+=`<button class="btn gold" data-act="riichi" type="button">${t('riichi')}</button>`;
       o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${k.kind==='ankan'?t('ankan'):t('kakan')} ${tileT(k.t)}</button>`);
@@ -194,9 +216,21 @@ function waitLine(x,rem){
   const txt=res?t('ronValue',{v:res.yakuman?LBL(res.label):t('han',{n:res.han}),pts:res.ron}):`<span class="noyaku">${isMenzen(G.players[0])?t('noYakuClosed'):t('noYakuOpen')}</span>`;
   return`<div class="wait">${tileT(x,'chip')}<div class="wl">${TN(x)} <small>${t('left',{n:rem})}</small><br>${txt}</div></div>`;
 }
+// "Only warn on mistakes" mode: a warning while a costly tile is selected, and the last costly discard afterwards.
+function discardWarning(id){
+  const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d)),j=judgeDiscard(rows,tt(id),[1,2,3].filter(i=>G.players[i].riichi));
+  return j.kind==='slow'?t('warnSlow',{n:j.loss}):j.kind==='back'?t('warnBack'):'';
+}
+function lastMistakeHTML(){
+  const r=(G.review||[]).slice(-1)[0];
+  if(!r||(r.kind!=='slow'&&r.kind!=='back'))return`<p class="note">${t('mistakesNone')}</p>`;
+  const v={t:tt(r.id),s:r.mine.s,n:r.mine.n,b:r.best.d,bs:r.best.s,bn:r.best.n};
+  return`<h3>${t('lastMove')}</h3><p class="note">${t(r.kind==='back'?'rv.back':'rv.slow',v)}</p>`;
+}
 function renderCoach(){
   const body=$('#coachBody'),tag=$('#coachTag');
-  if(!S.hints){body.innerHTML=`<p class="note">${t('hintsOff')}</p>`;tag.textContent='';return;}
+  if(S.hint==='off'){body.innerHTML=`<p class="note">${t('hintsOff')}</p>`;tag.textContent='';return;}
+  if(S.hint==='mistakes'){body.innerHTML=lastMistakeHTML();tag.textContent=t('opt.hintMistakes');return;}
   const pl=G.players[0];let h='';
   if(!pl.hand.length){body.innerHTML='';return;}
   const vis=visibleTo(0);

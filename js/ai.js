@@ -15,16 +15,23 @@ function keepValue(t,p){
   for(const i of doraInds())if(doraOf(i)===t)v+=5;
   return v;
 }
+// Danger of tile type t against one riichi player, from what is on the table: riv = types in their river,
+// safe = types discarded by others after their riichi, vis = copies of t visible (called tiles counted once).
+// why: genbutsu, honor (with vis), suji (both sides, or the one side an edge tile needs), half (one side of a
+// middle tile), or none. Shared by the AI, the coach panel and the defence practice puzzles.
+function tileRisk(t,riv,safe,vis){
+  if(riv.has(t)||safe.has(t))return{d:0,why:'genbutsu'};
+  if(t>=27)return{d:vis>=3?1:vis===2?3:5,why:'honor',vis};
+  const n=t%9,b=t-n,inR=k=>riv.has(b+k);
+  if(n<=2?inR(n+3):n>=6?inR(n-3):(inR(n-3)&&inR(n+3)))return{d:isTerm(t)?2:3,why:'suji'};
+  if(n>=3&&n<=5&&(inR(n-3)||inR(n+3)))return{d:6,why:'half'};
+  return{d:isTerm(t)?6:(n===1||n===7)?7:9,why:'none'};
+}
 function danger(t,r){
   const rp=G.players[r];
-  if(rp.river.some(x=>tt(x.id)===t)||rp.safe.has(t))return 0;
   // Called river tiles are counted once, in the caller's meld.
   let vis=0;for(const q of G.players){for(const x of q.river)if(!x.called&&tt(x.id)===t)vis++;for(const m of q.melds)for(const id of m.ids)if(tt(id)===t)vis++;}
-  if(t>=27)return vis>=3?1:vis===2?3:5;
-  const n=t%9,b=t-n,inR=k=>rp.river.some(x=>tt(x.id)===b+k);
-  if(n<=2?inR(n+3):n>=6?inR(n-3):(inR(n-3)&&inR(n+3)))return isTerm(t)?2:3;
-  if(n>=3&&n<=5&&(inR(n-3)||inR(n+3)))return 6;
-  return isTerm(t)?6:(n===1||n===7)?7:9;
+  return tileRisk(t,new Set(rp.river.map(x=>tt(x.id))),rp.safe,vis).d;
 }
 // Hard-level danger: adds kabe / no-chance (a ryanmen shape that needs a tile whose 4 copies are all visible to us
 // cannot exist) and a tanki-only reading for honours and terminals with three copies out.

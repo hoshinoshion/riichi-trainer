@@ -27,16 +27,26 @@ const settle = () => new Promise(r => setTimeout(r, 0));
 test('the same seed deals the same hands, another seed does not', () => {
   const deal = seed => {
     const { run } = load(harness);
-    run(`GEN++; G = { seed: ${seed}, rng: ${seed}, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`);
+    run(`GEN++; G = { seed: ${seed}, rng: ${seed}, dealt: 0, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`);
     return JSON.stringify(run('G.players.map(p => p.hand)'));
   };
   assert.strictEqual(deal(42), deal(42));
   assert.notStrictEqual(deal(42), deal(43));
 });
 
+test('a round is dealt the same whatever randomness was used before it', () => {
+  const deal = (rng, dealt) => {
+    const { run } = load(harness);
+    run(`GEN++; G = { seed: 99, rng: ${rng}, dealt: ${dealt}, players: [0,1,2,3].map(() => ({})), dealer: 0, bakaze: 0, kyoku: 0, honba: 0 }; startRound();`);
+    return JSON.stringify(run('[G.wall, G.dead]'));
+  };
+  assert.strictEqual(deal(1, 3), deal(123456, 3));   // the AI drew different amounts of rand() before hand 4
+  assert.notStrictEqual(deal(1, 3), deal(1, 4));
+});
+
 test('a save keeps Sets and round state', () => {
   const { run } = load(harness);
-  run(`GEN++; G = { seed: 7, rng: 7, players: [0,1,2,3].map(() => ({ score: 25000 })), dealer: 0, bakaze: 0, kyoku: 0, honba: 0, kyotaku: 0 };
+  run(`GEN++; G = { seed: 7, rng: 7, dealt: 0, players: [0,1,2,3].map(() => ({ score: 25000 })), dealer: 0, bakaze: 0, kyoku: 0, honba: 0, kyotaku: 0 };
     startRound(); G.players[1].safe.add(5); G.players[1].safe.add(30); G.flow = { p: 2, mode: 'call', forbid: [4, 7] }; saveGame();`);
   const back = run('loadSave()');
   assert.ok(back.players[1].safe instanceof run('Set'));

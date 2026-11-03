@@ -8,8 +8,8 @@ const vm = require('vm');
 
 const root = path.join(__dirname, '..');
 // Same order as the <script> tags in index.html (tests/layout.test.js checks this).
-const CORE = ['engine.js', 'i18n.js', 'state.js', 'rules.js', 'ai.js', 'review.js', 'flow.js', 'render.js'];
-const BROWSER = ['ui.js', 'shell.js'];
+const CORE = ['engine.js', 'i18n.js', 'state.js', 'rules.js', 'ai.js', 'review.js', 'practice.js', 'flow.js', 'render.js'];
+const BROWSER = ['ui.js', 'practice-ui.js', 'shell.js'];
 
 function load(extra = '', { storage = {} } = {}) {
   const el = () => ({ innerHTML: '', textContent: '', hidden: true, value: '', checked: false, addEventListener() {}, focus() {}, classList: { toggle() {} } });

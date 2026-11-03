@@ -101,7 +101,7 @@ test('复盘：对立直打现物算防守，不算失误；记录手牌、推�
   assert.strictEqual(r.hand.length, 14);
   assert.ok(!r.recs.includes(3), 'recommended tiles are the efficient ones, not 4m');
   assert.deepStrictEqual(plain(r.th), [{ p: 1, dg: 0, safe: [3] }]);
-  assert.deepStrictEqual(plain(G.stats), { decisions: 1, match: 0, defend: 1, slow: 0, back: 0, lost: 0, dealIn: 0 });
+  assert.deepStrictEqual(plain(G.stats), { decisions: 1, match: 0, defend: 1, slow: 0, back: 0, lost: 0, dealIn: 0, hands: 0, wins: 0, riichi: 0, calls: 0 });
   // Without the riichi the same discard is just less efficient.
   table(player(hand));
   const G2 = ctx.getG(); G2.review = []; G2.stats = run('newStats()');
@@ -118,4 +118,22 @@ test('放铳分析：立直后摸切没有可选的出牌', () => {
   const info = run(`dealInInfo(1, ${parse('4s')[0]})`);
   assert.strictEqual(info.locked, true);
   assert.strictEqual(info.riichi, true);
+});
+
+test('统计：对局记录最多保留 200 场，汇总和了率、放铳率和一致率', () => {
+  const { run } = require('../tools/load.js').load('this.getG = () => G;', { storage: {} });
+  run(`G = { lastWind: 0, stats: Object.assign(newStats(), { hands: 5, wins: 1, dealIn: 1, riichi: 2, calls: 1, decisions: 40, match: 30, defend: 2 }) };`);
+  for (let i = 0; i < 202; i++) run(`recordGame(${(i % 4) + 1}, 25000)`);
+  const h = run('loadHistory()');
+  assert.strictEqual(h.length, 200);
+  const x = run('historySummary(loadHistory())');
+  assert.strictEqual(x.games, 200);
+  assert.strictEqual(x.hands, 1000);
+  assert.strictEqual(x.win, 0.2);
+  assert.strictEqual(x.dealIn, 0.2);
+  assert.strictEqual(x.match, 0.8);
+  assert.strictEqual(x.avgRank, 2.5);
+  assert.strictEqual(x.first, 0.25);
+  assert.deepStrictEqual(plain(x.trend), new Array(20).fill(80));
+  assert.strictEqual(run('historySummary([])').avgRank, null);
 });

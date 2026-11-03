@@ -3,7 +3,7 @@
 function newGame(seed){
   GEN++;give({type:'abort'});
   seed=seed??newSeed();
-  G={seed,rng:seed,flow:null,stats:newStats(),review:[],players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
+  G={seed,rng:seed,dealt:0,flow:null,stats:newStats(),review:[],players:[0,1,2,3].map(i=>({id:i,isHuman:i===0,score:25000,hand:[],melds:[],river:[],drawn:null,safe:new Set()})),
      dealer:0,kyoku:0,bakaze:0,honba:0,kyotaku:0,lastWind:S.len==='south'?1:0,log:[],turn:0,wall:[],dead:[],kanCount:0,doraCount:1,pendingDora:0,noCalls:true,last:null};
   $('#modal').hidden=true;
   gameLoop(false);
@@ -17,10 +17,10 @@ function resumeGame(saved){
   gameLoop(true);
 }
 function startRound(){
-  const w=[...Array(136).keys()];
-  for(let i=w.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
+  const w=[...Array(136).keys()],r=dealRng(G.seed,G.dealt++);
+  for(let i=w.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[w[i],w[j]]=[w[j],w[i]];}
   G.dead=w.splice(0,14);G.wall=w;
-  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];G.flow=null;G.review=[];
+  G.kanCount=0;G.doraCount=1;G.pendingDora=0;G.noCalls=true;G.last=null;G.turn=G.dealer;G.log=[];G.flow=null;G.review=[];if(G.stats)G.stats.hands++;
   for(const p of G.players)Object.assign(p,{hand:[],melds:[],river:[],drawn:null,riichi:false,doubleRiichi:false,ippatsu:false,riichiPending:false,tempFuriten:false,riichiFuriten:false,safe:new Set()});
   for(let i=0;i<13;i++)for(let k=0;k<4;k++)G.players[(G.dealer+k)%4].hand.push(G.wall.pop());
   G.players.forEach(p=>p.hand.sort((a,b)=>a-b));
@@ -110,6 +110,7 @@ async function finishWin(w,l,winId,res){
   log('win',{w,l,ym:res.yakuman,label:res.label,han:res.han});
   const dealIn=l===0?dealInInfo(w,winId):null;
   if(dealIn)G.stats.dealIn++;
+  if(w===0&&G.stats)G.stats.wins++;
   G.turn=-1;render();
   await showModal(winModal(w,l,winId,res,deltas,before)+(dealIn?dealInHTML(dealIn):'')+reviewHTML(),t('next'));
   return{winner:w};
@@ -147,8 +148,9 @@ async function showFinal(){
   clearSave();
   const order=[0,1,2,3].sort((a,b)=>G.players[b].score-G.players[a].score||a-b);
   G.players[order[0]].score+=G.kyotaku*1000;G.kyotaku=0;
+  recordGame(order.indexOf(0)+1,G.players[0].score);renderStats();
   render();
-  const html=`<div><span class="mkind">${t('endKind')}</span><h2>${order[0]===0?t('firstPlace'):t('gameOver')}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${P(p)}</span><span>${G.players[p].score}</span></div>`).join('')}</div>${summaryHTML()}`;
+  const html=`<div><span class="mkind">${t('endKind')}</span><h2>${order[0]===0?t('firstPlace'):t('gameOver')}</h2></div><div class="rank">${order.map((p,i)=>`<div><b>${i+1}</b><span>${P(p)}</span><span>${G.players[p].score}</span></div>`).join('')}</div>${summaryHTML()}${challengeHTML()}`;
   await showModal(html,t('again'));
   newGame();
 }

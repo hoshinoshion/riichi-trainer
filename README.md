@@ -22,6 +22,11 @@ The interface is available in Japanese, English, Simplified Chinese and Traditio
   - After each hand, a review shows how many of your discards matched the coach and the three costliest ones, with your hand as it was, your discard and the coach's pick
   - When you deal in, explains whether the tile was dangerous, which safe tiles you were holding, and whether folding was the better play
   - At the end of the game, a summary: how often you matched the coach, shanten steps back, effective draws given up and deal-ins
+  - Three hint levels in Settings: show everything, only warn when a discard gives up draws or steps back, or off (exam mode, with only the review after each hand)
+- **Practice**: short puzzles beside the game, each with an explanation
+  - Which tile to discard, what a tenpai hand is waiting on, what a winning hand is worth, and which tile is safest against a riichi
+  - A daily puzzle that is the same for everyone that day, with a streak and a result to copy and share
+- **My stats**: every finished game is kept on this device, with games played, average place, win, deal-in, riichi and call rates, how often you matched the coach, and a trend line of that over the last 20 games
   - Built-in rules primer and yaku reference
 - **Computer opponents with three difficulty levels** (set in Settings, takes effect immediately; each opponent's level is shown on its name plate)
   - **Easy (入门)**: plays roughly by tile efficiency with frequent slips, calls without a yaku plan, and almost never folds
@@ -32,6 +37,7 @@ The interface is available in Japanese, English, Simplified Chinese and Traditio
 - **Themes**: modern light and dark (following the system setting by default) plus the classic felt table, switchable in Settings
 - **Installable app (PWA)**: add it to your phone's home screen and it opens full screen like an app, and keeps working offline. On iPhone, open the site in Safari, tap Share → Add to Home Screen; on Android Chrome, use the menu → Install app (or Add to Home screen)
 - **Picks up where you left off**: the game in progress is saved at every turn, so closing the tab or the app and opening it again continues the same game
+- **Challenge links**: the final screen copies a link that deals a friend the same tiles, hand by hand
 
 ## Rules
 
@@ -87,9 +93,11 @@ js/ai.js            Computer opponents for the three difficulty levels
 js/review.js        Post-hand review: judges your discards against the coach, explains deal-ins
 js/flow.js          Game and round flow: dealing, turns, calls, wins and draws
 js/render.js        Tiles, table, hand, action buttons, coach panel and result screens
-js/ui.js            Clicks, keyboard and settings controls, page text, start-up
+js/practice.js      Practice puzzles and the daily puzzle: generated from a seed, graded, progress kept
+js/ui.js            Clicks, keyboard and settings controls, page text, challenge links, start-up
+js/practice-ui.js   The practice screen
 js/shell.js         Browser-only shell: theme switching and service worker registration
-tests/              Engine, game-rule, review, save / resume, page layout and translation tests
+tests/              Engine, game-rule, review, stats, practice, save / resume, page layout and translation tests
 tools/load.js       Loads the game scripts into Node for tests and the simulator
 tools/sim.js        Headless AI-vs-AI simulator for tuning difficulty
 tools/smoke.js      Browser smoke test (headless Chromium)

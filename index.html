@@ -39,6 +39,7 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
   <header class="top">
     <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0f766e"/><g transform="rotate(-14 24 33)"><rect x="12" y="16" width="24" height="33" rx="5" fill="#fbfaf5" fill-opacity=".42"/></g><g transform="rotate(9 40 32)"><rect x="27" y="14" width="25" height="35" rx="5.5" fill="#fbfaf5"/><circle cx="39.5" cy="31.5" r="6" fill="#e5484d"/></g></svg><div><h1 data-i18n="title">立直麻将练习场</h1><p data-i18n="subtitle">单机 · 你与三位电脑对局 · 边打边看牌效提示</p></div></div>
     <div class="tools">
+      <button class="tool" id="btnPractice" type="button" data-i18n-title="pr.open"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg><span data-i18n="pr.open">练习</span></button>
       <button class="tool" id="btnNew" type="button" data-i18n-title="newGame"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="newGame">新对局</span></button>
       <label class="tool sel" data-i18n-title="set.lang"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="langCur"></span>
         <select id="optLang" data-i18n-aria="set.lang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
@@ -82,9 +83,11 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 
   <aside class="side">
     <section class="card log"><h2 data-i18n="log">对局记录</h2><ol id="log"></ol></section>
+    <section class="card stats"><div class="chead"><h2 data-i18n="stats.title">我的统计</h2><button class="linkbtn" id="btnClearStats" type="button" data-i18n="stats.clear">清除记录</button></div><div id="statsBody"></div></section>
     <section class="card settings">
       <h2 data-i18n="settings">设置</h2>
-      <label class="srow" for="optHints"><span data-i18n="set.hints">学习提示（向听 / 进张 / 听牌）</span><input type="checkbox" id="optHints"></label>
+      <label class="srow" for="optHint"><span data-i18n="set.hints">学习提示</span>
+        <select id="optHint"><option value="full" data-i18n="opt.hintFull">全部显示</option><option value="mistakes" data-i18n="opt.hintMistakes">只在打错时提醒</option><option value="off" data-i18n="opt.hintOff">关闭（考试模式）</option></select></label>
       <label class="srow" for="optOneTap"><span data-i18n="set.oneTap">单击直接出牌</span><input type="checkbox" id="optOneTap"></label>
       <label class="srow" for="optSkip"><span data-i18n="set.skip">自动跳过吃碰杠</span><input type="checkbox" id="optSkip"></label>
       <label class="srow" for="optAI"><span data-i18n="set.ai">电脑难度</span>
@@ -111,6 +114,13 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 
 </div>
 <div class="modal" id="modal" hidden></div>
+<div class="practice" id="practice" hidden>
+  <div class="pbox" role="dialog" aria-modal="true" aria-labelledby="prTitle">
+    <div class="ptop"><h2 id="prTitle" data-i18n="pr.title">练习</h2><button class="tool pclose" id="prClose" type="button" data-i18n-aria="pr.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+    <nav class="ptabs" id="prTabs"></nav>
+    <div class="pbody" id="prBody"></div>
+  </div>
+</div>
 
 <script src="js/engine.js"></script>
 <script src="js/i18n.js"></script>
@@ -118,9 +128,11 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
 <script src="js/rules.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/review.js"></script>
+<script src="js/practice.js"></script>
 <script src="js/flow.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/practice-ui.js"></script>
 <script src="js/shell.js"></script>
 </body>
 </html>
