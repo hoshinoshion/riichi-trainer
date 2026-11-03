@@ -1,7 +1,11 @@
 // Settings, game state and the async primitives every other script uses (pause, input, abort).
 // Loaded after engine.js and i18n.js; no DOM work at load time beyond the $ helper.
 // ===================== Settings =====================
-const S=(()=>{const d={hints:true,oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal',theme:'auto',lang:'auto'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
+const S=(()=>{const d={oneTap:false,autoSkip:false,speed:'mid',len:'east',ai:'normal',theme:'auto',lang:'auto'};try{return Object.assign(d,JSON.parse(localStorage.getItem('rmj-settings')||'{}'));}catch(e){return d;}})();
+// Hints: full (coach panel and recommended tiles), mistakes (only warn about a discard that loses draws or
+// steps back, then show it), off (exam mode: the review after each hand is all you get). Older saves had hints:true/false.
+if(!['full','mistakes','off'].includes(S.hint))S.hint=S.hints===false?'off':'full';
+delete S.hints;
 function saveS(){try{localStorage.setItem('rmj-settings',JSON.stringify(S));}catch(e){}}
 const DELAY={slow:950,mid:560,fast:220};
 const delay=()=>DELAY[S.speed]||560;

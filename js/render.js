@@ -144,7 +144,7 @@ function renderMe(){
   if(pl.drawn!=null)ids.push(pl.drawn);
   const dset=new Set(doraInds().map(doraOf));
   let rec=new Set();
-  if(S.hints&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d));if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
+  if(S.hint==='full'&&UI.mode==='discard'&&!UI.riichiMode){const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d));if(rows.length){const b=rows[0];rec=new Set(rows.filter(r=>r.s===b.s&&r.n===b.n).map(r=>r.d));}}
   // Re-rendering replaces the tiles, so put keyboard focus back on the same tile (or the first one).
   const ae=document.activeElement,fid=ae&&ae.closest&&ae.closest('#hand')?ae.dataset.id:null;
   $('#hand').innerHTML=ids.map(id=>{
@@ -167,6 +167,7 @@ function renderActions(){
     if(UI.riichiMode)h+=`<span class="amsg">${t('pickRiichi')}</span><button class="btn ghost" data-act="riichi-cancel" type="button">${t('cancel')}</button>`;
     else{
       h+=`<span class="amsg">${UI.selected!=null?t('tapAgain',{t:TN(tt(UI.selected))}):t('yourTurn',{one:S.oneTap})}</span>`;
+      if(UI.selected!=null&&S.hint==='mistakes'){const w=discardWarning(UI.selected);if(w)h+=`<span class="amsg warn">${w}</span>`;}
       if(o.tsumo)h+=`<button class="btn win" data-act="tsumo" type="button">${t('tsumo')}</button>`;
       if(o.riichi.size)h+=`<button class="btn gold" data-act="riichi" type="button">${t('riichi')}</button>`;
       o.kans.forEach((k,i)=>h+=`<button class="btn" data-act="kan:${i}" type="button">${k.kind==='ankan'?t('ankan'):t('kakan')} ${tileT(k.t)}</button>`);
@@ -196,9 +197,21 @@ function waitLine(x,rem){
   const txt=res?t('ronValue',{v:res.yakuman?LBL(res.label):t('han',{n:res.han}),pts:res.ron}):`<span class="noyaku">${isMenzen(G.players[0])?t('noYakuClosed'):t('noYakuOpen')}</span>`;
   return`<div class="wait">${tileT(x,'chip')}<div class="wl">${TN(x)} <small>${t('left',{n:rem})}</small><br>${txt}</div></div>`;
 }
+// "Only warn on mistakes" mode: a warning while a costly tile is selected, and the last costly discard afterwards.
+function discardWarning(id){
+  const rows=ukeireTable(0).filter(r=>!UI.opts.forbid.includes(r.d)),j=judgeDiscard(rows,tt(id),[1,2,3].filter(i=>G.players[i].riichi));
+  return j.kind==='slow'?t('warnSlow',{n:j.loss}):j.kind==='back'?t('warnBack'):'';
+}
+function lastMistakeHTML(){
+  const r=(G.review||[]).slice(-1)[0];
+  if(!r||(r.kind!=='slow'&&r.kind!=='back'))return`<p class="note">${t('mistakesNone')}</p>`;
+  const v={t:tt(r.id),s:r.mine.s,n:r.mine.n,b:r.best.d,bs:r.best.s,bn:r.best.n};
+  return`<h3>${t('lastMove')}</h3><p class="note">${t(r.kind==='back'?'rv.back':'rv.slow',v)}</p>`;
+}
 function renderCoach(){
   const body=$('#coachBody'),tag=$('#coachTag');
-  if(!S.hints){body.innerHTML=`<p class="note">${t('hintsOff')}</p>`;tag.textContent='';return;}
+  if(S.hint==='off'){body.innerHTML=`<p class="note">${t('hintsOff')}</p>`;tag.textContent='';return;}
+  if(S.hint==='mistakes'){body.innerHTML=lastMistakeHTML();tag.textContent=t('opt.hintMistakes');return;}
   const pl=G.players[0];let h='';
   if(!pl.hand.length){body.innerHTML='';return;}
   const vis=visibleTo(0);

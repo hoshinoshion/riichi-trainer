@@ -84,7 +84,8 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
     <section class="card log"><h2 data-i18n="log">对局记录</h2><ol id="log"></ol></section>
     <section class="card settings">
       <h2 data-i18n="settings">设置</h2>
-      <label class="srow" for="optHints"><span data-i18n="set.hints">学习提示（向听 / 进张 / 听牌）</span><input type="checkbox" id="optHints"></label>
+      <label class="srow" for="optHint"><span data-i18n="set.hints">学习提示</span>
+        <select id="optHint"><option value="full" data-i18n="opt.hintFull">全部显示</option><option value="mistakes" data-i18n="opt.hintMistakes">只在打错时提醒</option><option value="off" data-i18n="opt.hintOff">关闭（考试模式）</option></select></label>
       <label class="srow" for="optOneTap"><span data-i18n="set.oneTap">单击直接出牌</span><input type="checkbox" id="optOneTap"></label>
       <label class="srow" for="optSkip"><span data-i18n="set.skip">自动跳过吃碰杠</span><input type="checkbox" id="optSkip"></label>
       <label class="srow" for="optAI"><span data-i18n="set.ai">电脑难度</span>

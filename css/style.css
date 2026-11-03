@@ -227,6 +227,7 @@ button{font:inherit;color:inherit}
 .actions{min-height:48px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;text-align:center}
 .amsg{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:6px}
 .amsg b{color:var(--text)}
+.amsg.warn{color:var(--warn);font-weight:600}
 .btn{font:700 15px/1 var(--f-ui);padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:42px}
 .btn:hover{border-color:var(--muted)}
 .btn.gold{background:var(--gold);color:var(--gold-ink);border-color:transparent}

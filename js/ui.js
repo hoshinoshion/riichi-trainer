@@ -33,7 +33,7 @@ $('#actions').addEventListener('click',e=>{
   }
 });
 const bind=(id,key,isBox)=>{const el=$('#'+id);if(isBox)el.checked=S[key];else el.value=S[key];el.addEventListener('change',()=>{S[key]=isBox?el.checked:el.value;saveS();render();});};
-bind('optHints','hints',true);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);bind('optLang','lang',false);
+bind('optHint','hint',false);bind('optOneTap','oneTap',true);bind('optSkip','autoSkip',true);bind('optSpeed','speed',false);bind('optLen','len',false);bind('optAI','ai',false);bind('optTheme','theme',false);bind('optLang','lang',false);
 const aiHint=()=>{$('#aiHint').textContent=L('aiHint')[S.ai]||L('aiHint').normal;};
 $('#optAI').addEventListener('change',aiHint);
 // Starting over throws the current game away, so ask first once anything has been played.
