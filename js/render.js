@@ -291,25 +291,77 @@ function winModal(w, l, winId, res, deltas, before) {
 }
 
 // Post-round review (review.js): agreement with the coach, then the costliest discards with the hand as it was.
+const DISCARD_KINDS = ['match', 'defend', 'slow', 'back'];
+// One line explaining a recorded decision (review.js), for the review list and the replay.
+function reviewText(r) {
+  if (r.kind === 'slow' || r.kind === 'back')
+    return t(r.kind === 'back' ? 'rv.back' : 'rv.slow', {
+      t: tt(r.id),
+      s: r.mine.s,
+      n: r.mine.n,
+      b: r.best.d,
+      bs: r.best.s,
+      bn: r.best.n
+    });
+  if (r.kind === 'match' || r.kind === 'defend') return t('rv.' + r.kind, { t: tt(r.id) });
+  if (r.kind.startsWith('riichi')) return t('rv.' + r.kind, { t: tt(r.id), why: r.why });
+  return t('rv.' + r.kind, { t: tt(r.id), p: r.from, chose: r.chose, coach: r.coach });
+}
+// Your hand at a decision: the tile you discarded framed, the coach's picks dotted.
+function reviewHand(r) {
+  return r.hand
+    .map(id =>
+      tileHTML(id, [id === r.id ? 'mine' : '', (r.recs || []).includes(tt(id)) && id !== r.id ? 'recd' : ''].join(' '))
+    )
+    .join('');
+}
 function reviewHTML() {
   const R = G.review || [];
   if (!R.length) return '';
-  const a = R.filter(r => r.kind === 'match').length,
-    d = R.filter(r => r.kind === 'defend').length,
-    list = reviewMistakes();
-  const items = list
-    .map(r => {
-      const v = { t: tt(r.id), s: r.mine.s, n: r.mine.n, b: r.best.d, bs: r.best.s, bn: r.best.n };
-      const hand = r.hand
-        .map(id =>
-          tileHTML(id, [id === r.id ? 'mine' : '', r.recs.includes(tt(id)) && id !== r.id ? 'recd' : ''].join(' '))
-        )
-        .join('');
-      return `<div class="rv"><div class="rvh"><b>${t('rv.turn', { n: r.turn })}</b> ${t(r.kind === 'back' ? 'rv.back' : 'rv.slow', v)}</div><div class="rvhand">${hand}</div></div>`;
-    })
+  const disc = R.filter(r => DISCARD_KINDS.includes(r.kind)),
+    a = disc.filter(r => r.kind === 'match').length,
+    d = disc.filter(r => r.kind === 'defend').length,
+    list = reviewMistakes(),
+    choices = reviewChoices(),
+    notes = G.notes || [];
+  const item = r =>
+    `<div class="rv"><div class="rvh"><b>${t('rv.turn', { n: r.turn })}</b> ${reviewText(r)}</div><div class="rvhand">${reviewHand(r)}${
+      r.kind.startsWith('call') ? `<span class="gap"></span>${tileHTML(r.id, 'agari')}` : ''
+    }</div><button class="linkbtn" type="button" data-replay="${R.indexOf(r)}">${t('rp.here')}</button></div>`;
+  let body = list.length
+    ? `<p class="note">${t('rv.legend')}</p>${list.map(item).join('')}`
+    : `<p class="note">${t('rv.none')}</p>`;
+  if (choices.length) body += `<h4 class="rvsub">${t('rv.choicesTitle')}</h4>${choices.map(item).join('')}`;
+  if (notes.length)
+    body += `<h4 class="rvsub">${t('rv.notesTitle')}</h4><ul class="rvnotes">${notes
+      .map(n => `<li>${t('ai.' + n.why, { p: n.p, n: n.turn, t: n.t })}</li>`)
+      .join('')}</ul>`;
+  body += `<div class="rpbar"><button class="btn" type="button" data-replay="0">${t('rp.open')}</button></div><div class="replay" id="replayBox"></div>`;
+  return `<details class="review"${list.length || choices.length ? ' open' : ''}><summary>${t('rv.title')} · ${t('rv.agree', { a, n: disc.length, d })}</summary>${body}</details>`;
+}
+// Replay: the table at your i-th recorded decision, from its snapshot, with buttons to step through them.
+function replayHTML(i) {
+  const R = G.review || [],
+    r = R[i];
+  if (!r || !r.snap) return '';
+  const s = r.snap;
+  const rows = [3, 2, 1, 0]
+    .map(
+      p =>
+        `<div class="rprow${p === 0 ? ' me' : ''}"><span class="rpname">${P(p)}${s.ri[p] ? ` <span class="rtag">${t('riichiTag')}</span>` : ''}</span><div class="rpriver">${s.r[
+          p
+        ]
+          .map(([id, ri, c]) => tileHTML(id, [ri ? 'yoko' : '', c ? 'gone' : ''].join(' ')))
+          .join(
+            ''
+          )}${s.m[p].length ? '<span class="gap"></span>' + s.m[p].map(m => meldHTML(m)).join('') : ''}</div></div>`
+    )
     .join('');
-  return `<details class="review"${list.length ? ' open' : ''}><summary>${t('rv.title')} · ${t('rv.agree', { a, n: R.length, d })}</summary>
-  ${list.length ? `<p class="note">${t('rv.legend')}</p>${items}` : `<p class="note">${t('rv.none')}</p>`}</details>`;
+  const offered = r.kind.startsWith('call') ? `<span class="gap"></span>${tileHTML(r.id, 'agari')}` : '';
+  return `<div class="rphead"><b>${t('rv.turn', { n: r.turn })}</b><span>${t('rp.count', { i: i + 1, n: R.length })} · ${t('wallLeft', { n: s.w })}</span></div>
+  <div class="mdora"><div>${t('doraInd')} ${s.d.map(x => tileT(x, 'xs')).join('')}</div></div>
+  <div class="rptable">${rows}</div><div class="rvhand">${reviewHand(r)}${offered}</div><p class="note">${reviewText(r)}</p>
+  <div class="rpnav"><button class="btn" type="button" data-replay="${i - 1}"${i ? '' : ' disabled'}>${t('rp.prev')}</button><button class="btn" type="button" data-replay="${i + 1}"${i < R.length - 1 ? '' : ' disabled'}>${t('rp.next')}</button></div>`;
 }
 // Deal-in analysis from dealInInfo(): what you could have known when the tile went out.
 function dealInHTML(x) {

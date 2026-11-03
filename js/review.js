@@ -34,7 +34,12 @@ const newStats = () => ({
   hands: 0,
   wins: 0,
   riichi: 0,
-  calls: 0
+  calls: 0,
+  // riichi and call decisions you made, and how many matched the coach (the hard AI in your seat)
+  rDec: 0,
+  rOk: 0,
+  cDec: 0,
+  cOk: 0
 });
 
 // Called with your 14-tile hand just before the discard goes out. forbid: tile types kuikae rules out.
@@ -58,12 +63,79 @@ function recordDiscard(id, forbid) {
     best: { d: best.d, s: best.s, n: best.n },
     recs: rows.filter(r => r.s === best.s && r.n === best.n).map(r => r.d),
     // Per riichi player: how dangerous this tile was, and which tiles in hand were genbutsu against them.
-    th: threats.map(p => ({ p, dg: danger(d, p), safe: kinds.filter(t => danger(t, p) === 0) }))
+    th: threats.map(p => ({ p, dg: danger(d, p), safe: kinds.filter(t => danger(t, p) === 0) })),
+    snap: tableSnap()
   });
   if (!G.stats) G.stats = newStats();
   G.stats.decisions++;
   G.stats[j.kind]++;
   G.stats.lost += j.loss;
+}
+
+// The table as you saw it, for the replay: rivers ([id, riichi, called]), melds, riichi flags, dora, wall count.
+function tableSnap() {
+  return {
+    r: G.players.map(p => p.river.map(x => [x.id, x.riichi ? 1 : 0, x.called ? 1 : 0])),
+    m: G.players.map(p => p.melds.map(m => ({ type: m.type, ids: m.ids.slice(), called: m.called, from: m.from }))),
+    ri: G.players.map(p => (p.riichi ? 1 : 0)),
+    d: doraInds(),
+    w: G.wall.length
+  };
+}
+// Riichi decisions: whenever you could declare riichi with the tile you discarded. The coach is the hard AI:
+// it stays damaten when the hand already has a yaku and is worth a mangan, or when every wait is gone.
+function riichiAdvice(d) {
+  const e = tenpaiEV(0, d, visibleTo(0), false);
+  if (e.left === 0) return { riichi: false, why: 'dead' };
+  if (e.allYaku && !e.furiten && e.minRon >= 7700) return { riichi: false, why: 'value' };
+  return { riichi: true, why: 'default' };
+}
+function recordRiichi(id, declared) {
+  const a = riichiAdvice(tt(id)),
+    pl = G.players[0];
+  const kind = declared === a.riichi ? 'riichiOk' : declared ? 'riichiDama' : 'riichiSkip';
+  G.review.push({
+    turn: pl.river.length + 1,
+    hand: pl.hand.slice().sort((x, y) => x - y),
+    id,
+    kind,
+    why: a.why,
+    snap: tableSnap()
+  });
+  if (!G.stats) G.stats = newStats();
+  G.stats.rDec++;
+  if (kind === 'riichiOk') G.stats.rOk++;
+}
+// Call decisions: a pon, kan or chi you were offered on discard id from player d, and what you chose.
+function recordCall(d, id, chose) {
+  const coach = aiPon(0, id, 'hard') || (d === 3 ? aiChi(0, id, 'hard') : null),
+    called = chose !== 'pass',
+    pl = G.players[0];
+  const kind = called === !!coach ? 'callOk' : called ? 'callTook' : 'callSkip';
+  G.review.push({
+    turn: pl.river.length + 1,
+    hand: pl.hand.slice().sort((x, y) => x - y),
+    id,
+    from: d,
+    chose,
+    coach: coach ? coach.type : 'pass',
+    kind,
+    snap: tableSnap()
+  });
+  if (!G.stats) G.stats = newStats();
+  G.stats.cDec++;
+  if (kind === 'callOk') G.stats.cOk++;
+}
+// Riichi and call decisions that differ from the coach, in the order they happened.
+const reviewChoices = () => G.review.filter(r => ['riichiDama', 'riichiSkip', 'callTook', 'callSkip'].includes(r.kind));
+
+// Notable computer decisions this round, for the review: the first fold, push against riichi and damaten of each
+// player. t is the tile type they discarded.
+function noteAI(p, why, t) {
+  if (!['fold', 'push', 'dama'].includes(why)) return;
+  const notes = G.notes || (G.notes = []);
+  if (notes.some(n => n.p === p && n.why === why)) return;
+  notes.push({ p, why, t, turn: G.players[p].river.length + 1 });
 }
 
 // The costliest decisions of this round, worst first.

@@ -226,6 +226,15 @@ function challengeURL() {
   }).toString();
   return u.href;
 }
+// Replay buttons in the review step through your recorded decisions.
+$('#modal').addEventListener('click', e => {
+  const b = e.target.closest('[data-replay]');
+  if (!b) return;
+  const box = $('#replayBox');
+  box.innerHTML = replayHTML(+b.dataset.replay);
+  box.scrollIntoView({ block: 'nearest' });
+  box.querySelector('[data-replay]:not([disabled])')?.focus();
+});
 // Share buttons in the result screens copy a link or a result line; if the clipboard is refused, show the text.
 $('#modal').addEventListener('click', e => {
   const b = e.target.closest('[data-share]');

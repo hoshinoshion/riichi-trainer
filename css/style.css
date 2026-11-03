@@ -349,6 +349,21 @@ button{font:inherit;color:inherit}
 .rvhand .tile{--w:clamp(16px,5vw,24px)}
 .rvhand .tile.mine{outline:2px solid var(--warn);outline-offset:1px}
 .rvhand .tile.recd::after{content:"";position:absolute;left:50%;bottom:calc(var(--w)*-.32);width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--gold)}
+.rvsub{margin:10px 0 0;font:700 13px/1.4 var(--f-ui);color:var(--muted)}
+.rvnotes{margin:4px 0 0;padding-left:1.2em;display:grid;gap:4px;font-size:13px}
+.rv .linkbtn{justify-self:start}
+.rpbar{margin-top:10px}
+.replay:empty{display:none}
+.replay{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;display:grid;gap:8px;background:var(--panel)}
+.rphead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px}
+.rphead span{color:var(--muted)}
+.rptable{display:grid;gap:4px}
+.rprow{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:8px;align-items:center;font-size:12px}
+.rprow.me .rpname{font-weight:700}
+.rpriver{display:flex;flex-wrap:wrap;gap:1px;align-items:flex-end;--w:clamp(13px,3.6vw,18px)}
+.rpriver .tile{--w:clamp(13px,3.6vw,18px)}
+.rpriver .gap,.rvhand .gap{width:8px}
+.rpnav{display:flex;gap:8px;justify-content:space-between}
 .dealin{border-left:3px solid var(--warn);padding:4px 0 4px 12px;display:grid;gap:6px;font-size:13.5px}
 .dealin h3,.summary h3{margin:0;font:700 14px/1.4 var(--f-ui)}
 .dealin p{margin:0}

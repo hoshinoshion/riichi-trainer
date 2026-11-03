@@ -156,7 +156,11 @@ test('复盘：对立直打现物算防守，不算失误；记录手牌、推�
     hands: 0,
     wins: 0,
     riichi: 0,
-    calls: 0
+    calls: 0,
+    rDec: 0,
+    rOk: 0,
+    cDec: 0,
+    cOk: 0
   });
   // Without the riichi the same discard is just less efficient.
   table(player(hand));
@@ -312,4 +316,39 @@ test('规则：挑战链接里的规则编码可以还原', () => {
   }
   assert.strictEqual(run(`decodeRules('11d')`), null);
   assert.strictEqual(run(`decodeRules('1111x11111')`), null);
+});
+
+test('复盘：电脑思路每人每种只记第一次', () => {
+  table(player([]));
+  const G = ctx.getG();
+  G.players[1].river = [{ id: 0 }, { id: 4 }];
+  run(`noteAI(1, 'fold', 5); noteAI(1, 'fold', 6); noteAI(1, 'eff', 7); noteAI(2, 'dama', 8)`);
+  assert.deepStrictEqual(plain(G.notes), [
+    { p: 1, why: 'fold', t: 5, turn: 3 },
+    { p: 2, why: 'dama', t: 8, turn: 1 }
+  ]);
+});
+
+test('复盘：鸣牌判断对照困难电脑，并留下牌桌快照', () => {
+  // 东东 in hand, 上家 discards 东 (seat wind for player 0 when dealer is 0): the coach pons it.
+  const hand = parse('11z234m567p789s23m5s');
+  table(player(hand));
+  const G = ctx.getG();
+  G.rules = run('({ ...RULE_PRESETS.standard })');
+  G.review = [];
+  G.stats = run('newStats()');
+  const east = parse('1111z')[2];
+  G.players[3].river = [{ id: east }];
+  run(`recordCall(3, ${east}, 'pass')`);
+  run(`recordCall(3, ${east}, 'pon')`);
+  assert.deepStrictEqual(
+    G.review.map(r => [r.kind, r.coach]),
+    [
+      ['callSkip', 'pon'],
+      ['callOk', 'pon']
+    ]
+  );
+  assert.strictEqual(G.stats.cDec, 2);
+  assert.strictEqual(G.stats.cOk, 1);
+  assert.deepStrictEqual(plain(G.review[0].snap.r[3]), [[east, 0, 0]]);
 });

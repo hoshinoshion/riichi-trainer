@@ -344,5 +344,7 @@ async function aiTurn(p, info) {
   const ch = aiChooseDiscard(p, info.forbid);
   const canRiichi = !info.afterCall && ch.s === 0 && riichiTypes(p).has(ch.d),
     riichi = canRiichi && aiWantsRiichi(p, ch.d);
+  const facing = G.players.some((x, i) => i !== p && x.riichi);
+  noteAI(p, canRiichi && !riichi ? 'dama' : ch.why === 'fold' ? 'fold' : ch.s === 0 && facing ? 'push' : ch.why, ch.d);
   return { type: 'discard', id: ch.id, riichi };
 }

@@ -161,7 +161,7 @@ const newSeed = () => Math.floor(Math.random() * 4294967296);
 // turn, so reopening the page continues from the turn that was in progress. Sets are stored as {$set:[…]}.
 // Bump SAVE_V when the shape of G changes; older saves are then ignored.
 const SAVE_KEY = 'rmj-game',
-  SAVE_V = 4;
+  SAVE_V = 5;
 function saveGame() {
   if (!G) return;
   try {

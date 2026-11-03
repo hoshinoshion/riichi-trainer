@@ -71,6 +71,7 @@ function startRound() {
   G.log = [];
   G.flow = null;
   G.review = [];
+  G.notes = [];
   G.kanBy = [];
   if (G.stats) G.stats.hands++;
   for (const p of G.players)
@@ -133,7 +134,10 @@ async function humanTurn(p, info) {
   Object.assign(UI, { mode: 'idle', opts: null, selected: null, riichiMode: false });
   if (v.type === 'tsumo') return { type: 'tsumo', res: opts.tsumo };
   if (v.type === 'kyuushu') return v;
-  if (v.type === 'discard') recordDiscard(v.id, opts.forbid);
+  if (v.type === 'discard') {
+    recordDiscard(v.id, opts.forbid);
+    if (opts.riichi.has(tt(v.id))) recordRiichi(v.id, !!v.riichi);
+  }
   return v;
 }
 
@@ -167,6 +171,7 @@ async function resolveCalls(d, id, rob) {
       render();
       hc = await input();
       Object.assign(UI, { mode: 'idle', call: null });
+      if (!rob && hc.type !== 'ron' && (o.pon || o.kan || o.chis.length)) recordCall(d, id, hc.type);
     }
     if (hOpts.inWait && hc.type !== 'ron') markMissed(0);
     if (hc.type === 'ron') ronRes[0] = hOpts.res;

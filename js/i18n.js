@@ -166,6 +166,27 @@ STR['zh-CN'] = {
     `${P(v.w)} ${v.l == null ? '自摸' : '荣和'}${v.l != null ? '（' + P(v.l) + '放铳）' : ''} ${v.ym ? LBL(v.label) : t('han', { n: v.han })}`,
   'log.draw': v => `流局：听牌 ${v.ten.map(P).join('、') || '无人'}`,
   'log.resume': '已从上次中断的地方继续对局',
+  'rv.match': v => `打 ${TN(v.t)}：和助手推荐一致。`,
+  'rv.defend': v => `打 ${TN(v.t)}：面对立直选了更安全的牌，算防守。`,
+  'rv.riichiOk': '立直的判断和助手一致。',
+  'rv.riichiSkip': v => `打 ${TN(v.t)} 听牌时没有立直；助手会立直：多 1 番，还有一发和里宝牌的机会。`,
+  'rv.riichiDama': v =>
+    `打 ${TN(v.t)} 时立直了；助手会默听：${v.why === 'dead' ? '待牌已经全部见光，立直也和不了' : '这手牌已经有役且到满贯，立直多得的点数不多，还会让对手防你'}。`,
+  'rv.callOk': '鸣牌的判断和助手一致。',
+  'rv.callTook': v =>
+    `你${{ pon: '碰', chi: '吃', kan: '杠' }[v.chose]}了 ${P(v.p)} 的 ${TN(v.t)}；助手会跳过：这样鸣不进向听，或者鸣了没有役。`,
+  'rv.callSkip': v =>
+    `你跳过了 ${P(v.p)} 的 ${TN(v.t)}；助手会${{ pon: '碰', chi: '吃' }[v.coach]}：能进向听，而且鸣了也有役。`,
+  'rv.choicesTitle': '立直与鸣牌',
+  'rv.notesTitle': '对手思路',
+  'ai.fold': v => `${P(v.p)} 第 ${v.n} 巡开始弃和（打 ${TN(v.t)}）：有人立直或亮出大牌，自己离听牌还远。`,
+  'ai.push': v => `${P(v.p)} 第 ${v.n} 巡面对立直继续推进（打 ${TN(v.t)}）：已经听牌，判断值得冒险。`,
+  'ai.dama': v => `${P(v.p)} 第 ${v.n} 巡听牌却默听（打 ${TN(v.t)}）：已有役且点数够高，立直多得少，还会被防。`,
+  'rp.here': '回到这一巡',
+  'rp.open': '逐巡回放',
+  'rp.prev': '‹ 上一手',
+  'rp.next': '下一手 ›',
+  'rp.count': v => `第 ${v.i} / ${v.n} 个决定`,
   kyuushu: '九种九牌（流局）',
   kakanBy: '{p} 加杠',
   abortKind: '途中流局',
@@ -475,6 +496,27 @@ STR['zh-TW'] = {
     `${P(v.w)} ${v.l == null ? '自摸' : '榮和'}${v.l != null ? '（' + P(v.l) + '放槍）' : ''} ${v.ym ? LBL(v.label) : t('han', { n: v.han })}`,
   'log.draw': v => `流局：聽牌 ${v.ten.map(P).join('、') || '無人'}`,
   'log.resume': '已從上次中斷的地方繼續對局',
+  'rv.match': v => `打 ${TN(v.t)}：和助手推薦一致。`,
+  'rv.defend': v => `打 ${TN(v.t)}：面對立直選了更安全的牌，算防守。`,
+  'rv.riichiOk': '立直的判斷和助手一致。',
+  'rv.riichiSkip': v => `打 ${TN(v.t)} 聽牌時沒有立直；助手會立直：多 1 番，還有一發和裏寶牌的機會。`,
+  'rv.riichiDama': v =>
+    `打 ${TN(v.t)} 時立直了；助手會默聽：${v.why === 'dead' ? '待牌已經全部見光，立直也和不了' : '這手牌已經有役且到滿貫，立直多得的點數不多，還會讓對手防你'}。`,
+  'rv.callOk': '鳴牌的判斷和助手一致。',
+  'rv.callTook': v =>
+    `你${{ pon: '碰', chi: '吃', kan: '槓' }[v.chose]}了 ${P(v.p)} 的 ${TN(v.t)}；助手會跳過：這樣鳴不進向聽，或者鳴了沒有役。`,
+  'rv.callSkip': v =>
+    `你跳過了 ${P(v.p)} 的 ${TN(v.t)}；助手會${{ pon: '碰', chi: '吃' }[v.coach]}：能進向聽，而且鳴了也有役。`,
+  'rv.choicesTitle': '立直與鳴牌',
+  'rv.notesTitle': '對手思路',
+  'ai.fold': v => `${P(v.p)} 第 ${v.n} 巡開始棄和（打 ${TN(v.t)}）：有人立直或亮出大牌，自己離聽牌還遠。`,
+  'ai.push': v => `${P(v.p)} 第 ${v.n} 巡面對立直繼續推進（打 ${TN(v.t)}）：已經聽牌，判斷值得冒險。`,
+  'ai.dama': v => `${P(v.p)} 第 ${v.n} 巡聽牌卻默聽（打 ${TN(v.t)}）：已有役且點數夠高，立直多得少，還會被防。`,
+  'rp.here': '回到這一巡',
+  'rp.open': '逐巡回放',
+  'rp.prev': '‹ 上一手',
+  'rp.next': '下一手 ›',
+  'rp.count': v => `第 ${v.i} / ${v.n} 個決定`,
   kyuushu: '九種九牌（流局）',
   kakanBy: '{p} 加槓',
   abortKind: '途中流局',
@@ -827,6 +869,30 @@ STR.ja = {
     `${P(v.w)} ${v.l == null ? 'ツモ' : 'ロン'}${v.l != null ? '（' + P(v.l) + 'の放銃）' : ''} ${v.ym ? LBL(v.label) : t('han', { n: v.han })}`,
   'log.draw': v => `流局：テンパイ ${v.ten.map(P).join('・') || 'なし'}`,
   'log.resume': '前回の続きから再開しました',
+  'rv.match': v => `${TN(v.t)} 切り：推奨どおり。`,
+  'rv.defend': v => `${TN(v.t)} 切り：リーチに対してより安全な牌を選んだ守備です。`,
+  'rv.riichiOk': 'リーチ判断は推奨どおり。',
+  'rv.riichiSkip': v =>
+    `${TN(v.t)} 切りで聴牌したのにリーチしませんでした。推奨はリーチ：1翻増え、一発や裏ドラも狙えます。`,
+  'rv.riichiDama': v =>
+    `${TN(v.t)} 切りでリーチしました。推奨はダマ：${v.why === 'dead' ? '待ちがすべて見えていて、リーチしても和了れません' : 'すでに役があり満貫あるので、リーチで増える点は少なく、警戒されるだけです'}。`,
+  'rv.callOk': '鳴きの判断は推奨どおり。',
+  'rv.callTook': v =>
+    `${P(v.p)} の ${TN(v.t)} を${{ pon: 'ポン', chi: 'チー', kan: 'カン' }[v.chose]}しました。推奨はスルー：シャンテンが進まないか、鳴くと役がありません。`,
+  'rv.callSkip': v =>
+    `${P(v.p)} の ${TN(v.t)} をスルーしました。推奨は${{ pon: 'ポン', chi: 'チー' }[v.coach]}：シャンテンが進み、役もあります。`,
+  'rv.choicesTitle': 'リーチと鳴き',
+  'rv.notesTitle': '相手の考え',
+  'ai.fold': v =>
+    `${P(v.p)} は ${v.n} 巡目からオリ（${TN(v.t)} 切り）：リーチや大物手の気配があり、自分は聴牌から遠いため。`,
+  'ai.push': v => `${P(v.p)} は ${v.n} 巡目、リーチに押し（${TN(v.t)} 切り）：聴牌していて、勝負する価値があると判断。`,
+  'ai.dama': v =>
+    `${P(v.p)} は ${v.n} 巡目に聴牌してダマ（${TN(v.t)} 切り）：役があり点数も十分で、リーチの得が少ないため。`,
+  'rp.here': 'この巡目を見る',
+  'rp.open': '一手ずつ振り返る',
+  'rp.prev': '‹ 前の手',
+  'rp.next': '次の手 ›',
+  'rp.count': v => `${v.n} 手中 ${v.i} 手目`,
   kyuushu: '九種九牌（流局）',
   kakanBy: '{p} が加槓',
   abortKind: '途中流局',
@@ -1190,6 +1256,31 @@ STR.en = {
     `${P(v.w)}: ${v.l == null ? 'tsumo' : 'ron'}${v.l != null ? ' (off ' + P(v.l) + ')' : ''}, ${v.ym ? LBL(v.label) : t('han', { n: v.han })}`,
   'log.draw': v => `Draw. Tenpai: ${v.ten.map(P).join(', ') || 'nobody'}`,
   'log.resume': 'Resumed where you left off',
+  'rv.match': v => `${TN(v.t)}: same as the coach.`,
+  'rv.defend': v => `${TN(v.t)}: a safer tile against riichi, a defensive choice.`,
+  'rv.riichiOk': 'Your riichi decision matched the coach.',
+  'rv.riichiSkip': v =>
+    `You did not declare riichi when discarding ${TN(v.t)} for tenpai. The coach would: one more han, plus the chance of ippatsu and ura dora.`,
+  'rv.riichiDama': v =>
+    `You declared riichi with ${TN(v.t)}. The coach would stay damaten: ${v.why === 'dead' ? 'every winning tile is already visible, so riichi cannot win' : 'the hand already has a yaku and is worth a mangan, so riichi adds little and warns the others'}.`,
+  'rv.callOk': 'Your call decision matched the coach.',
+  'rv.callTook': v =>
+    `You called ${{ pon: 'pon', chi: 'chi', kan: 'kan' }[v.chose]} on ${P(v.p)}'s ${TN(v.t)}. The coach would pass: the call does not advance the hand, or leaves it without a yaku.`,
+  'rv.callSkip': v =>
+    `You passed on ${P(v.p)}'s ${TN(v.t)}. The coach would call ${{ pon: 'pon', chi: 'chi' }[v.coach]}: it advances the hand and keeps a yaku.`,
+  'rv.choicesTitle': 'Riichi and calls',
+  'rv.notesTitle': 'What the opponents were thinking',
+  'ai.fold': v =>
+    `${P(v.p)} folded from turn ${v.n} (discarding ${TN(v.t)}): someone was in riichi or showing a big hand, and they were far from tenpai.`,
+  'ai.push': v =>
+    `${P(v.p)} pushed against riichi on turn ${v.n} (discarding ${TN(v.t)}): already tenpai and judged it worth the risk.`,
+  'ai.dama': v =>
+    `${P(v.p)} was tenpai on turn ${v.n} but stayed damaten (discarding ${TN(v.t)}): the hand had a yaku and enough value, so riichi would add little.`,
+  'rp.here': 'Show this turn',
+  'rp.open': 'Replay turn by turn',
+  'rp.prev': '‹ Previous',
+  'rp.next': 'Next ›',
+  'rp.count': v => `Decision ${v.i} of ${v.n}`,
   kyuushu: 'Nine terminals (abort)',
   kakanBy: '{p} adds to a kan:',
   abortKind: 'Abortive draw',
