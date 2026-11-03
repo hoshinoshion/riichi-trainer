@@ -226,8 +226,9 @@ function showModal(html, btn) {
   const g = GEN;
   return new Promise((res, rej) => {
     const m = $('#modal');
-    m.innerHTML = `<div class="mbox" role="dialog" aria-modal="true">${html}<div><button class="btn gold" id="mclose" type="button">${btn}</button></div></div>`;
+    m.innerHTML = `<div class="mbox${S.fx ? ' fx' : ''}" role="dialog" aria-modal="true">${html}<div><button class="btn gold" id="mclose" type="button">${btn}</button></div></div>`;
     m.hidden = false;
+    countUp(m);
     const b = $('#mclose');
     b.focus();
     b.onclick = () => {
@@ -238,7 +239,7 @@ function showModal(html, btn) {
   });
 }
 function deltasHTML(deltas, before) {
-  return `<div class="deltas">${[0, 1, 2, 3].map(i => `<div><small>${P(i)} · ${W4(seatOf(i))}</small>${before[i] + deltas[i]}<small class="${deltas[i] > 0 ? 'up' : deltas[i] < 0 ? 'dn' : ''}">${deltas[i] > 0 ? '+' : ''}${deltas[i] || '±0'}</small></div>`).join('')}</div>`;
+  return `<div class="deltas">${[0, 1, 2, 3].map(i => `<div><small>${charName(i)} · ${W4(seatOf(i))}</small><span data-count="${before[i] + deltas[i]}" data-from="${before[i]}">${before[i] + deltas[i]}</span><small class="${deltas[i] > 0 ? 'up' : deltas[i] < 0 ? 'dn' : ''}">${deltas[i] > 0 ? '+' : ''}${deltas[i] || '±0'}</small></div>`).join('')}</div>`;
 }
 function winModal(w, l, winId, res, deltas, before) {
   const pl = G.players[w];
@@ -249,9 +250,12 @@ function winModal(w, l, winId, res, deltas, before) {
     tileHTML(winId, 'win') +
     (pl.melds.length ? '<span class="gap"></span>' : '') +
     pl.melds.map(m => meldHTML(m)).join('');
+  // With effects on, the rows come in one by one (--i), the ura dora turns over, and a limit hand gets a banner.
+  let i = 0;
   let rows = res.yaku
     .map(
-      ([n, h]) => `<li><span>${YN(n)}</span><b>${typeof h === 'number' ? t('han', { n: h }) : t('yakuman')}</b></li>`
+      ([n, h]) =>
+        `<li style="--i:${i++}"><span>${YN(n)}</span><b>${typeof h === 'number' ? t('han', { n: h }) : t('yakuman')}</b></li>`
     )
     .join('');
   if (!res.yakuman)
@@ -261,7 +265,7 @@ function winModal(w, l, winId, res, deltas, before) {
       [t('ura'), res.ura]
     ]
       .filter(x => x[1])
-      .map(([n, h]) => `<li><span>${n}</span><b>${t('han', { n: h })}</b></li>`)
+      .map(([n, h]) => `<li style="--i:${i++}"><span>${n}</span><b>${t('han', { n: h })}</b></li>`)
       .join('');
   const total = res.yakuman ? LBL(res.label) : t('fuHan', { fu: res.fu, han: res.han, label: LBL(res.label) });
   const pay =
@@ -276,7 +280,7 @@ function winModal(w, l, winId, res, deltas, before) {
       : t('honbaRon', { n: G.honba * 300 })
     : '';
   const ura = pl.riichi
-    ? `<div>${t('uraInd')} ${uraInds()
+    ? `<div class="ura">${t('uraInd')} ${uraInds()
         .map(x => tileT(x, 'xs'))
         .join('')}</div>`
     : '';
@@ -286,8 +290,67 @@ function winModal(w, l, winId, res, deltas, before) {
     .map(x => tileT(x, 'xs'))
     .join('')}</div>${ura}</div>
   <ul class="myaku">${rows}</ul>
+  ${limitLevel(res) ? `<div class="limit l${limitLevel(res)}" style="--i:${i}">${LBL(res.label)}</div>` : ''}
   <div class="mtotal">${total}<small>${pay}${extra}</small></div>
   ${deltasHTML(deltas, before)}`;
+}
+// 1 mangan … 4 sanbaiman, 5 yakuman: the banner grows with the hand.
+const limitLevel = res => (res.yakuman ? 5 : { 满贯: 1, 跳满: 2, 倍满: 3, 三倍满: 4, 累计役满: 5 }[res.label] || 0);
+// Numbers marked data-count roll up from zero when the result screen opens (effects on, motion allowed).
+function countUp(root) {
+  if (
+    !S.fx ||
+    document.documentElement.classList.contains('reduce-motion') ||
+    typeof requestAnimationFrame !== 'function'
+  )
+    return;
+  root.querySelectorAll('[data-count]').forEach(el => {
+    const to = +el.dataset.count,
+      from = +el.dataset.from || 0,
+      t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 700);
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+// A brush-style stamp over the table for big moments: riichi, calls, wins. p: who; key: stamp.* text.
+function stamp(key, p) {
+  if (!S.fx || typeof document.createElement !== 'function') return;
+  const host = $('.table');
+  if (!host) return;
+  const el = document.createElement('div');
+  el.className = 'stamp' + (p === 0 ? ' mine' : '');
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = `<span>${t('stamp.' + key)}</span><small>${charName(p)}</small>`;
+  host.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+// Seat characters (S.styles): a name, an avatar and short lines in a speech bubble on their plate.
+const charOn = p => p > 0 && S.styles !== false;
+const charName = p => (charOn(p) ? L('chars')[p - 1] : P(p));
+const AVATARS = [
+  null,
+  // 下家: a round panda who calls a lot
+  `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="#1c1c20"/><circle cx="31" cy="9" r="6" fill="#1c1c20"/><circle cx="20" cy="22" r="15" fill="#fbfaf5" stroke="#1c1c20" stroke-width="1.2"/><ellipse cx="13.5" cy="21" rx="4" ry="5" fill="#1c1c20" transform="rotate(-20 13.5 21)"/><ellipse cx="26.5" cy="21" rx="4" ry="5" fill="#1c1c20" transform="rotate(20 26.5 21)"/><circle cx="14" cy="20.5" r="1.4" fill="#fff"/><circle cx="26" cy="20.5" r="1.4" fill="#fff"/><ellipse cx="20" cy="27" rx="2" ry="1.4" fill="#1c1c20"/><path d="M17.5 30q2.5 2 5 0" stroke="#1c1c20" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>`,
+  // 对家: a careful orange cat
+  `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 16 8 3l10 8zM34 16 32 3l-10 8z" fill="#f0a14a"/><circle cx="20" cy="23" r="15" fill="#f0a14a"/><path d="M14 10q6-3 12 0" stroke="#c97a26" stroke-width="2" fill="none"/><ellipse cx="20" cy="29" rx="7" ry="5" fill="#fff4e6"/><path d="M11 21q3-3 6 0M23 21q3-3 6 0" stroke="#1c1c20" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M18.5 27h3l-1.5 1.6z" fill="#e5636a"/></svg>`,
+  // 上家: a fox who chases one-suit hands
+  `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 18 7 2l11 10zM35 18 33 2 22 12z" fill="#e0622c"/><path d="M8 7l1 7 4-3zM32 7l-1 7-4-3z" fill="#3a2418"/><path d="M5 18q2-10 15-10t15 10q-2 14-15 19Q7 32 5 18z" fill="#e0622c"/><path d="M8 22q5 1 12 15 7-14 12-15-6 7-12 15Q14 29 8 22z" fill="#fff6ee"/><path d="M12 19l5 1.5M28 19l-5 1.5" stroke="#1c1c20" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="31" r="1.6" fill="#1c1c20"/></svg>`
+];
+// Speech bubbles never use rand(), so they cannot change a seeded game. Each player says each kind of line at
+// most once per hand.
+const BUBBLES = {};
+function say(p, kind) {
+  if (!charOn(p) || typeof document.createElement !== 'function' || !G) return;
+  const said = G.said || (G.said = []);
+  if (said.includes(p + kind)) return;
+  said.push(p + kind);
+  BUBBLES[p] = { text: L('lines.' + kind)[p - 1], until: Date.now() + 2400 };
+  renderOpps();
+  setTimeout(renderOpps, 2500);
 }
 
 // Post-round review (review.js): agreement with the coach, then the costliest discards with the hand as it was.
@@ -442,11 +505,15 @@ function render() {
 }
 // Opponents sit around the discard area: 下家 (1) right, 对家 (2) top, 上家 (3) left.
 function renderOpps() {
+  if (!G) return;
   for (const p of [1, 2, 3]) {
     const pl = G.players[p],
-      sw = seatOf(p);
-    $('#opp' + p).innerHTML = `<div class="plate${G.turn === p ? ' on' : ''}">
-    <div class="ph"><span class="wb${sw === 0 ? ' dealer' : ''}">${WIND_CH[sw]}</span><span class="nm">${P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><b class="sc">${pl.score}</b>${pl.riichi ? `<span class="rtag">${t('riichiTag')}</span>` : ''}</div>
+      sw = seatOf(p),
+      ch = charOn(p),
+      bub = BUBBLES[p] && BUBBLES[p].until > Date.now() ? BUBBLES[p].text : '';
+    $('#opp' + p).innerHTML = `<div class="plate${G.turn === p ? ' on' : ''}${pl.riichi ? ' riichi' : ''}">
+    ${bub ? `<div class="bubble" role="status">${bub}</div>` : ''}
+    <div class="ph">${ch ? `<span class="ava">${AVATARS[p]}</span>` : ''}<span class="wb${sw === 0 ? ' dealer' : ''}">${WIND_CH[sw]}</span><span class="nm">${ch ? `${charName(p)} <small>${P(p)}</small>` : P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><b class="sc">${pl.score}</b>${pl.riichi ? `<span class="rtag">${t('riichiTag')}</span>` : ''}</div>
     <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div><div class="pm">${pl.melds.map(m => meldHTML(m, 'mini')).join('')}</div></div></div>`;
   }
 }

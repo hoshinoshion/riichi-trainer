@@ -81,6 +81,9 @@ const bind = (id, key, isBox) => {
   });
 };
 bind('optHint', 'hint', false);
+bind('optStyles', 'styles', true);
+bind('optFx', 'fx', true);
+bind('optSound', 'sound', true);
 bind('optOneTap', 'oneTap', true);
 bind('optSkip', 'autoSkip', true);
 bind('optSpeed', 'speed', false);
@@ -106,7 +109,9 @@ $('#btnNew').addEventListener('click', () => {
 // Header buttons show the current language and theme next to their icons.
 function updateTools() {
   $('#langCur').textContent = LANG_NAMES[LANG];
-  $('#themeCur').textContent = t('opt.' + (['light', 'dark', 'classic'].includes(S.theme) ? S.theme : 'auto'));
+  $('#themeCur').textContent = t(
+    'opt.' + (['light', 'dark', 'classic', 'parlor', 'tatami'].includes(S.theme) ? S.theme : 'auto')
+  );
 }
 function renderYakuTable() {
   const desc = L('yakuDesc'),

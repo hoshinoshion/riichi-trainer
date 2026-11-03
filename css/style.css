@@ -61,6 +61,42 @@ img{max-width:100%}
   --f-head:"Noto Serif SC","Songti SC","STSong",serif;
   color-scheme:dark;
 }
+/* Venue: a late-night mahjong parlour. Deep violet felt, neon-pink accent, rose tile backs. */
+:root[data-theme="parlor"]{
+  --ink:#120f1c; --ink-2:#18142a; --panel:#1b1728; --panel-2:#241f35; --line:#352e4d;
+  --text:#efeaf7; --muted:#a59cbd;
+  --gold:#ff7ab6; --gold-ink:#2a0717;
+  --ivory:#fbf6ff; --ivory-2:#e6dcef;
+  --back:#b8326f; --back-2:#7d1f4b;
+  --tile-edge:rgba(0,0,0,.6); --tile-shadow:rgba(0,0,0,.5);
+  --table-bg:radial-gradient(circle at 50% 25%,#2c2249,#140f22 75%);
+  --table-shadow:inset 0 0 0 1px rgba(255,122,182,.12),0 0 40px -10px rgba(255,122,182,.25);
+  --mat-bg:radial-gradient(circle at 50% 46%,#2f2552 0%,#1d1734 80%);
+  --mat-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 0 40px rgba(0,0,0,.35);
+  --felt-core:#1a1430; --center-line:rgba(255,255,255,.08);
+  --stick:#f4eefb; --dealer:#ffd166;
+  --seat-bg:rgba(0,0,0,.28); --seat-line:rgba(255,255,255,.1); --board-line:rgba(255,255,255,.06);
+  --warn:#ff8f6b; --ok:#7be0b5;
+  color-scheme:dark;
+}
+/* Venue: a tatami room. Woven straw table, warm paper panels, dark wood tile backs, lacquer-red accent. */
+:root[data-theme="tatami"]{
+  --ink:#efe6d2; --ink-2:#e8dcc3; --panel:#fbf6ea; --panel-2:#f1e8d4; --line:#ddd0b3;
+  --text:#2b2418; --muted:#76694f;
+  --gold:#9a2a17; --gold-ink:#fff8ef;
+  --ivory:#fffdf6; --ivory-2:#ece2c9;
+  --back:#5a3a22; --back-2:#3b2414;
+  --tile-edge:#cdbf9c; --tile-shadow:rgba(60,40,10,.18);
+  --table-bg:repeating-linear-gradient(90deg,#cbb47c 0 22px,#c3ab71 22px 24px);
+  --table-shadow:inset 0 0 0 6px #6b4a2b,inset 0 0 0 7px rgba(0,0,0,.2);
+  --mat-bg:#dcc994; --mat-shadow:inset 0 1px 3px rgba(60,40,10,.15),inset 0 0 0 1px rgba(60,40,10,.12);
+  --felt-core:#efe3bf; --center-line:#cdb987;
+  --stick:#3b2414; --dealer:#9a2a17;
+  --seat-bg:#fbf6ea; --seat-line:#ddd0b3; --board-line:rgba(60,40,10,.12);
+  --warn:#b4401f; --ok:#3f7a2e;
+  --f-head:"Noto Serif SC","Songti SC","STSong",serif;
+  color-scheme:light;
+}
 html,body{background:var(--ink);color:var(--text)}
 /* Default tile width. Containers (hand, ponds, dora, melds) override --w and their tiles inherit it. */
 :root{--w:30px}
@@ -437,7 +473,35 @@ body.noscroll{overflow:hidden}
 .pdiff{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
 .pdiff select{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:4px 6px;color:var(--text);font:inherit}
 .myaku.fu li b{font-variant-numeric:tabular-nums}
-@media (prefers-reduced-motion:reduce){.pond .tile.fresh{animation:none}.hand .tile{transition:none}}
+/* Big-moment stamps, speech bubbles and character avatars. */
+.table{position:relative}
+.stamp{position:absolute;left:50%;top:45%;z-index:12;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:4px;pointer-events:none}
+.stamp span{font:900 clamp(40px,9vw,84px)/1 var(--f-tile);color:var(--t-red);padding:.08em .3em .14em;border:5px solid var(--t-red);border-radius:18px;background:color-mix(in srgb,var(--panel) 82%,transparent);white-space:nowrap;animation:stampin 1.25s cubic-bezier(.2,1.5,.4,1) both}
+.stamp.mine span{color:var(--gold);border-color:var(--gold)}
+.stamp small{font:700 13px/1 var(--f-ui);color:var(--text);background:var(--panel);padding:3px 8px;border-radius:999px;animation:fadeout 1.25s both}
+@keyframes stampin{0%{transform:scale(2) rotate(-14deg);opacity:0}18%{transform:scale(.94) rotate(-6deg);opacity:1}28%{transform:scale(1) rotate(-6deg)}80%{opacity:1}100%{transform:scale(1.04) rotate(-6deg);opacity:0}}
+@keyframes fadeout{0%,80%{opacity:1}100%{opacity:0}}
+.plate{position:relative}
+.plate.riichi .ph{box-shadow:0 0 0 1px var(--t-red),0 0 14px -2px var(--t-red)}
+.ava{width:28px;height:28px;flex:none;border-radius:50%;background:var(--panel-2);display:grid;place-items:center;overflow:hidden}
+.ava svg{width:26px;height:26px}
+.nm small{color:var(--muted);font-weight:400;font-size:11px}
+.bubble{position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);z-index:5;width:max-content;max-width:min(180px,40vw);background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:5px 10px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 18px rgba(0,0,0,.16);animation:pop .25s ease-out both}
+.bubble::after{content:"";position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--panel)}
+.opp.top .bubble{bottom:auto;top:calc(100% + 6px)}
+.opp.top .bubble::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--panel)}
+@keyframes pop{from{transform:translateX(-50%) scale(.85);opacity:0}}
+/* Result screen effects (setting fx): rows come in one by one, the ura dora turns over, limit hands get a banner. */
+.mbox.fx .myaku li{animation:rowin .35s ease both;animation-delay:calc(var(--i,0) * 140ms)}
+@keyframes rowin{from{transform:translateX(-10px);opacity:0}}
+.mbox.fx .ura .tile{animation:flipin .6s ease both .5s}
+@keyframes flipin{0%{transform:rotateY(90deg)}100%{transform:none}}
+.limit{justify-self:center;font:900 26px/1 var(--f-tile);color:var(--t-red);border:3px solid var(--t-red);border-radius:12px;padding:6px 16px 8px;transform:rotate(-3deg)}
+.limit.l2{font-size:32px}.limit.l3{font-size:38px}.limit.l4{font-size:44px}
+.limit.l5{font-size:50px;color:var(--gold);border-color:var(--gold);box-shadow:0 0 24px -4px var(--gold)}
+.mbox.fx .limit{animation:stampin2 .6s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(var(--i,0) * 140ms + 200ms)}
+@keyframes stampin2{from{transform:scale(2) rotate(-12deg);opacity:0}to{transform:rotate(-3deg)}}
+@media (prefers-reduced-motion:reduce){.pond .tile.fresh,.stamp span,.stamp small,.bubble,.mbox.fx .myaku li,.mbox.fx .ura .tile,.mbox.fx .limit{animation:none}.hand .tile,.drawer{transition:none}}
 @media (max-width:520px){
   .app{--gut:10px;gap:12px;padding-top:10px}
   .btn{padding:10px 14px;font-size:14px}.btn.win{font-size:16px}

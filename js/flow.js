@@ -72,6 +72,7 @@ function startRound() {
   G.flow = null;
   G.review = [];
   G.notes = [];
+  G.said = [];
   G.kanBy = [];
   if (G.stats) G.stats.hands++;
   for (const p of G.players)
@@ -223,12 +224,19 @@ async function roundLoop() {
         if (rob.rons) return await finishWins(rob.rons, p, id);
       }
       doSelfKan(p, dec.opt);
+      stamp('kan', p);
+      sfx('call');
       render();
       await pause(delay() * 0.6);
       mode = 'rinshan';
       continue;
     }
     doDiscard(p, dec.id, !!dec.riichi);
+    if (dec.riichi) {
+      stamp('riichi', p);
+      sfx('riichi');
+      say(p, 'riichi');
+    } else sfx('discard');
     render();
     G.players.forEach(x => x.river.forEach(r => (r.fresh = false)));
     await pause(pl.isHuman ? 150 : delay() * 0.45);
@@ -244,6 +252,9 @@ async function roundLoop() {
     if (ab) return await abortive(ab);
     if (cr.call) {
       applyCall(cr.call, p, dec.id);
+      stamp(cr.call.type, cr.call.q);
+      sfx('call');
+      say(cr.call.q, 'call');
       forbid = kuikaeOf(tt(dec.id), cr.call.useT);
       p = cr.call.q;
       mode = cr.call.type === 'kan' ? 'rinshan' : 'call';
@@ -286,6 +297,11 @@ async function finishWin(w, l, winId, res, first = true) {
   if (w === 0 && G.stats) G.stats.wins++;
   G.turn = -1;
   render();
+  stamp(l === null ? 'tsumo' : 'ron', w);
+  sfx('win');
+  say(w, 'win');
+  if (l !== null && w === 0) say(l, 'lose');
+  if (S.fx) await pause(900);
   await showModal(
     winModal(w, l, winId, res, deltas, before) + (dealIn ? dealInHTML(dealIn) : '') + reviewHTML(),
     t('next')

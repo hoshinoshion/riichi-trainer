@@ -2,7 +2,18 @@
 // Loaded after engine.js and i18n.js; no DOM work at load time beyond the $ helper.
 // ===================== Settings =====================
 const S = (() => {
-  const d = { oneTap: false, autoSkip: false, speed: 'mid', len: 'east', ai: 'normal', theme: 'auto', lang: 'auto' };
+  const d = {
+    oneTap: false,
+    autoSkip: false,
+    speed: 'mid',
+    len: 'east',
+    ai: 'normal',
+    theme: 'auto',
+    lang: 'auto',
+    fx: true, // stamps and result-screen animations
+    sound: false, // synthesized sound effects (shell.js)
+    styles: true // seat characters: play styles, avatars and lines
+  };
   try {
     return Object.assign(d, JSON.parse(localStorage.getItem('rmj-settings') || '{}'));
   } catch (e) {
@@ -88,6 +99,9 @@ function decodeRules(s) {
   return r;
 }
 
+// Sound effects; shell.js replaces this with the Web Audio version in the browser.
+let sfx = () => {};
+
 const DELAY = { slow: 950, mid: 560, fast: 220 };
 const delay = () => DELAY[S.speed] || 560;
 const $ = s => document.querySelector(s);
@@ -161,7 +175,7 @@ const newSeed = () => Math.floor(Math.random() * 4294967296);
 // turn, so reopening the page continues from the turn that was in progress. Sets are stored as {$set:[…]}.
 // Bump SAVE_V when the shape of G changes; older saves are then ignored.
 const SAVE_KEY = 'rmj-game',
-  SAVE_V = 5;
+  SAVE_V = 6;
 function saveGame() {
   if (!G) return;
   try {

@@ -352,3 +352,19 @@ test('复盘：鸣牌判断对照困难电脑，并留下牌桌快照', () => {
   assert.strictEqual(G.stats.cOk, 1);
   assert.deepStrictEqual(plain(G.review[0].snap.r[3]), [[east, 0, 0]]);
 });
+
+test('复盘：一直不立直只记第一次', () => {
+  table(player(parse('123m456p789s11z23s4p')));
+  const G = ctx.getG();
+  G.rules = run('({ ...RULE_PRESETS.standard })');
+  G.review = [];
+  G.stats = run('newStats()');
+  const id = G.players[0].hand[13];
+  run(
+    `riichiAdvice = () => ({ riichi: true, why: 'default' }); recordRiichi(${id}, false); recordRiichi(${id}, false); recordRiichi(${id}, true)`
+  );
+  assert.deepStrictEqual(
+    G.review.map(r => r.kind),
+    ['riichiSkip', 'riichiOk']
+  );
+});

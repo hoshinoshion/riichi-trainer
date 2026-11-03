@@ -96,6 +96,8 @@ function recordRiichi(id, declared) {
   const a = riichiAdvice(tt(id)),
     pl = G.players[0];
   const kind = declared === a.riichi ? 'riichiOk' : declared ? 'riichiDama' : 'riichiSkip';
+  // Staying damaten turn after turn is one decision: only the first such turn of a hand is kept.
+  if (!declared && G.review.some(r => r.kind === 'riichiSkip' || r.kind === 'riichiOk')) return;
   G.review.push({
     turn: pl.river.length + 1,
     hand: pl.hand.slice().sort((x, y) => x - y),

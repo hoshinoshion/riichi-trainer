@@ -64,7 +64,7 @@ const check = (ok, msg) => {
     return { page, errors };
   };
 
-  for (const theme of ['light', 'dark', 'classic']) {
+  for (const theme of ['light', 'dark', 'classic', 'parlor', 'tatami']) {
     for (const [name, viewport] of [
       ['phone', { width: 390, height: 844 }],
       ['desktop', { width: 1440, height: 900 }]
