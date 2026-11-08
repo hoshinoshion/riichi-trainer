@@ -144,7 +144,9 @@ button{font:inherit;color:inherit}
 .dtop h2{margin:0;font:900 18px/1.3 var(--f-head)}
 .dclose{width:36px;padding:0;justify-content:center}
 .scrim{position:fixed;inset:0;z-index:14;background:rgba(5,10,8,.45)}
-@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 500px)/18.8)}}
+/* Landscape screens are short: the mat and your hand share the height. The hand is 1.6 discards wide (at most 44px),
+   so pw = (height - everything else) / (18.8 mat + 1.6 × 1.46 hand rows). */
+@media (min-width:900px) and (orientation:landscape){.stage{--pwh:calc((100svh - 350px)/21.14);--twh:max(30px,calc(var(--pw)*1.6))}}
 @media (min-width:1240px){
   .app{grid-template-columns:minmax(0,1fr) 360px;grid-template-areas:"top top" "game drawer"}
   .drawer{grid-area:drawer;position:sticky;top:12px;bottom:auto;align-self:start;height:calc(100svh - 84px);width:auto;transform:none;visibility:visible;background:none;border:0;box-shadow:none;padding:0 2px 12px 0;z-index:auto;transition:none}
@@ -178,7 +180,7 @@ button{font:inherit;color:inherit}
 .stage{--side:92px;--agap:16px;--tpad:14px;grid-template-columns:minmax(0,1fr);display:grid;gap:12px;
   /* --pw: pond tile width, sized so the board fits between the side seats (and the viewport height on landscape screens). */
   --pw:clamp(14px,min(calc((100cqi - 2*var(--side) - 2*var(--tpad) - 2*var(--agap) - 28px)/18.8),var(--pwh,99px)),34px);
-  --tw:min(44px,calc((100cqi - 2*var(--tpad) - 14px)/15.2))}
+  --tw:min(44px,calc((100cqi - 2*var(--tpad) - 14px)/15.2),var(--twh,99px))}
 /* The table: status strip, opponents around the discard area, then your seat and hand. */
 .table{background:var(--table-bg);box-shadow:var(--table-shadow);border-radius:20px;padding:var(--tpad);display:grid;gap:12px;min-width:0}
 /* Top and bottom rows share one height (1fr of an auto-height grid), so the mat sits in the exact centre. */
@@ -194,9 +196,14 @@ button{font:inherit;color:inherit}
   .opp.left .pb,.opp.right .pb{flex-direction:column}
   .opp.left .backs,.opp.right .backs{flex-direction:column}
   /* Seat contents scale with the pond tiles so the whole table stays in proportion. */
-  .arena .backs i{width:calc(var(--pw)*.5);height:calc(var(--pw)*.68);border-radius:calc(var(--pw)*.1)}
-  .opp.left .backs i,.opp.right .backs i{width:calc(var(--pw)*.68);height:calc(var(--pw)*.5)}
-  .arena .pm .tile{--w:calc(var(--pw)*.62)}
+  /* Concealed hands as standing tile backs about two-thirds the size of a discard, melds at three-quarters. */
+  .arena .backs i{width:calc(var(--pw)*.64);height:calc(var(--pw)*.86);border-radius:calc(var(--pw)*.12)}
+  .opp.left .backs i,.opp.right .backs i{width:calc(var(--pw)*.86);height:calc(var(--pw)*.6)}
+  .arena .pm .tile{--w:calc(var(--pw)*.76)}
+  /* The seat across sits on one line (name pill, then its tiles), so the rows above and below the mat stay short
+     and the mat, and with it every discard, can be larger. The log ticker moves to the table's top-left corner. */
+  .opp.top .plate{flex-direction:row;gap:12px}
+  .table>.ticker{position:absolute;left:calc(var(--tpad) + 4px);top:calc(var(--tpad) - 2px);max-width:calc((100% - 2*var(--tpad))*.22);text-align:left;white-space:normal;font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
   .arena .nm,.arena .sc{font-size:clamp(12px,calc(var(--pw)*.52),15px)}
   .arena .wb{width:clamp(20px,calc(var(--pw)*.9),26px);height:clamp(20px,calc(var(--pw)*.9),26px);line-height:clamp(18px,calc(var(--pw)*.9 - 2px),24px)}
   .opp.left .pm,.opp.right .pm{flex-direction:column;align-items:center}
@@ -213,7 +220,7 @@ button{font:inherit;color:inherit}
   .table .sc{order:8}.table .ph .rtag{order:9}
   .table .pb{flex-direction:column;gap:5px;width:100%}
   .table .backs{gap:1px;justify-content:center;max-width:100%}
-  .table .backs i{width:6px;height:9px;border-radius:1.5px;flex:0 1 6px;min-width:3px;box-shadow:none}
+  .table .backs i{width:8px;height:11px;border-radius:2px;flex:0 1 8px;min-width:3px;box-shadow:0 1px 0 var(--ivory-2)}
 }
 
 /* opponent plates */
@@ -267,13 +274,8 @@ button{font:inherit;color:inherit}
 .tile .face{position:absolute;inset:7% 9% 9%;display:flex;align-items:center;justify-content:center}
 .tile svg{width:100%;height:100%;display:block}
 .tile.back{background:linear-gradient(170deg,var(--back) 35%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),0 calc(var(--w)*.1) 0 .5px var(--ivory-2),0 calc(var(--w)*.1 + 2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
-.mf{display:flex;flex-direction:column;align-items:center;line-height:.95;font-family:var(--f-tile);font-weight:800}
-.mf .n{font-size:calc(var(--w)*.46);color:var(--t-ink)}
-.mf .s{font-size:calc(var(--w)*.48);color:var(--t-red)}
-.mf.red .n{color:var(--t-red)}
-.hf{font:800 calc(var(--w)*.7)/1 var(--f-tile);color:var(--t-ink)}
-.hf.h32{color:var(--t-green)} .hf.h33{color:var(--t-red)}
-.haku{width:70%;height:78%;border:calc(var(--w)*.06) solid #4a72c4;border-radius:calc(var(--w)*.08)}
+/* Face inks (the faces are SVG; see face() in render.js). */
+.tile .gi{fill:var(--t-ink)} .tile .gr{fill:var(--t-red)} .tile .gg{fill:var(--t-green)} .tile .gb{stroke:var(--t-blue)}
 .tile.yoko{transform:rotate(-90deg);margin-left:calc(var(--w)*.18);margin-right:calc(var(--w)*.18)}
 .tile.gone{opacity:.32}
 .tile.last{outline:2px solid var(--gold);outline-offset:1px}
@@ -286,6 +288,11 @@ button{font:inherit;color:inherit}
 .pond .tile.fresh{animation:drop .22s ease-out}
 @keyframes drop{from{transform:translateY(-30%);opacity:0}to{transform:none;opacity:1}}
 .pond .tile.yoko.fresh{animation:none}
+/* Motion (setting fx; see the Motion section of render.js). Discards fly in from script; these are the CSS parts. */
+.stick.drop{animation:stickdrop .52s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes stickdrop{0%{transform:translateY(-260%) scale(1.6);opacity:0}55%{opacity:1}100%{transform:none}}
+.meld.mnew{animation:meldin .52s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes meldin{from{transform:translateY(-40%) scale(1.15);opacity:0}}
 
 /* my area */
 .me{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
@@ -406,6 +413,34 @@ kbd{font:600 12px/1 var(--f-ui);padding:3px 6px;border-radius:6px;border:1px sol
 .deltas div{background:var(--panel-2);border-radius:10px;padding:8px;text-align:center;font-variant-numeric:tabular-nums}
 .deltas small{display:block;color:var(--muted);font-size:12px}
 .deltas .up{color:var(--ok)} .deltas .dn{color:var(--warn)}
+/* Win screen: a banner with the tsumo / ron seal and the points gained, a large hand whose tiles turn over one by
+   one with the winning tile rising last, a yaku sheet whose rows come in one by one, then the total. */
+.mbox:has(.mhero){max-width:720px}
+.mhero{margin:-20px -20px 0;padding:18px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--t-red) 14%,var(--panel)),var(--panel) 70%)}
+.mhero.mine{background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 22%,var(--panel)),var(--panel) 70%)}
+.mkind.seal{font:900 22px/1 var(--f-head);letter-spacing:.08em;padding:10px 12px;border-radius:10px;background:var(--t-red);color:#fff;transform:rotate(-4deg);box-shadow:0 6px 16px -8px var(--t-red);flex:none}
+.mhero.mine .mkind.seal{background:var(--gold);color:var(--gold-ink);box-shadow:0 6px 16px -8px var(--gold)}
+.mwho{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.mwho h2{margin:0}
+.mwho .ava{width:40px;height:40px}.mwho .ava svg{width:38px;height:38px}
+.mgain{margin-left:auto;font:900 clamp(26px,6vw,40px)/1 var(--f-head);color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mbox .mhand,.mbox .mhand .tile{--w:clamp(18px,4.9vw,42px)}
+.mbox .mhand{padding:12px 0 4px;justify-content:center}
+.mbox .mhand .win{outline:0;transform:translateY(-14%);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 2px var(--t-red),0 calc(var(--w)*.1) 0 .5px var(--tile-depth),0 0 22px -2px color-mix(in srgb,var(--t-red) 70%,transparent)}
+.msheet{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px 20px;align-items:center}
+.msheet .myaku{grid-template-columns:minmax(0,1fr)}
+.mfinal{display:grid;gap:12px;justify-items:center;text-align:center}
+@media (max-width:560px){.msheet{grid-template-columns:minmax(0,1fr)}.mhero{gap:10px;padding:14px 16px;margin:-20px -20px 0}.mkind.seal{font-size:18px;padding:8px 10px}.mwho .ava{display:none}}
+.deltas div{border:1px solid transparent}
+.deltas .gain{border-color:color-mix(in srgb,var(--ok) 55%,transparent);background:color-mix(in srgb,var(--ok) 10%,var(--panel-2))}
+.deltas .loss{border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.mbox.fx .mhand .tile{animation:tileflip .42s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+.mbox.fx .mhand .win{animation:winrise .6s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i,0) * 45ms + 120ms)}
+@keyframes tileflip{from{transform:rotateY(90deg) translateY(10%);opacity:0}}
+@keyframes winrise{from{transform:translateY(-70%) scale(1.3);opacity:0}to{transform:translateY(-14%)}}
+.mbox.fx .mfinal{animation:rowin .4s ease both;animation-delay:calc(var(--n,0) * 45ms + var(--i,0) * 160ms + 100ms)}
+.mbox.fx .mhero .seal{animation:stampin2 .55s cubic-bezier(.2,1.5,.4,1) both}
 .mrow{display:grid;gap:6px}
 .mrow + .mrow{border-top:1px solid var(--line);padding-top:10px}
 .rank{display:grid;gap:6px}
@@ -528,16 +563,17 @@ body.noscroll{overflow:hidden}
 .opp.top .bubble::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--panel)}
 @keyframes pop{from{transform:translateX(-50%) scale(.85);opacity:0}}
 /* Result screen effects (setting fx): rows come in one by one, the ura dora turns over, limit hands get a banner. */
-.mbox.fx .myaku li{animation:rowin .35s ease both;animation-delay:calc(var(--i,0) * 140ms)}
+/* Rows wait for the hand to turn over (--n tiles) when there is one. */
+.mbox.fx .myaku li{animation:rowin .35s ease both;animation-delay:calc(var(--n,0) * 45ms + var(--i,0) * 160ms)}
 @keyframes rowin{from{transform:translateX(-10px);opacity:0}}
 .mbox.fx .ura .tile{animation:flipin .6s ease both .5s}
 @keyframes flipin{0%{transform:rotateY(90deg)}100%{transform:none}}
 .limit{justify-self:center;font:900 26px/1 var(--f-tile);color:var(--t-red);border:3px solid var(--t-red);border-radius:12px;padding:6px 16px 8px;transform:rotate(-3deg)}
 .limit.l2{font-size:32px}.limit.l3{font-size:38px}.limit.l4{font-size:44px}
 .limit.l5{font-size:50px;color:var(--gold);border-color:var(--gold);box-shadow:0 0 24px -4px var(--gold)}
-.mbox.fx .limit{animation:stampin2 .6s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(var(--i,0) * 140ms + 200ms)}
+.mbox.fx .limit{animation:stampin2 .6s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(var(--n,0) * 45ms + var(--i,0) * 160ms + 250ms)}
 @keyframes stampin2{from{transform:scale(2) rotate(-12deg);opacity:0}to{transform:rotate(-3deg)}}
-@media (prefers-reduced-motion:reduce){.pond .tile.fresh,.stamp span,.stamp small,.bubble,.mbox.fx .myaku li,.mbox.fx .ura .tile,.mbox.fx .limit{animation:none}.hand .tile,.drawer{transition:none}}
+@media (prefers-reduced-motion:reduce){.mbox.fx .mhand .tile,.mbox.fx .mfinal,.mbox.fx .mhero .seal,.stick.drop,.meld.mnew,.pond .tile.fresh,.stamp span,.stamp small,.bubble,.mbox.fx .myaku li,.mbox.fx .ura .tile,.mbox.fx .limit{animation:none}.hand .tile,.drawer{transition:none}}
 @media (max-width:520px){
   .app{--gut:10px;gap:12px;padding-top:10px}
   .btn{padding:10px 14px;font-size:14px}.btn.win{font-size:16px}
@@ -547,5 +583,7 @@ body.noscroll{overflow:hidden}
   .tools{gap:6px}.tool{width:36px;padding:0;justify-content:center}.tool span{display:none}
   .card{padding:12px 14px}
 }
+/* Mid widths: the header buttons drop their labels (they keep their tooltips) so the header stays on one line. */
+@media (min-width:521px) and (max-width:1100px){.top{flex-wrap:nowrap}.brand{min-width:0}.tools{gap:6px}.tool{width:36px;padding:0;justify-content:center}.tool span{display:none}}
 /* The narrowest phones: the title takes the logo's room so it fits on two lines beside the five header buttons. */
 @media (max-width:420px){.logo{display:none}}

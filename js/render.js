@@ -186,16 +186,24 @@ function souSVG(n, red) {
   }
   return `<svg viewBox="0 0 30 40" aria-hidden="true">${s}</svg>`;
 }
+// A character from GLYPHS (js/glyphs.js) drawn in a size × size box at (x, y) of the 30 × 40 face; cls picks its ink.
+function glyph(ch, x, y, size, cls) {
+  return `<path class="${cls}" transform="translate(${x} ${y}) scale(${size / GLYPH_EM})" d="${GLYPHS[ch]}"/>`;
+}
+// Every face is an SVG in the same 30 × 40 box, so tiles look the same on every device and need no web font.
 const faceCache = {};
 function face(t, red) {
   const k = t + (red ? 'r' : '');
   if (faceCache[k]) return faceCache[k];
   let h;
-  if (t < 9) h = `<div class="mf${red ? ' red' : ''}"><span class="n">${NUMK[t]}</span><span class="s">萬</span></div>`;
+  if (t < 9)
+    h = `<svg viewBox="0 0 30 40" aria-hidden="true">${glyph(NUMK[t], 6, 0.5, 18, red ? 'gr' : 'gi')}${glyph('萬', 4.5, 19, 21, 'gr')}</svg>`;
   else if (t < 18) h = pinSVG(t - 8, red);
   else if (t < 27) h = souSVG(t - 17, red);
-  else if (t === 31) h = `<div class="haku"></div>`;
-  else h = `<div class="hf h${t}">${'東南西北白發中'[t - 27]}</div>`;
+  else if (t === 31)
+    h = `<svg viewBox="0 0 30 40" aria-hidden="true"><rect class="gb" x="6.5" y="8" width="17" height="24" rx="2" fill="none" stroke-width="2"/></svg>`;
+  else
+    h = `<svg viewBox="0 0 30 40" aria-hidden="true">${glyph('東南西北白發中'[t - 27], 2, 7, 26, t === 32 ? 'gg' : t === 33 ? 'gr' : 'gi')}</svg>`;
   return (faceCache[k] = h);
 }
 function tileHTML(id, cls = '', attr = '') {
@@ -239,15 +247,17 @@ function showModal(html, btn) {
   });
 }
 function deltasHTML(deltas, before) {
-  return `<div class="deltas">${[0, 1, 2, 3].map(i => `<div><small>${charName(i)} · ${W4(seatOf(i))}</small><span data-count="${before[i] + deltas[i]}" data-from="${before[i]}">${before[i] + deltas[i]}</span><small class="${deltas[i] > 0 ? 'up' : deltas[i] < 0 ? 'dn' : ''}">${deltas[i] > 0 ? '+' : ''}${deltas[i] || '±0'}</small></div>`).join('')}</div>`;
+  return `<div class="deltas">${[0, 1, 2, 3].map(i => `<div class="${deltas[i] > 0 ? 'gain' : deltas[i] < 0 ? 'loss' : ''}"><small>${charName(i)} · ${W4(seatOf(i))}</small><span data-count="${before[i] + deltas[i]}" data-from="${before[i]}">${before[i] + deltas[i]}</span><small class="${deltas[i] > 0 ? 'up' : deltas[i] < 0 ? 'dn' : ''}">${deltas[i] > 0 ? '+' : ''}${deltas[i] || '±0'}</small></div>`).join('')}</div>`;
 }
 function winModal(w, l, winId, res, deltas, before) {
   const pl = G.players[w];
   const hand = (l === null ? pl.hand.filter(x => x !== winId) : pl.hand.slice()).sort((a, b) => a - b);
+  // With effects on, the tiles turn over one by one (--i), then the winning tile rises.
+  let k = 0;
   const handH =
-    hand.map(id => tileHTML(id)).join('') +
+    hand.map(id => tileHTML(id, '', `style="--i:${k++}"`)).join('') +
     '<span class="gap"></span>' +
-    tileHTML(winId, 'win') +
+    tileHTML(winId, 'win', `style="--i:${k++}"`) +
     (pl.melds.length ? '<span class="gap"></span>' : '') +
     pl.melds.map(m => meldHTML(m)).join('');
   // With effects on, the rows come in one by one (--i), the ura dora turns over, and a limit hand gets a banner.
@@ -284,14 +294,16 @@ function winModal(w, l, winId, res, deltas, before) {
         .map(x => tileT(x, 'xs'))
         .join('')}</div>`
     : '';
-  return `<div><span class="mkind">${l === null ? t('tsumo') : t('ron')}</span><h2>${w === 0 ? t('youWon') : t('playerWon', { p: P(w) })}${l === 0 ? t('youDealt') : ''}</h2></div>
-  <div class="mhand">${handH}</div>
+  // A banner (tsumo / ron seal, who won, the points they gain counting up), the hand, the yaku sheet, then the
+  // total with its limit banner, and everyone's score change.
+  return `<div class="mhero${w === 0 ? ' mine' : ''}"><span class="mkind seal">${l === null ? t('tsumo') : t('ron')}</span><div class="mwho">${charOn(w) ? `<span class="ava">${AVATARS[w]}</span>` : ''}<h2>${w === 0 ? t('youWon') : t('playerWon', { p: P(w) })}${l === 0 ? t('youDealt') : ''}</h2></div><b class="mgain" data-count="${deltas[w]}" data-from="0" data-prefix="+">+${deltas[w]}</b></div>
+  <div class="mhand" style="--n:${k}">${handH}</div>
   <div class="mdora"><div>${t('doraInd')} ${doraInds()
     .map(x => tileT(x, 'xs'))
     .join('')}</div>${ura}</div>
-  <ul class="myaku">${rows}</ul>
-  ${limitLevel(res) ? `<div class="limit l${limitLevel(res)}" style="--i:${i}">${LBL(res.label)}</div>` : ''}
-  <div class="mtotal">${total}<small>${pay}${extra}</small></div>
+  <div class="msheet" style="--n:${k}"><ul class="myaku">${rows}</ul>
+  <div class="mfinal" style="--i:${i}">${limitLevel(res) ? `<div class="limit l${limitLevel(res)}">${LBL(res.label)}</div>` : ''}
+  <div class="mtotal">${total}<small>${pay}${extra}</small></div></div></div>
   ${deltasHTML(deltas, before)}`;
 }
 // 1 mangan … 4 sanbaiman, 5 yakuman: the banner grows with the hand.
@@ -310,7 +322,7 @@ function countUp(root) {
       t0 = performance.now();
     const step = now => {
       const k = Math.min(1, (now - t0) / 700);
-      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+      el.textContent = (el.dataset.prefix || '') + Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
       if (k < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -514,27 +526,128 @@ function renderOpps() {
     $('#opp' + p).innerHTML = `<div class="plate${G.turn === p ? ' on' : ''}${pl.riichi ? ' riichi' : ''}">
     ${bub ? `<div class="bubble" role="status">${bub}</div>` : ''}
     <div class="ph">${ch ? `<span class="ava">${AVATARS[p]}</span>` : ''}<span class="wb${sw === 0 ? ' dealer' : ''}">${WIND_CH[sw]}</span><span class="nm">${ch ? `${charName(p)} <small>${P(p)}</small>` : P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><b class="sc">${pl.score}</b>${pl.riichi ? `<span class="rtag">${t('riichiTag')}</span>` : ''}</div>
-    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div><div class="pm">${pl.melds.map(m => meldHTML(m, 'mini')).join('')}</div></div></div>`;
+    <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div><div class="pm">${meldsHTML(p, 'mini')}</div></div></div>`;
   }
+}
+// ===================== Motion =====================
+// Cosmetic motion (setting fx): a discard flies from the hand or seat that played it into its pond, a riichi stick
+// drops onto the table, a new meld slides in. The table is re-rendered often, so each movement is keyed and
+// remembered with its start time: a re-render picks the movement up where it was instead of restarting or cutting it.
+const MOTION = new Map(); // key → { t0, x, y, s } (x, y, s: a discard's starting offset and scale)
+const DISCARD_MS = 340,
+  DROP_MS = 520;
+const motionOn = () =>
+  !!S.fx &&
+  typeof document.createElement === 'function' &&
+  !document.documentElement.classList.contains('reduce-motion') &&
+  typeof Element === 'function' &&
+  'animate' in Element.prototype;
+const motionKey = k => `${G.seed}:${G.dealt}:${k}`;
+// Milliseconds since the movement for key started (starting it now if new), or -1 once it is over.
+function motionAge(key, ms) {
+  if (MOTION.size > 64) MOTION.clear();
+  const m = MOTION.get(key);
+  if (!m) {
+    MOTION.set(key, { t0: performance.now(), x: 0, y: 0, s: 1 });
+    return 0;
+  }
+  const age = performance.now() - m.t0;
+  return age < ms ? age : -1;
+}
+// CSS-animated pieces (riichi stick, new meld): a class, with a negative delay when resumed after a re-render.
+function motionAttr(cls, k, ms) {
+  if (!motionOn()) return '';
+  const age = motionAge(motionKey(k), ms);
+  return age < 0 ? '' : ` ${cls}" style="animation-delay:-${Math.round(age)}ms`;
+}
+// Before the table is redrawn: where each new discard comes from (your tile still in the hand, or the seat).
+function discardSources() {
+  const out = [];
+  if (!motionOn()) return out;
+  for (let p = 0; p < 4; p++) {
+    const rv = G.players[p].river,
+      r = rv[rv.length - 1];
+    if (!r || !r.fresh) continue;
+    const key = motionKey(`d${p}:${rv.length}`);
+    if (MOTION.has(key)) {
+      out[p] = { key };
+      continue;
+    }
+    const src = p === 0 ? $(`#hand [data-id="${r.id}"]`) : $(`#opp${p} .backs`);
+    if (src) out[p] = { key, rect: src.getBoundingClientRect() };
+  }
+  return out;
+}
+// After: start (or resume) each discard's flight. The pond is rotated toward its player, so the screen offset is
+// turned into the pond's own frame; the individual translate / scale properties leave the tile's transform alone.
+function flyDiscards(src) {
+  src.forEach((d, p) => {
+    if (!d) return;
+    const tile = /** @type {HTMLElement|null} */ ($(`#square .pond:nth-child(${p + 1}) .tile:last-child`));
+    if (!tile) return;
+    let m = MOTION.get(d.key);
+    if (!m && d.rect) {
+      const to = tile.getBoundingClientRect(),
+        dx = d.rect.left + d.rect.width / 2 - (to.left + to.width / 2),
+        dy = d.rect.top + d.rect.height / 2 - (to.top + to.height / 2),
+        a = (ROT[p] * Math.PI) / 180;
+      m = {
+        t0: performance.now(),
+        x: dx * Math.cos(a) + dy * Math.sin(a),
+        y: -dx * Math.sin(a) + dy * Math.cos(a),
+        s: p === 0 ? Math.max(1, d.rect.width / Math.max(1, to.width)) : 0.8
+      };
+      MOTION.set(d.key, m);
+    }
+    if (!m) return;
+    const age = performance.now() - m.t0;
+    if (age >= DISCARD_MS) return;
+    const anim = tile.animate(
+      [
+        { translate: `${m.x}px ${m.y}px`, scale: String(m.s), opacity: p === 0 ? 1 : 0.2 },
+        { translate: '0 0', scale: '1', opacity: 1 }
+      ],
+      { duration: DISCARD_MS, easing: 'cubic-bezier(.2,.8,.25,1)', fill: 'backwards' }
+    );
+    anim.currentTime = age;
+  });
 }
 function renderSquare() {
   let h = '';
+  const src = discardSources(),
+    moving = motionOn();
   for (let p = 0; p < 4; p++) {
     const pl = G.players[p];
-    h += `<div class="pond" style="--r:${ROT[p]}deg">${pl.river.map((r, i) => tileHTML(r.id, [r.riichi ? 'yoko' : '', r.called ? 'gone' : '', r.fresh ? 'fresh' : '', G.last && G.last.p === p && i === pl.river.length - 1 && !r.called && G.turn !== -1 ? 'last' : ''].join(' '))).join('')}</div>`;
+    // Without motion the newest discard gets the simple CSS drop-in (class fresh) on its first draw only.
+    const fresh = (r, i) =>
+      r.fresh && i === pl.river.length - 1 && !moving && motionAge(motionKey(`f${p}:${i}`), 1e9) === 0;
+    h += `<div class="pond" style="--r:${ROT[p]}deg">${pl.river.map((r, i) => tileHTML(r.id, [r.riichi ? 'yoko' : '', r.called ? 'gone' : '', fresh(r, i) ? 'fresh' : '', G.last && G.last.p === p && i === pl.river.length - 1 && !r.called && G.turn !== -1 ? 'last' : ''].join(' '))).join('')}</div>`;
   }
   // Centre: each seat's wind on its edge (highlighted on that player's turn, riichi stick when declared);
   // round, honba, riichi deposits, dora indicators and the wall count in the middle.
   h += '<div class="center">';
   for (let p = 0; p < 4; p++) {
     const pl = G.players[p];
-    h += `<div class="seat${G.turn === p ? ' on' : ''}${seatOf(p) === 0 ? ' dealer' : ''}" style="--r:${ROT[p]}deg"><b>${WIND_CH[seatOf(p)]}</b>${pl.riichi ? '<i class="stick"></i>' : ''}</div>`;
+    h += `<div class="seat${G.turn === p ? ' on' : ''}${seatOf(p) === 0 ? ' dealer' : ''}" style="--r:${ROT[p]}deg"><b>${WIND_CH[seatOf(p)]}</b>${pl.riichi ? `<i class="stick${motionAttr('drop', 'r' + p, DROP_MS)}"></i>` : ''}</div>`;
   }
   const inds = doraInds();
   h += `<div class="mid"><b>${roundName()}</b><span>${t('honba', { n: G.honba })} · <i class="stick" title="${t('stat.kyotaku')}"></i>×${G.kyotaku}</span>
     <div class="cdora" title="${t('stat.dora')}">${[0, 1, 2, 3, 4].map(i => (i < inds.length ? tileT(inds[i]) : backHTML())).join('')}</div>
     <span>${t('wallLeft', { n: G.wall.length })}</span></div></div>`;
   $('#square').innerHTML = h;
+  flyDiscards(src);
+}
+// Melds, the newest one sliding in when it was just called.
+function meldsHTML(p, cls = '') {
+  const ms = G.players[p].melds;
+  return ms
+    .map((m, i) => {
+      const h = meldHTML(m, cls);
+      return i === ms.length - 1
+        ? h.replace('class="meld"', `class="meld${motionAttr('mnew', `m${p}:${ms.length}`, DROP_MS)}"`)
+        : h;
+    })
+    .join('');
 }
 function renderMe() {
   const pl = G.players[0],
@@ -580,7 +693,7 @@ function renderMe() {
     const el = $(`#hand [data-id="${fid}"]`) || $('#hand .tile[data-id]');
     if (el) el.focus();
   }
-  $('#mymelds').innerHTML = pl.melds.map(m => meldHTML(m)).join('');
+  $('#mymelds').innerHTML = meldsHTML(0);
 }
 function renderActions() {
   const el = $('#actions');
