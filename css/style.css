@@ -122,6 +122,10 @@ img{max-width:100%}
   color-scheme:dark;
 }
 html,body{background:var(--ink);color:var(--text)}
+/* Nothing scrolls sideways: the closed drawer waits off-screen to the right, which mobile Safari would otherwise let
+   you pan to. clip (unlike hidden) does not make a scroll container, so the docked drawer stays sticky. */
+html,body{overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
 /* Default tile width. Containers (hand, ponds, dora, melds) override --w and their tiles inherit it. */
 :root{--w:30px}
 body{font-family:var(--f-ui);font-size:14px;line-height:1.55;-webkit-tap-highlight-color:transparent}
@@ -134,9 +138,6 @@ button{font:inherit;color:inherit}
    or, on wide screens, docked beside the table so the full coach stays in view. */
 .app{--gut:16px;max-width:1520px;margin:0 auto;padding-block:12px;padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:max(var(--gut),env(safe-area-inset-right,0px));display:grid;gap:12px 20px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "game"}
 .top{grid-area:top}.game{grid-area:game}
-/* The app fills the viewport and your hand settles at the bottom of it, near the thumb on phones. */
-.app{min-height:100svh;grid-template-rows:auto 1fr}
-.game{display:grid}.stage{grid-template-rows:auto 1fr}.me{align-content:end}
 .drawer{position:fixed;top:0;right:0;bottom:0;z-index:15;width:min(400px,92vw);overflow-y:auto;overscroll-behavior:contain;background:var(--ink);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.18);display:grid;gap:14px;align-content:start;
   padding:max(14px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) 14px;transform:translateX(105%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
 .drawer.open{transform:none;visibility:visible;transition:transform .25s ease}
