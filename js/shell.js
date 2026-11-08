@@ -1,6 +1,13 @@
 // Browser shell: theme switching and the PWA service worker. Kept out of game.js so the game logic
 // still loads in Node (tests, tools/sim.js) without window, matchMedia or navigator.
-const THEME_COLOR = { light: '#f4f4f1', dark: '#111214', classic: '#0d1613', parlor: '#120f1c', tatami: '#efe6d2' };
+const THEME_COLOR = {
+  light: '#f4f4f1',
+  dark: '#111214',
+  classic: '#0d1613',
+  parlor: '#120f1c',
+  tatami: '#efe6d2',
+  lacquer: '#0c0a09'
+};
 const THEMES = Object.keys(THEME_COLOR);
 const darkMQ = matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {

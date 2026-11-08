@@ -9,9 +9,9 @@
 <script>
 // Pick the theme before the stylesheet paints: saved choice, else the system light/dark preference.
 (function(){var t='auto';try{t=JSON.parse(localStorage.getItem('rmj-settings')||'{}').theme||'auto';}catch(e){}
-if(['light','dark','classic','parlor','tatami'].indexOf(t)<0)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+if(['light','dark','classic','parlor','tatami','lacquer'].indexOf(t)<0)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);
-document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'#f4f4f1',dark:'#111214',classic:'#0d1613',parlor:'#120f1c',tatami:'#efe6d2'}[t]);})();
+document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'#f4f4f1',dark:'#111214',classic:'#0d1613',parlor:'#120f1c',tatami:'#efe6d2',lacquer:'#0c0a09'}[t]);})();
 </script>
 <link rel="canonical" href="https://riichi.hoshinoshion.com/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -45,7 +45,7 @@ document.querySelector('meta[name=theme-color]').setAttribute('content',{light:'
       <label class="tool sel" data-i18n-title="set.lang"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="langCur"></span>
         <select id="optLang" data-i18n-aria="set.lang"><option value="auto" data-i18n="opt.langAuto">自动（跟随浏览器）</option><option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label>
       <label class="tool sel" data-i18n-title="set.theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg><span id="themeCur"></span>
-        <select id="optTheme" data-i18n-aria="set.theme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option><option value="parlor" data-i18n="opt.parlor">深夜雀庄</option><option value="tatami" data-i18n="opt.tatami">和室</option></select></label>
+        <select id="optTheme" data-i18n-aria="set.theme"><option value="auto" data-i18n="opt.auto">跟随系统</option><option value="light" data-i18n="opt.light">浅色</option><option value="dark" data-i18n="opt.dark">深色</option><option value="classic" data-i18n="opt.classic">经典牌桌</option><option value="parlor" data-i18n="opt.parlor">深夜雀庄</option><option value="tatami" data-i18n="opt.tatami">和室</option><option value="lacquer" data-i18n="opt.lacquer">漆金</option></select></label>
     </div>
   </header>
 

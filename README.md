@@ -43,7 +43,7 @@ The interface is available in Japanese, English, Simplified Chinese and Traditio
 - **Languages**: Japanese, English, Simplified Chinese and Traditional Chinese, picked from the browser language and switchable in Settings
 - **Characters**: the three opponents can be characters (on by default): Dango the panda calls a lot, Mikan the cat folds early, Tsukiko the fox chases one-suit hands. Each has an avatar and a few lines
 - **Look and feel**: the table fills the screen and everything else sits in a menu drawer (docked beside the table on wide screens); brush-style stamps for riichi, calls and wins; yaku revealed one by one with limit banners; optional sound
-- **Themes**: modern light and dark (following the system setting by default), the classic felt table, and two venues, a late-night parlour and a tatami room
+- **Themes**: modern light and dark (following the system setting by default), the classic felt table, and three venues: a late-night parlour, a tatami room and black lacquer with gold inlay
 - **Keyboard**: arrows to choose a tile, Enter to discard, R riichi, T tsumo / ron, P / C / K calls, Esc to skip, ? for the full list. Screen readers hear each table event, and hand tiles are labelled
 - **Installable app (PWA)**: add it to your phone's home screen and it opens full screen like an app, and keeps working offline. On iPhone, open the site in Safari, tap Share → Add to Home Screen; on Android Chrome, use the menu → Install app (or Add to Home screen)
 - **Picks up where you left off**: the game in progress is saved at every turn, so closing the tab or the app and opening it again continues the same game
