@@ -15,9 +15,9 @@ img{max-width:100%}
   --ivory:#fffefb; --ivory-2:#e6e3da;
   --back:#14897f; --back-2:#0f6b63;
   --tile-edge:#d8d5cc; --tile-shadow:rgba(0,0,0,.12);
-  --table-bg:#e6e5df; --table-shadow:inset 0 0 0 1px var(--line);
-  --mat-bg:#efeee9; --mat-shadow:inset 0 1px 3px rgba(0,0,0,.06),inset 0 0 0 1px rgba(0,0,0,.035);
-  --felt-core:#f8f8f5; --center-line:var(--line);
+  --table-bg:linear-gradient(180deg,#e6ebe8,#dde3e0); --table-shadow:inset 0 0 0 1px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04),0 18px 40px -28px rgba(15,60,55,.35);
+  --mat-bg:radial-gradient(circle at 50% 42%,#f7f9f8 0%,#ebf0ed 85%); --mat-shadow:inset 0 1px 3px rgba(0,0,0,.06),inset 0 0 0 1px rgba(0,0,0,.04);
+  --felt-core:#fbfbf9; --center-line:var(--line);
   --stick:#3a3a3e; --dealer:#d4380d;
   --seat-bg:var(--panel); --seat-line:var(--line); --board-line:rgba(0,0,0,.07);
   --t-red:#c3302a; --t-blue:#22479a; --t-green:#16704a; --t-ink:#1c1c20;
@@ -25,6 +25,10 @@ img{max-width:100%}
   --f-tile:"Shippori Mincho B1","Noto Serif SC","Songti SC",serif;
   --f-head:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   --f-ui:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  /* Polish tokens, derived from the ones above so every theme gets them: the tile's coloured back seen as its
+     thickness, the gold rim drawn inside the play mat, and the lift of cards and seats. */
+  --tile-depth:var(--back); --mat-rim:color-mix(in srgb,var(--gold) 26%,transparent);
+  --elev:0 1px 2px rgba(0,0,0,.05),0 10px 28px -18px rgba(0,0,0,.35);
   color-scheme:light;
 }
 :root[data-theme="dark"]{
@@ -97,6 +101,26 @@ img{max-width:100%}
   --f-head:"Noto Serif SC","Songti SC","STSong",serif;
   color-scheme:light;
 }
+/* Lacquer & gold: a black lacquer table with gold inlay around deep jade felt, vermilion tile backs. */
+:root[data-theme="lacquer"]{
+  --ink:#0c0a09; --ink-2:#14110f; --panel:#171311; --panel-2:#221c17; --line:#3a2f25;
+  --text:#f3ebdd; --muted:#b3a58e;
+  --gold:#d9b25f; --gold-ink:#1d1405;
+  --ivory:#fcf7ec; --ivory-2:#e9dec6;
+  --back:#8a2a1f; --back-2:#561510;
+  --tile-edge:rgba(0,0,0,.55); --tile-shadow:rgba(0,0,0,.55);
+  --table-bg:radial-gradient(ellipse at 50% 0%,#2b2019,#110d0b 72%);
+  --table-shadow:inset 0 0 0 1px rgba(217,178,95,.45),inset 0 0 0 6px #110d0b,inset 0 0 0 7px rgba(217,178,95,.2),0 24px 50px -24px rgba(0,0,0,.9);
+  --mat-bg:radial-gradient(circle at 50% 44%,#21423a 0%,#132823 85%);
+  --mat-shadow:inset 0 0 0 1px rgba(217,178,95,.45),inset 0 0 50px rgba(0,0,0,.5);
+  --felt-core:linear-gradient(160deg,#1a1512,#0e0b09); --center-line:rgba(217,178,95,.45);
+  --stick:#f3ebdd; --dealer:#f0915f;
+  --seat-bg:linear-gradient(180deg,rgba(40,31,24,.9),rgba(16,12,10,.9)); --seat-line:rgba(217,178,95,.3); --board-line:rgba(255,255,255,.06);
+  --warn:#f0915f; --ok:#8fd19e;
+  --mat-rim:rgba(217,178,95,.38); --elev:0 1px 0 rgba(217,178,95,.08) inset,0 14px 30px -18px rgba(0,0,0,.9);
+  --f-head:"Noto Serif SC","Songti SC","STSong",serif;
+  color-scheme:dark;
+}
 html,body{background:var(--ink);color:var(--text)}
 /* Default tile width. Containers (hand, ponds, dora, melds) override --w and their tiles inherit it. */
 :root{--w:30px}
@@ -110,6 +134,9 @@ button{font:inherit;color:inherit}
    or, on wide screens, docked beside the table so the full coach stays in view. */
 .app{--gut:16px;max-width:1520px;margin:0 auto;padding-block:12px;padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:max(var(--gut),env(safe-area-inset-right,0px));display:grid;gap:12px 20px;grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "game"}
 .top{grid-area:top}.game{grid-area:game}
+/* The app fills the viewport and your hand settles at the bottom of it, near the thumb on phones. */
+.app{min-height:100svh;grid-template-rows:auto 1fr}
+.game{display:grid}.stage{grid-template-rows:auto 1fr}.me{align-content:end}
 .drawer{position:fixed;top:0;right:0;bottom:0;z-index:15;width:min(400px,92vw);overflow-y:auto;overscroll-behavior:contain;background:var(--ink);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.18);display:grid;gap:14px;align-content:start;
   padding:max(14px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) 14px;transform:translateX(105%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
 .drawer.open{transform:none;visibility:visible;transition:transform .25s ease}
@@ -192,8 +219,8 @@ button{font:inherit;color:inherit}
 /* opponent plates */
 /* A seat: a name pill (wind, name, level, score, riichi), then tile backs and melds, straight on the table. */
 .plate{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;max-width:100%}
-.ph{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:4px 12px 4px 4px;white-space:nowrap;transition:border-color .2s,box-shadow .2s}
-.plate.on .ph{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.ph{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:4px 12px 4px 4px;white-space:nowrap;box-shadow:var(--elev);transition:border-color .2s,box-shadow .2s}
+.plate.on .ph{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px -4px color-mix(in srgb,var(--gold) 70%,transparent)}
 .wb{width:22px;height:22px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);font:800 14px/20px var(--f-tile);text-align:center;flex:none}
 .wb.dealer{background:var(--t-red);border-color:var(--t-red);color:#fff}
 .nm{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -201,8 +228,7 @@ button{font:inherit;color:inherit}
 .pb{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%}
 /* Concealed tiles as small tile backs. */
 .backs{display:flex;gap:2px;min-width:0;overflow:hidden}
-.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:var(--back);box-shadow:inset 0 0 0 1.5px var(--back-2)}
-:root[data-theme="classic"] .backs i{background:linear-gradient(var(--back),var(--back-2));box-shadow:0 1.5px 0 var(--ivory-2)}
+.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:linear-gradient(170deg,var(--back) 40%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1.5px 0 var(--ivory-2),0 2px 3px var(--tile-shadow)}
 .lv{font-size:10.5px;font-weight:700;line-height:16px;padding:0 5px;border-radius:4px;flex:none;border:1px solid var(--line);color:var(--muted)}
 .lv-easy{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
 .lv-hard{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
@@ -215,8 +241,10 @@ button{font:inherit;color:inherit}
 /* table */
 /* The play mat: where the discards go. */
 .square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--mat-bg);box-shadow:var(--mat-shadow);border-radius:calc(var(--pw)*.9)}
+/* A thin inlaid rim just inside the mat's edge. */
+.square::before{content:"";position:absolute;inset:calc(var(--pw)*.3 + 2px);border:1px solid var(--mat-rim);border-radius:calc(var(--pw)*.7);pointer-events:none}
 .pond{--w:var(--pw);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 8px);display:flex;flex-wrap:wrap;gap:3px 1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
-.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:0 1px 3px var(--tile-shadow)}
+.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px var(--tile-shadow),0 calc(var(--pw)*.4) calc(var(--pw)*1.2) calc(var(--pw)*-.4) var(--tile-shadow)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
 .seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
 .seat.dealer b{color:var(--dealer)}
@@ -232,13 +260,13 @@ button{font:inherit;color:inherit}
 
 /* tiles */
 /* Modern themes: flat tiles with a thin outline and a soft shadow. Classic overrides below with the 3D look. */
-.tile{width:var(--w);height:calc(var(--w)*1.36);position:relative;flex:none;border-radius:calc(var(--w)*.14);background:var(--ivory);box-shadow:0 0 0 1px var(--tile-edge),0 1px 3px var(--tile-shadow);margin-bottom:calc(var(--w)*.07)}
+/* Every theme: an ivory face on a coloured back, the back showing below the face as the tile's thickness. */
+.tile{width:var(--w);height:calc(var(--w)*1.36);position:relative;flex:none;border-radius:calc(var(--w)*.14);background:linear-gradient(170deg,var(--ivory) 58%,var(--ivory-2) 140%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 1px var(--tile-edge),0 calc(var(--w)*.045) 0 .5px var(--ivory-2),0 calc(var(--w)*.1) 0 .5px var(--tile-depth),0 calc(var(--w)*.1 + 2px) calc(var(--w)*.12 + 2px) var(--tile-shadow);margin-bottom:calc(var(--w)*.1)}
 .tile svg .h{fill:var(--ivory)} .tile svg .hs{stroke:var(--ivory)}
 .tile .face{position:absolute;inset:7% 9% 9%;display:flex;align-items:center;justify-content:center}
 .tile svg{width:100%;height:100%;display:block}
-.tile.back{background:var(--back);box-shadow:inset 0 0 0 calc(var(--w)*.09) var(--back-2),inset 0 0 0 calc(var(--w)*.09 + 1px) rgba(255,255,255,.18),0 1px 3px var(--tile-shadow)}
-:root[data-theme="classic"] .tile{border-radius:calc(var(--w)*.13);background:linear-gradient(170deg,var(--ivory) 55%,var(--ivory-2));box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--w)*.07) 0 var(--tile-edge),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow)}
-:root[data-theme="classic"] .tile.back{background:linear-gradient(170deg,var(--back),var(--back-2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),0 calc(var(--w)*.07) 0 var(--ivory-2),0 calc(var(--w)*.07 + 2px) 4px var(--tile-shadow)}
+.tile.back{background:linear-gradient(170deg,var(--back) 35%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),0 calc(var(--w)*.1) 0 .5px var(--ivory-2),0 calc(var(--w)*.1 + 2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
 .mf{display:flex;flex-direction:column;align-items:center;line-height:.95;font-family:var(--f-tile);font-weight:800}
 .mf .n{font-size:calc(var(--w)*.46);color:var(--t-ink)}
 .mf .s{font-size:calc(var(--w)*.48);color:var(--t-red)}
@@ -261,8 +289,8 @@ button{font:inherit;color:inherit}
 
 /* my area */
 .me{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
-.mebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:center;font-size:13px;color:var(--muted);justify-self:center;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:5px 14px;transition:border-color .2s,box-shadow .2s}
-.mebar.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.mebar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:center;font-size:13px;color:var(--muted);justify-self:center;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:5px 14px;box-shadow:var(--elev);transition:border-color .2s,box-shadow .2s}
+.mebar.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px -4px color-mix(in srgb,var(--gold) 70%,transparent)}
 
 .mebar b{color:var(--text);font-variant-numeric:tabular-nums}
 .actions{min-height:48px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;text-align:center}
@@ -271,16 +299,18 @@ button{font:inherit;color:inherit}
 .amsg.warn{color:var(--warn);font-weight:600}
 .btn{font:700 15px/1 var(--f-ui);padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:42px}
 .btn:hover{border-color:var(--muted)}
-.btn.gold{background:var(--gold);color:var(--gold-ink);border-color:transparent}
-.btn.win{background:var(--t-red);color:#fff;border-color:transparent;font-size:17px;padding:11px 24px}
+.btn.gold{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 82%,#fff),var(--gold) 70%);color:var(--gold-ink);border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 16px -8px var(--gold)}
+.btn.win{background:linear-gradient(180deg,color-mix(in srgb,var(--t-red) 80%,#fff),var(--t-red) 70%);color:#fff;border-color:transparent;font-size:17px;padding:11px 24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 8px 20px -8px var(--t-red)}
+.btn{transition:transform .1s ease,border-color .2s}.btn:active{transform:translateY(1px)}
 .btn.ghost{background:transparent}
 .btn .tile{--w:16px}
 .handrow{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:12px 16px}
-.hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:14px}
+.hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:14px;position:relative}
+/* The rack the hand stands on. */
+.hand::before{content:"";position:absolute;left:calc(var(--w)*-.3);right:calc(var(--w)*-.3);bottom:calc(var(--w)*-.16);height:calc(var(--w)*.36);border-radius:calc(var(--w)*.18);background:linear-gradient(180deg,color-mix(in srgb,var(--text) 10%,transparent),color-mix(in srgb,var(--text) 4%,transparent));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 8%,transparent)}
 .hand .tile{cursor:pointer;transition:transform .12s ease}
 .hand .tile:hover{transform:translateY(-6%)}
-.hand .tile.sel{transform:translateY(-30%);box-shadow:0 0 0 2px var(--gold),0 6px 12px var(--tile-shadow)}
-:root[data-theme="classic"] .hand .tile.sel{box-shadow:0 0 0 2px var(--gold),0 calc(var(--w)*.07) 0 var(--tile-edge),0 6px 10px rgba(0,0,0,.45)}
+.hand .tile.sel{transform:translateY(-30%);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 2px var(--gold),0 calc(var(--w)*.1) 0 .5px var(--tile-depth),0 10px 18px -4px var(--tile-shadow),0 0 22px -6px var(--gold)}
 .hand .tile.drawn{margin-left:calc(var(--w)*.4)}
 .hand .tile.dim{filter:brightness(.45) saturate(.6);cursor:not-allowed}
 /* Recommended tile: a small triangle (a shape, not only a colour) under it. */
@@ -294,7 +324,7 @@ kbd{font:600 12px/1 var(--f-ui);padding:3px 6px;border-radius:6px;border:1px sol
 .mymelds .tile{--w:calc(var(--tw)*.82)}
 
 /* side column */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0;box-shadow:var(--elev)}
 .card h2{margin:0;font:900 16px/1.3 var(--f-head);letter-spacing:.03em}
 .chead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .tag{font-size:12px;color:var(--muted)}
@@ -357,7 +387,7 @@ kbd{font:600 12px/1 var(--f-ui);padding:3px 6px;border-radius:6px;border:1px sol
 
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(5,10,8,.72);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:50;overflow:auto}
-.mbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:640px;width:100%;display:grid;gap:14px;max-height:100%;overflow:auto}
+.mbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 80px -30px rgba(0,0,0,.6);padding:20px;max-width:640px;width:100%;display:grid;gap:14px;max-height:100%;overflow:auto}
 .mkind{display:inline-block;font:900 13px/1 var(--f-head);letter-spacing:.2em;color:var(--gold-ink);background:var(--gold);padding:5px 8px;border-radius:5px}
 .mkind.draw{background:var(--muted)}
 .mbox h2{margin:6px 0 0;font:900 24px/1.25 var(--f-head)}
@@ -489,7 +519,7 @@ body.noscroll{overflow:hidden}
 @keyframes fadeout{0%,80%{opacity:1}100%{opacity:0}}
 .plate{position:relative}
 .plate.riichi .ph{box-shadow:0 0 0 1px var(--t-red),0 0 14px -2px var(--t-red)}
-.ava{width:28px;height:28px;flex:none;border-radius:50%;background:var(--panel-2);display:grid;place-items:center;overflow:hidden}
+.ava{width:28px;height:28px;flex:none;border-radius:50%;background:var(--panel-2);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--gold) 45%,transparent);display:grid;place-items:center;overflow:hidden}
 .ava svg{width:26px;height:26px}
 .nm small{color:var(--muted);font-weight:400;font-size:11px}
 .bubble{position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);z-index:5;width:max-content;max-width:min(180px,40vw);background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:5px 10px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 18px rgba(0,0,0,.16);animation:pop .25s ease-out both}
@@ -512,8 +542,10 @@ body.noscroll{overflow:hidden}
   .app{--gut:10px;gap:12px;padding-top:10px}
   .btn{padding:10px 14px;font-size:14px}.btn.win{font-size:16px}
   .brand h1{font-size:19px}.brand p{display:none}.logo{width:34px;height:34px}
-  .top{gap:8px 10px;flex-wrap:nowrap}.brand{min-width:0}.brand h1{font-size:17px}
+  .top{gap:8px 10px;flex-wrap:nowrap}.brand{min-width:0}.brand h1{font-size:15.5px;line-height:1.15;letter-spacing:.02em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   /* Header tools collapse to icon buttons. */
   .tools{gap:6px}.tool{width:36px;padding:0;justify-content:center}.tool span{display:none}
   .card{padding:12px 14px}
 }
+/* The narrowest phones: the title takes the logo's room so it fits on two lines beside the five header buttons. */
+@media (max-width:420px){.logo{display:none}}

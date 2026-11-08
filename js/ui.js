@@ -110,7 +110,7 @@ $('#btnNew').addEventListener('click', () => {
 function updateTools() {
   $('#langCur').textContent = LANG_NAMES[LANG];
   $('#themeCur').textContent = t(
-    'opt.' + (['light', 'dark', 'classic', 'parlor', 'tatami'].includes(S.theme) ? S.theme : 'auto')
+    'opt.' + (['light', 'dark', 'classic', 'parlor', 'tatami', 'lacquer'].includes(S.theme) ? S.theme : 'auto')
   );
 }
 function renderYakuTable() {
