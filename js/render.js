@@ -234,7 +234,7 @@ function showModal(html, btn) {
   const g = GEN;
   return new Promise((res, rej) => {
     const m = $('#modal');
-    m.innerHTML = `<div class="mbox${S.fx ? ' fx' : ''}" role="dialog" aria-modal="true">${html}<div><button class="btn gold" id="mclose" type="button">${btn}</button></div></div>`;
+    m.innerHTML = `<div class="mbox${S.fx ? ' fx' : ''}" role="dialog" aria-modal="true">${html}<div class="mfoot"><button class="btn gold" id="mclose" type="button">${btn}</button></div></div>`;
     m.hidden = false;
     countUp(m);
     const b = $('#mclose');
@@ -412,7 +412,7 @@ function reviewHTML() {
       .map(n => `<li>${t('ai.' + n.why, { p: n.p, n: n.turn, t: n.t })}</li>`)
       .join('')}</ul>`;
   body += `<div class="rpbar"><button class="btn" type="button" data-replay="0">${t('rp.open')}</button></div><div class="replay" id="replayBox"></div>`;
-  return `<details class="review"${list.length || choices.length ? ' open' : ''}><summary>${t('rv.title')} · ${t('rv.agree', { a, n: disc.length, d })}</summary>${gloss(body)}</details>`;
+  return `<details class="review"><summary>${t('rv.title')} · ${t('rv.agree', { a, n: disc.length, d })}</summary>${gloss(body)}</details>`;
 }
 // Replay: the table at your i-th recorded decision, from its snapshot, with buttons to step through them.
 function replayHTML(i) {
