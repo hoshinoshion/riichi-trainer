@@ -927,6 +927,6 @@ function renderTip() {
     }
   }
   el.innerHTML = parts.length
-    ? gloss(parts.join(' · ')) + ` <button class="linkbtn" type="button" data-open-coach>${t('tip.more')}</button>`
+    ? `<span class="ctxt">${gloss(parts.join(' · '))}</span><button class="linkbtn" type="button" data-open-coach>${t('tip.more')}</button>`
     : '';
 }

@@ -124,6 +124,14 @@ img{max-width:100%}
 html,body{background:var(--ink);color:var(--text)}
 /* Nothing scrolls sideways: the closed drawer waits off-screen to the right, which mobile Safari would otherwise let
    you pan to. clip (unlike hidden) does not make a scroll container, so the docked drawer stays sticky. */
+/* Scrollbars: thin and in the theme's colours (Windows and Linux show them; macOS overlays its own). The panels
+   that scroll inside the page show theirs only while the pointer is over them, like macOS. */
+html{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent}
+.drawer,.log ol,.mbox,.practice,.tbl-wrap,.replay,.modal{scrollbar-width:thin}
+@media (hover:hover){
+  .drawer,.log ol,.mbox,.practice,.tbl-wrap,.replay{scrollbar-color:transparent transparent;transition:scrollbar-color .2s}
+  .drawer:hover,.log ol:hover,.mbox:hover,.practice:hover,.tbl-wrap:hover,.replay:hover{scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent}
+}
 html,body{overflow-x:hidden}
 @supports (overflow:clip){html,body{overflow-x:clip}}
 /* Default tile width. Containers (hand, ponds, dora, melds) override --w and their tiles inherit it. */
@@ -155,11 +163,15 @@ button{font:inherit;color:inherit}
   .log ol{max-height:220px}
 }
 /* The one-line coach by your hand, and the latest log line at the top of the table. */
-.ctip{min-height:22px;font-size:13px;line-height:1.6;color:var(--muted);text-align:center}
-.ctip .linkbtn{margin-left:6px}
+/* Your hand never moves with the hints: the coach line is always exactly one line (empty or not, a long tip ends in
+   an ellipsis with "More" still showing), and the action row is a fixed 48px with messages of at most two lines.
+   overflow-x: clip, unlike hidden, lets a glossary tooltip in the tip still drop below the line. */
+.ctip{height:22px;font-size:13px;line-height:22px;color:var(--muted);display:flex;justify-content:center;align-items:center;gap:6px;min-width:0}
+.ctxt{min-width:0;white-space:nowrap;overflow-x:hidden;text-overflow:ellipsis}
+@supports (overflow:clip){.ctxt{overflow-x:clip;overflow-y:visible}}
+.ctip .linkbtn{flex:none}
 .ctip b{color:var(--text)}
 .ctip .warn{color:var(--warn);font-weight:600}
-.ctip:empty{display:none}
 .ticker{margin:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;min-height:1.5em}
 
 /* header */
@@ -218,7 +230,12 @@ button{font:inherit;color:inherit}
   /* .table prefix: these must beat the base seat rules that come later in the file. */
   .table .plate{width:100%}
   .table .ph{flex-wrap:wrap;justify-content:center;border-radius:12px;padding:5px 6px;row-gap:3px;width:100%}
-  .table .sc{order:8}.table .ph .rtag{order:9}
+  .table .sc{order:8}
+  /* Keep the seats a fixed height so the table, and your hand below it, never move: the riichi tag is a badge on
+     the name pill's corner instead of a new row, and one row is always kept for melds. */
+  .table .ph{position:relative}
+  .table .ph .rtag{position:absolute;top:-7px;right:-4px;box-shadow:0 1px 3px var(--tile-shadow)}
+  .table .pm,.table .pm:empty{display:flex;min-height:21px;justify-content:center}
   .table .pb{flex-direction:column;gap:5px;width:100%}
   .table .backs{gap:1px;justify-content:center;max-width:100%}
   .table .backs i{width:8px;height:11px;border-radius:2px;flex:0 1 8px;min-width:3px;box-shadow:0 1px 0 var(--ivory-2)}
@@ -301,8 +318,15 @@ button{font:inherit;color:inherit}
 .mebar.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px -4px color-mix(in srgb,var(--gold) 70%,transparent)}
 
 .mebar b{color:var(--text);font-variant-numeric:tabular-nums}
-.actions{min-height:48px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;text-align:center}
-.amsg{color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:6px}
+.actions{height:64px;display:flex;flex-wrap:nowrap;gap:8px;align-items:center;justify-content:flex-start;text-align:center;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:8px 4px;margin-block:-8px}
+.actions::-webkit-scrollbar{display:none}
+/* Centred, but when many buttons overflow the row it scrolls from its start instead of cutting both ends. */
+.actions>:first-child{margin-left:auto}.actions>:last-child{margin-right:auto}
+.actions .btn{flex:none}
+.amsg{color:var(--muted);font-size:13.5px;line-height:1.4;min-width:6em;flex:0 1 auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* A message with a tile in it (who discarded what) is short: one line, the tile beside the text. */
+.amsg:has(.tile){display:flex;align-items:center;gap:6px;white-space:nowrap}
+.amsg>.tile{flex:none}
 .amsg b{color:var(--text)}
 .amsg.warn{color:var(--warn);font-weight:600}
 .btn{font:700 15px/1 var(--f-ui);padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:42px}
