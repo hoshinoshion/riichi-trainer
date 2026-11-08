@@ -20,6 +20,7 @@
     "js/review.js",
     "js/practice.js",
     "js/flow.js",
+    "js/glyphs.js",
     "js/render.js",
     "js/ui.js",
     "js/practice-ui.js",

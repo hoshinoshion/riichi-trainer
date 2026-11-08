@@ -119,6 +119,7 @@ js/rules.js         基于对局状态的规则：听牌、振听、能否鸣牌
 js/ai.js            三档难度的电脑对手
 js/review.js        局后复盘：对照助手判断你的出牌，分析放铳
 js/flow.js          对局与每一局的流程：发牌、轮转、鸣牌、和牌与流局
+js/glyphs.js        牌面文字的 SVG 路径（由 tools/glyphs.py 生成；字体 Shippori Mincho B1，OFL 授权）
 js/render.js        牌面、牌桌、手牌、操作按钮、学习提示和结算画面
 js/practice.js      练习题和每日一题：按种子出题、判分、记录进度
 js/ui.js            点击、键盘和设置控件，页面文字，挑战链接，启动

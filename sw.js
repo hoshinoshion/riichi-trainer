@@ -2,7 +2,7 @@
 // Same-origin files are network-first, so a new deploy shows up on the next load and the cache is only
 // the offline fallback. Google Fonts are cache-first (the page has local fallback fonts anyway).
 // When adding a public file the app needs offline, add it to SHELL; bump CACHE to drop old entries.
-const CACHE = 'riichi-v5';
+const CACHE = 'riichi-v6';
 const SHELL = [
   './',
   'css/style.css',
@@ -14,6 +14,7 @@ const SHELL = [
   'js/review.js',
   'js/practice.js',
   'js/flow.js',
+  'js/glyphs.js',
   'js/render.js',
   'js/ui.js',
   'js/practice-ui.js',

@@ -17,6 +17,7 @@ const CORE = [
   'review.js',
   'practice.js',
   'flow.js',
+  'glyphs.js',
   'render.js'
 ];
 const BROWSER = ['ui.js', 'practice-ui.js', 'shell.js'];
