@@ -210,17 +210,20 @@ button{font:inherit;color:inherit}
   .opp.left .backs,.opp.right .backs{flex-direction:column}
   /* Seat contents scale with the pond tiles so the whole table stays in proportion. */
   /* Concealed hands as standing tile backs about two-thirds the size of a discard, melds at three-quarters. */
-  .arena .backs{--bt:max(2px,calc(var(--pw)*.12))}
-  .opp.top .backs{--bt:max(3px,calc(var(--pw)*.2))}
-  .arena .backs i{width:calc(var(--pw)*.64);height:calc(var(--pw)*.86);border-radius:calc(var(--pw)*.12)}
-  /* The side seats' tiles stand across your view: from above you see each tile's top, the ivory body on the
-     player's side and the coloured back toward the table's centre, and below it the tile's side. */
-  .opp.left .backs i,.opp.right .backs i{position:relative;width:calc(var(--pw)*.86);height:calc(var(--pw)*.5);border-radius:calc(var(--pw)*.1);
-    --split:linear-gradient(90deg,var(--ivory) 0 56%,var(--back) 56%);background:var(--split);
-    box-shadow:0 0 0 .5px var(--tile-edge),0 calc(var(--bt) + 2px) 3px var(--tile-shadow)}
-  .opp.right .backs i{--split:linear-gradient(90deg,var(--back) 0 44%,var(--ivory) 44%)}
-  .opp.left .backs i::after,.opp.right .backs i::after{content:"";position:absolute;left:0;right:0;top:calc(100% - 1px);height:calc(var(--bt) + 1px);border-radius:0 0 calc(var(--pw)*.1) calc(var(--pw)*.1);background:var(--split);filter:brightness(.8)}
-  .opp.left .backs,.opp.right .backs{gap:calc(var(--bt) + 1px);padding:1px 2px calc(var(--bt) + 4px)}
+  /* Across: a row of standing tiles, backs toward you, tops showing above (see the standing-tile notes below). */
+  .arena .backs{--tw:calc(var(--pw)*.64);--th:calc(var(--pw)*.62);--tt:calc(var(--pw)*.3)}
+  /* Left and right: their tiles stand in a column running away from you, so all you see is the column of tile
+     tops (the ivory body on the player's side, the coloured back toward the centre, a seam between tiles) and,
+     on the tile nearest you, its side. The coloured part is wider than the top alone: from the middle of the table
+     you also see a sliver of each tile's back, turned toward you. */
+  .opp.left .backs,.opp.right .backs{flex-direction:column;gap:0;padding:2px 3px calc(var(--pw)*.46 + 4px);filter:drop-shadow(1px 2px 2px var(--tile-shadow))}
+  .opp.left .backs i,.opp.right .backs i{--split:linear-gradient(90deg,var(--ivory-2) 0,var(--ivory) 20% 40%,color-mix(in srgb,var(--back) 75%,#fff) 40% 48%,var(--back) 48%,var(--back-2));
+    position:relative;width:calc(var(--pw)*.72);height:calc(var(--pw)*.52);border-radius:0;background:var(--split);box-shadow:inset 0 -1px 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.4),0 0 0 .5px var(--tile-edge)}
+  .opp.right .backs i{--split:linear-gradient(90deg,var(--back-2),var(--back) 52%,color-mix(in srgb,var(--back) 75%,#fff) 52% 60%,var(--ivory) 60% 80%,var(--ivory-2))}
+  .opp.left .backs i::before,.opp.right .backs i::before{content:none}
+  .opp.left .backs i:first-child,.opp.right .backs i:first-child{border-radius:calc(var(--pw)*.1) calc(var(--pw)*.1) 0 0}
+  .opp.left .backs i:last-child,.opp.right .backs i:last-child{border-radius:0}
+  .opp.left .backs i:last-child::after,.opp.right .backs i:last-child::after{content:"";position:absolute;left:0;right:0;top:100%;height:calc(var(--pw)*.46);border-radius:0 0 calc(var(--pw)*.1) calc(var(--pw)*.1);background:var(--split);filter:brightness(.8);box-shadow:inset 0 1px 0 rgba(0,0,0,.25)}
   .arena .pm .tile{--w:calc(var(--pw)*.76)}
   /* The seat across sits on one line (name pill, then its tiles), so the rows above and below the mat stay short
      and the mat, and with it every discard, can be larger. The log ticker moves to the table's top-left corner. */
@@ -256,14 +259,14 @@ button{font:inherit;color:inherit}
   .table .pm,.table .pm:empty{display:flex;min-height:20px;justify-content:center}
   .table .pb{flex-direction:column;gap:1px;width:100%}
   .table .backs{gap:1px;justify-content:center;max-width:100%}
-  .table .backs{--bt:1.5px;padding:3px 1px 2px}
-  .table .backs i{width:8px;height:11px;border-radius:2px;flex:0 1 8px;min-width:3px}
+  .table .backs{--th:8px;--tt:4px;padding:5px 1px 2px}
+  .table .backs i{--tw:8px;width:auto;flex:0 1 8px;min-width:3px}
 }
 
 /* opponent plates */
 /* A seat: a name pill (wind, name, level, score, riichi), then tile backs and melds, straight on the table. */
 .plate{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;max-width:100%}
-.ph{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:4px 12px 4px 4px;white-space:nowrap;box-shadow:var(--elev);transition:border-color .2s,box-shadow .2s}
+.ph{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;background:var(--seat-bg);border:1px solid var(--seat-line);border-radius:999px;padding:4px 12px 4px 4px;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 0 rgba(0,0,0,.06),var(--elev);transition:border-color .2s,box-shadow .2s}
 .plate.on .ph{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 18px -4px color-mix(in srgb,var(--gold) 70%,transparent)}
 .wb{width:22px;height:22px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);font:800 14px/20px var(--f-tile);text-align:center;flex:none}
 .wb.dealer{background:var(--t-red);border-color:var(--t-red);color:#fff}
@@ -271,11 +274,13 @@ button{font:inherit;color:inherit}
 .sc{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
 .pb{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%}
 /* Concealed tiles as small tile backs. */
-.backs{--bt:2px;display:flex;gap:2px;min-width:0;overflow:hidden;padding:calc(var(--bt) + 1px) 1px calc(var(--bt) + 3px)}
-/* Standing tiles seen from your seat: the back faces you, and above it the tile's top shows its two layers, the
-   coloured back nearest you and the ivory body behind. A soft shadow falls on the table below. */
-.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:linear-gradient(175deg,color-mix(in srgb,var(--back) 88%,#fff) 0%,var(--back) 45%,var(--back-2));
-  box-shadow:inset 0 -1px 0 rgba(0,0,0,.18),0 calc(var(--bt)*-.45) 0 0 color-mix(in srgb,var(--back) 75%,#fff),0 calc(var(--bt)*-1) 0 0 var(--ivory),0 calc(var(--bt)*-1) 0 .5px var(--tile-edge),0 2px 3px var(--tile-shadow)}
+.backs{--tw:10px;--th:10px;--tt:5px;display:flex;gap:1px;min-width:0;overflow:hidden;padding:calc(var(--tt) + 2px) 2px 4px;filter:drop-shadow(0 2px 2px var(--tile-shadow))}
+/* Standing tiles, seen from your seat above and behind your own hand: an opponent's tile shows its back (the
+   coloured face toward you) and, above it, its top: the coloured back layer nearest you, then the ivory body. */
+.backs i{flex:none;position:relative;width:var(--tw);height:var(--th);border-radius:0 0 calc(var(--tw)*.16) calc(var(--tw)*.16);
+  background:linear-gradient(180deg,var(--back),var(--back-2));box-shadow:inset 0 -1px 0 rgba(0,0,0,.2),inset 1px 0 0 rgba(255,255,255,.12)}
+.backs i::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:var(--tt);border-radius:calc(var(--tw)*.16) calc(var(--tw)*.16) 0 0;
+  background:linear-gradient(0deg,color-mix(in srgb,var(--back) 70%,#fff) 0 32%,var(--ivory) 32%);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 0 .5px var(--tile-edge)}
 .lv{font-size:10.5px;font-weight:700;line-height:16px;padding:0 5px;border-radius:4px;flex:none;border:1px solid var(--line);color:var(--muted)}
 .lv-easy{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
 .lv-hard{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
@@ -287,17 +292,19 @@ button{font:inherit;color:inherit}
 
 /* table */
 /* The play mat: where the discards go. */
-.square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--mat-bg);box-shadow:var(--mat-shadow);border-radius:calc(var(--pw)*.9)}
+/* Felt: a faint grain over the theme's mat colour, and a lip around the mat's edge. */
+.square{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--grain),var(--mat-bg);box-shadow:var(--mat-shadow),inset 0 2px 6px rgba(0,0,0,.12),0 1px 0 rgba(255,255,255,.18);border-radius:calc(var(--pw)*.9)}
 /* A thin inlaid rim just inside the mat's edge. */
 .square::before{content:"";position:absolute;inset:calc(var(--pw)*.3 + 2px);border:1px solid var(--mat-rim);border-radius:calc(var(--pw)*.7);pointer-events:none}
 .pond{--w:var(--pw);--rot:var(--r);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.9 + 6px);display:flex;flex-wrap:wrap;gap:calc(var(--pw)*.1 + 2px) calc(var(--pw)*.1 + 1px);align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
-.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px var(--tile-shadow),0 calc(var(--pw)*.4) calc(var(--pw)*1.2) calc(var(--pw)*-.4) var(--tile-shadow)}
+.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--pw)*.16) 0 -1px color-mix(in srgb,var(--text) 22%,transparent),0 calc(var(--pw)*.16 + 2px) 4px var(--tile-shadow),0 calc(var(--pw)*.5) calc(var(--pw)*1.2) calc(var(--pw)*-.3) var(--tile-shadow)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
 .seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
 .seat.dealer b{color:var(--dealer)}
 .seat.on{background:var(--gold);color:var(--gold-ink)}
 .seat.on b{color:var(--gold-ink)}
-.stick{display:inline-block;vertical-align:middle;width:calc(var(--pw)*1.2);height:3px;border-radius:2px;background:var(--stick);position:relative}
+.stick{display:inline-block;vertical-align:middle;width:calc(var(--pw)*1.2);height:4px;border-radius:2px;background:linear-gradient(180deg,color-mix(in srgb,var(--stick) 70%,#fff),var(--stick) 60%,color-mix(in srgb,var(--stick) 80%,#000));box-shadow:0 1.5px 1.5px rgba(0,0,0,.35);position:relative}
 .stick::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;border-radius:50%;background:var(--t-red)}
 .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--pw)*.18);pointer-events:none}
 .mid b{font:900 calc(var(--pw)*.78)/1.1 var(--f-head)}
@@ -374,12 +381,15 @@ button{font:inherit;color:inherit}
 .btn.ghost{background:transparent}
 .btn .tile{--w:16px}
 .handrow{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:12px 16px}
-.hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:8px;position:relative}
+.hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:2px;position:relative}
 /* The rack the hand stands on. */
-.hand::before{content:"";position:absolute;left:calc(var(--w)*-.3);right:calc(var(--w)*-.3);bottom:calc(var(--w)*-.16);height:calc(var(--w)*.36);border-radius:calc(var(--w)*.18);background:linear-gradient(180deg,color-mix(in srgb,var(--text) 10%,transparent),color-mix(in srgb,var(--text) 4%,transparent));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 8%,transparent)}
-.hand .tile{cursor:pointer;transition:transform .12s ease}
+.hand::before{content:"";position:absolute;left:calc(var(--w)*-.3);right:calc(var(--w)*-.3);bottom:calc(var(--w)*-.16);height:calc(var(--w)*.36);border-radius:calc(var(--w)*.18);background:linear-gradient(180deg,color-mix(in srgb,var(--text) 12%,transparent),color-mix(in srgb,var(--text) 5%,transparent));box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent),0 3px 0 color-mix(in srgb,var(--text) 10%,transparent),0 6px 10px -4px var(--tile-shadow)}
+.hand .tile{cursor:pointer;transition:transform .12s ease;--top:calc(var(--w)*.15);margin-top:var(--top);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -2px 3px rgba(0,0,0,.05),0 0 0 1px var(--tile-edge),0 calc(var(--top)*-.5) 0 .5px var(--ivory-2),0 calc(var(--top)*-1) 0 .5px var(--tile-depth),0 4px 6px -1px var(--tile-shadow)}
+/* Your own tiles stand facing you: above each face is its top, the ivory body nearest you and the coloured back
+   behind it; the shadow falls on the rack. */
 .hand .tile:hover{transform:translateY(-6%)}
-.hand .tile.sel{transform:translateY(-30%);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 2px var(--gold),0 calc(var(--w)*.1) 0 .5px var(--tile-depth),0 10px 18px -4px var(--tile-shadow),0 0 22px -6px var(--gold)}
+.hand .tile.sel{transform:translateY(-30%);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 2px var(--gold),0 calc(var(--top)*-.5) 0 .5px var(--ivory-2),0 calc(var(--top)*-1) 0 .5px var(--tile-depth),0 12px 18px -4px var(--tile-shadow),0 0 22px -6px var(--gold)}
 .hand .tile.drawn{margin-left:calc(var(--w)*.4)}
 .hand .tile.dim{filter:brightness(.45) saturate(.6);cursor:not-allowed}
 /* Recommended tile: a small triangle (a shape, not only a colour) under it. */
