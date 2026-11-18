@@ -603,10 +603,15 @@ function flyDiscards(src) {
     if (!m) return;
     const age = performance.now() - m.t0;
     if (age >= DISCARD_MS) return;
+    // The tile is solid all the way (an opponent's only fades in over the first few frames, as it leaves the
+    // seat), and lifted while it flies: a wider shadow further below it, which settles as it lands.
+    const w = tile.offsetWidth || 20,
+      lift = `drop-shadow(0 ${(w * 0.35).toFixed(1)}px ${(w * 0.25).toFixed(1)}px rgba(0, 0, 0, .28))`;
     const anim = tile.animate(
       [
-        { translate: `${m.x}px ${m.y}px`, scale: String(m.s), opacity: p === 0 ? 1 : 0.2 },
-        { translate: '0 0', scale: '1', opacity: 1 }
+        { translate: `${m.x}px ${m.y}px`, scale: String(m.s), opacity: p === 0 ? 1 : 0, filter: lift, offset: 0 },
+        { opacity: 1, offset: 0.18 },
+        { translate: '0 0', scale: '1', opacity: 1, filter: 'drop-shadow(0 0 0 rgba(0, 0, 0, 0))', offset: 1 }
       ],
       { duration: DISCARD_MS, easing: 'cubic-bezier(.2,.8,.25,1)', fill: 'backwards' }
     );
