@@ -214,7 +214,7 @@ button{font:inherit;color:inherit}
   /* Seat contents scale with the pond tiles so the whole table stays in proportion. */
   /* Concealed hands as standing tile backs about two-thirds the size of a discard, melds at three-quarters. */
   /* Across: a row of standing tiles, backs toward you, tops showing above (see the standing-tile notes below). */
-  .arena .backs{--tw:calc(var(--pw)*.64);--th:calc(var(--pw)*.62);--tt:calc(var(--pw)*.3)}
+  .arena .backs{--tw:calc(var(--pw)*.64);--th:calc(var(--pw)*.66);--tt:calc(var(--pw)*.22)}
   /* Left and right: their tiles stand in a column running away from you, so all you see is the column of tile
      tops (the ivory body on the player's side, the coloured back toward the centre, a seam between tiles) and,
      on the tile nearest you, its side. The coloured part is wider than the top alone: from the middle of the table
@@ -262,7 +262,7 @@ button{font:inherit;color:inherit}
   .table .pm,.table .pm:empty{display:flex;min-height:20px;justify-content:center}
   .table .pb{flex-direction:column;gap:1px;width:100%}
   .table .backs{gap:1px;justify-content:center;max-width:100%}
-  .table .backs{--th:8px;--tt:4px;padding:5px 1px 2px}
+  .table .backs{--th:10px;--tt:2.5px;padding:4px 1px 2px}
   .table .backs i{--tw:8px;width:auto;flex:0 1 8px;min-width:3px}
 }
 
@@ -387,7 +387,7 @@ button{font:inherit;color:inherit}
 .hand{--w:var(--tw);display:flex;gap:2px;align-items:flex-end;padding-top:2px;position:relative}
 /* The rack the hand stands on. */
 .hand::before{content:"";position:absolute;left:calc(var(--w)*-.3);right:calc(var(--w)*-.3);bottom:calc(var(--w)*-.16);height:calc(var(--w)*.36);border-radius:calc(var(--w)*.18);background:linear-gradient(180deg,color-mix(in srgb,var(--text) 12%,transparent),color-mix(in srgb,var(--text) 5%,transparent));box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent),0 3px 0 color-mix(in srgb,var(--text) 10%,transparent),0 6px 10px -4px var(--tile-shadow)}
-.hand .tile{cursor:pointer;transition:transform .12s ease;--top:calc(var(--w)*.15);margin-top:var(--top);
+.hand .tile{cursor:pointer;transition:transform .12s ease;--top:calc(var(--w)*.12);margin-top:var(--top);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -2px 3px rgba(0,0,0,.05),0 0 0 1px var(--tile-edge),0 calc(var(--top)*-.5) 0 .5px var(--ivory-2),0 calc(var(--top)*-1) 0 .5px var(--tile-depth),0 4px 6px -1px var(--tile-shadow)}
 /* Your own tiles stand facing you: above each face is its top, the ivory body nearest you and the coloured back
    behind it; the shadow falls on the rack. */
