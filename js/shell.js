@@ -28,7 +28,7 @@ const applyMotion = () => document.documentElement.classList.toggle('reduce-moti
 motionMQ.addEventListener('change', applyMotion);
 applyMotion();
 
-// Sound (setting S.sound, off by default): short tones made with Web Audio, no audio files. The venue themes
+// Sound (setting S.sound, on by default): short tones made with Web Audio, no audio files. The venue themes
 // tune the tile click: lower on tatami, brighter in the late-night parlour.
 let actx = null;
 function tone(freq, start, dur, type = 'triangle', vol = 0.18) {
@@ -64,6 +64,16 @@ function click(freq) {
   src.connect(f).connect(g).connect(actx.destination);
   src.start();
 }
+// Browsers only let audio start after the page has been touched, so open (or wake) the audio context on the first
+// tap, click or key press; the sounds before that are skipped rather than queued.
+function unlockAudio() {
+  if (!S.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || /** @type {any} */ (window).webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+  } catch (e) {}
+}
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 sfx = kind => {
   if (!S.sound) return;
   try {
