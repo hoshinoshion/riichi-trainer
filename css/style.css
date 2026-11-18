@@ -18,7 +18,7 @@ img{max-width:100%}
   --table-bg:linear-gradient(180deg,#e6ebe8,#dde3e0); --table-shadow:inset 0 0 0 1px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04),0 18px 40px -28px rgba(15,60,55,.35);
   --mat-bg:radial-gradient(circle at 50% 42%,#f7f9f8 0%,#ebf0ed 85%); --mat-shadow:inset 0 1px 3px rgba(0,0,0,.06),inset 0 0 0 1px rgba(0,0,0,.04);
   --felt-core:#fbfbf9; --center-line:var(--line);
-  --stick:#3a3a3e; --dealer:#d4380d;
+  --stick:#f6f4ee; --dealer:#d4380d;
   --seat-bg:var(--panel); --seat-line:var(--line); --board-line:rgba(0,0,0,.07);
   --t-red:#c3302a; --t-blue:#22479a; --t-green:#16704a; --t-ink:#1c1c20;
   --warn:#d4380d; --ok:#15803d;
@@ -95,7 +95,7 @@ img{max-width:100%}
   --table-shadow:inset 0 0 0 6px #6b4a2b,inset 0 0 0 7px rgba(0,0,0,.2);
   --mat-bg:#dcc994; --mat-shadow:inset 0 1px 3px rgba(60,40,10,.15),inset 0 0 0 1px rgba(60,40,10,.12);
   --felt-core:#efe3bf; --center-line:#cdb987;
-  --stick:#3b2414; --dealer:#9a2a17;
+  --stick:#fbf6ea; --dealer:#9a2a17;
   --seat-bg:#fbf6ea; --seat-line:#ddd0b3; --board-line:rgba(60,40,10,.12);
   --warn:#b4401f; --ok:#3f7a2e;
   --f-head:"Noto Serif SC","Songti SC","STSong",serif;
@@ -304,12 +304,18 @@ button{font:inherit;color:inherit}
    front of it (lower on screen) covers it, as on a real table; renderSquare sets that stacking order (--z). */
 .pond{--w:var(--pw);--rot:var(--r);z-index:1;position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 6px);display:flex;flex-wrap:wrap;gap:1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
 .center{z-index:0;position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.5);height:calc(var(--pw)*6.5);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--pw)*.12) 0 -1px color-mix(in srgb,var(--text) 22%,transparent),0 calc(var(--pw)*.12 + 1px) 3px var(--tile-shadow)}
-.seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
+.seat{--rot:var(--r);position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
 .seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
 .seat.dealer b{color:var(--dealer)}
 .seat.on{background:var(--gold);color:var(--gold-ink)}
 .seat.on b{color:var(--gold-ink)}
-.stick{display:inline-block;vertical-align:middle;width:calc(var(--pw)*1.2);height:4px;border-radius:2px;background:linear-gradient(180deg,color-mix(in srgb,var(--stick) 70%,#fff),var(--stick) 60%,color-mix(in srgb,var(--stick) 80%,#000));box-shadow:0 1.5px 1.5px rgba(0,0,0,.35);position:relative}
+.stick{display:inline-block;vertical-align:middle;width:calc(var(--pw)*1.2);height:4px;border-radius:2px;background:linear-gradient(180deg,color-mix(in srgb,var(--stick) 70%,#fff),var(--stick) 60%,color-mix(in srgb,var(--stick) 80%,#000));box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 1.5px 1.5px rgba(0,0,0,.35);position:relative}
+/* Like the tiles, a stick on a turned seat keeps its highlight on top and its shadow below on screen. */
+@supports (width:calc(1px * sin(30deg))){
+  .stick{--sx:sin(var(--rot,0deg));--sy:cos(var(--rot,0deg));
+    background:linear-gradient(calc(180deg - var(--rot,0deg)),color-mix(in srgb,var(--stick) 70%,#fff),var(--stick) 60%,color-mix(in srgb,var(--stick) 80%,#000));
+    box-shadow:0 0 0 .5px rgba(0,0,0,.22),calc(var(--sx)*1.5px) calc(var(--sy)*1.5px) 1.5px rgba(0,0,0,.35)}
+}
 .stick::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;border-radius:50%;background:var(--t-red)}
 .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--pw)*.18);pointer-events:none}
 .mid b{font:900 calc(var(--pw)*.78)/1.1 var(--f-head)}
@@ -345,7 +351,8 @@ button{font:inherit;color:inherit}
 .tile .gi{fill:var(--t-ink)} .tile .gr{fill:var(--t-red)} .tile .gg{fill:var(--t-green)} .tile .gb{stroke:var(--t-blue)}
 .tile.yoko{transform:rotate(-90deg);margin-left:calc(var(--w)*.18);margin-right:calc(var(--w)*.18)}
 .tile.gone{opacity:.32}
-.tile.last{outline:2px solid var(--gold);outline-offset:1px}
+/* The latest discard: a ring just inside its face, so the touching tiles around it never hide it. */
+.tile.last{outline:2px solid var(--gold);outline-offset:-2px}
 .tile.dora::before{content:"";position:absolute;right:2px;top:2px;width:0;height:0;border-left:calc(var(--w)*.2) solid transparent;border-top:calc(var(--w)*.2) solid var(--gold);border-radius:0 2px 0 0;z-index:1}
 .mini{--w:14px}
 .chip{--w:22px}
