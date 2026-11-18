@@ -621,7 +621,11 @@ function renderSquare() {
     // Without motion the newest discard gets the simple CSS drop-in (class fresh) on its first draw only.
     const fresh = (r, i) =>
       r.fresh && i === pl.river.length - 1 && !moving && motionAge(motionKey(`f${p}:${i}`), 1e9) === 0;
-    h += `<div class="pond" style="--r:${ROT[p]}deg">${pl.river.map((r, i) => tileHTML(r.id, [r.riichi ? 'yoko' : '', r.called ? 'gone' : '', fresh(r, i) ? 'fresh' : '', G.last && G.last.p === p && i === pl.river.length - 1 && !r.called && G.turn !== -1 ? 'last' : ''].join(' '))).join('')}</div>`;
+    // Stacking: the tile lower on screen is nearer you and covers the near side of the one behind it. Your pond and
+    // the left one (rows and tiles run down the screen) already stack that way in document order; across, rows run
+    // up the screen, and on the right, tiles run up each column, so those count down.
+    const z = i => (p === 2 ? 9 - Math.floor(i / 6) : p === 1 ? 40 - i : 0);
+    h += `<div class="pond" style="--r:${ROT[p]}deg">${pl.river.map((r, i) => tileHTML(r.id, [r.riichi ? 'yoko' : '', r.called ? 'gone' : '', fresh(r, i) ? 'fresh' : '', G.last && G.last.p === p && i === pl.river.length - 1 && !r.called && G.turn !== -1 ? 'last' : ''].join(' '), z(i) ? `style="--z:${z(i)}"` : '')).join('')}</div>`;
   }
   // Centre: each seat's wind on its edge (highlighted on that player's turn, riichi stick when declared);
   // round, honba, riichi deposits, dora indicators and the wall count in the middle.
