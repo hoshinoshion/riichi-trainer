@@ -648,9 +648,10 @@ function renderSquare() {
 // are left out: the meld shows them.
 function markSame() {
   const ty = UI.selected != null && G ? tt(UI.selected) : -1;
-  document
-    .querySelectorAll('.table .tile[data-t], #mymelds .tile[data-t]')
-    .forEach(el => el.classList.toggle('same', +el.dataset.t === ty && !el.classList.contains('gone')));
+  document.querySelectorAll('.table .tile[data-t], #mymelds .tile[data-t]').forEach(el => {
+    const e = /** @type {HTMLElement} */ (el);
+    e.classList.toggle('same', +e.dataset.t === ty && !e.classList.contains('gone'));
+  });
 }
 // Melds, the newest one sliding in when it was just called.
 function meldsHTML(p, cls = '') {
