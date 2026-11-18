@@ -210,8 +210,17 @@ button{font:inherit;color:inherit}
   .opp.left .backs,.opp.right .backs{flex-direction:column}
   /* Seat contents scale with the pond tiles so the whole table stays in proportion. */
   /* Concealed hands as standing tile backs about two-thirds the size of a discard, melds at three-quarters. */
+  .arena .backs{--bt:max(2px,calc(var(--pw)*.12))}
+  .opp.top .backs{--bt:max(3px,calc(var(--pw)*.2))}
   .arena .backs i{width:calc(var(--pw)*.64);height:calc(var(--pw)*.86);border-radius:calc(var(--pw)*.12)}
-  .opp.left .backs i,.opp.right .backs i{width:calc(var(--pw)*.86);height:calc(var(--pw)*.6)}
+  /* The side seats' tiles stand across your view: from above you see each tile's top, the ivory body on the
+     player's side and the coloured back toward the table's centre, and below it the tile's side. */
+  .opp.left .backs i,.opp.right .backs i{position:relative;width:calc(var(--pw)*.86);height:calc(var(--pw)*.5);border-radius:calc(var(--pw)*.1);
+    --split:linear-gradient(90deg,var(--ivory) 0 56%,var(--back) 56%);background:var(--split);
+    box-shadow:0 0 0 .5px var(--tile-edge),0 calc(var(--bt) + 2px) 3px var(--tile-shadow)}
+  .opp.right .backs i{--split:linear-gradient(90deg,var(--back) 0 44%,var(--ivory) 44%)}
+  .opp.left .backs i::after,.opp.right .backs i::after{content:"";position:absolute;left:0;right:0;top:calc(100% - 1px);height:calc(var(--bt) + 1px);border-radius:0 0 calc(var(--pw)*.1) calc(var(--pw)*.1);background:var(--split);filter:brightness(.8)}
+  .opp.left .backs,.opp.right .backs{gap:calc(var(--bt) + 1px);padding:1px 2px calc(var(--bt) + 4px)}
   .arena .pm .tile{--w:calc(var(--pw)*.76)}
   /* The seat across sits on one line (name pill, then its tiles), so the rows above and below the mat stay short
      and the mat, and with it every discard, can be larger. The log ticker moves to the table's top-left corner. */
@@ -244,10 +253,11 @@ button{font:inherit;color:inherit}
      the name pill's corner instead of a new row, and one row is always kept for melds. */
   .table .ph{position:relative}
   .table .ph .rtag{position:absolute;top:-7px;right:-4px;box-shadow:0 1px 3px var(--tile-shadow)}
-  .table .pm,.table .pm:empty{display:flex;min-height:21px;justify-content:center}
-  .table .pb{flex-direction:column;gap:5px;width:100%}
+  .table .pm,.table .pm:empty{display:flex;min-height:20px;justify-content:center}
+  .table .pb{flex-direction:column;gap:1px;width:100%}
   .table .backs{gap:1px;justify-content:center;max-width:100%}
-  .table .backs i{width:8px;height:11px;border-radius:2px;flex:0 1 8px;min-width:3px;box-shadow:0 1px 0 var(--ivory-2)}
+  .table .backs{--bt:1.5px;padding:3px 1px 2px}
+  .table .backs i{width:8px;height:11px;border-radius:2px;flex:0 1 8px;min-width:3px}
 }
 
 /* opponent plates */
@@ -261,8 +271,11 @@ button{font:inherit;color:inherit}
 .sc{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
 .pb{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%}
 /* Concealed tiles as small tile backs. */
-.backs{display:flex;gap:2px;min-width:0;overflow:hidden}
-.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:linear-gradient(170deg,var(--back) 40%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1.5px 0 var(--ivory-2),0 2px 3px var(--tile-shadow)}
+.backs{--bt:2px;display:flex;gap:2px;min-width:0;overflow:hidden;padding:calc(var(--bt) + 1px) 1px calc(var(--bt) + 3px)}
+/* Standing tiles seen from your seat: the back faces you, and above it the tile's top shows its two layers, the
+   coloured back nearest you and the ivory body behind. A soft shadow falls on the table below. */
+.backs i{flex:none;width:10px;height:14px;border-radius:2.5px;background:linear-gradient(175deg,color-mix(in srgb,var(--back) 88%,#fff) 0%,var(--back) 45%,var(--back-2));
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.18),0 calc(var(--bt)*-.45) 0 0 color-mix(in srgb,var(--back) 75%,#fff),0 calc(var(--bt)*-1) 0 0 var(--ivory),0 calc(var(--bt)*-1) 0 .5px var(--tile-edge),0 2px 3px var(--tile-shadow)}
 .lv{font-size:10.5px;font-weight:700;line-height:16px;padding:0 5px;border-radius:4px;flex:none;border:1px solid var(--line);color:var(--muted)}
 .lv-easy{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
 .lv-hard{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
@@ -277,7 +290,7 @@ button{font:inherit;color:inherit}
 .square{width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--mat-bg);box-shadow:var(--mat-shadow);border-radius:calc(var(--pw)*.9)}
 /* A thin inlaid rim just inside the mat's edge. */
 .square::before{content:"";position:absolute;inset:calc(var(--pw)*.3 + 2px);border:1px solid var(--mat-rim);border-radius:calc(var(--pw)*.7);pointer-events:none}
-.pond{--w:var(--pw);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 8px);display:flex;flex-wrap:wrap;gap:3px 1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
+.pond{--w:var(--pw);--rot:var(--r);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.9 + 6px);display:flex;flex-wrap:wrap;gap:calc(var(--pw)*.1 + 2px) calc(var(--pw)*.1 + 1px);align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
 .center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px var(--tile-shadow),0 calc(var(--pw)*.4) calc(var(--pw)*1.2) calc(var(--pw)*-.4) var(--tile-shadow)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
 .seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
@@ -294,13 +307,28 @@ button{font:inherit;color:inherit}
 
 /* tiles */
 /* Modern themes: flat tiles with a thin outline and a soft shadow. Classic overrides below with the 3D look. */
-/* Every theme: an ivory face on a coloured back, the back showing below the face as the tile's thickness. */
+/* Every theme: an ivory face on a coloured back, the back showing below the face as the tile's thickness.
+   The viewer sits at the bottom of the screen, so the thickness always shows toward the screen's bottom edge, however
+   the tile is turned: --tr is the tile's rotation on screen (its pond's, minus 90° when laid sideways), and the
+   shadow offsets are turned back by it (sin / cos). Browsers without CSS trig keep the plain downward version. */
 .tile{width:var(--w);height:calc(var(--w)*1.36);position:relative;flex:none;border-radius:calc(var(--w)*.14);background:linear-gradient(170deg,var(--ivory) 58%,var(--ivory-2) 140%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 1px var(--tile-edge),0 calc(var(--w)*.045) 0 .5px var(--ivory-2),0 calc(var(--w)*.1) 0 .5px var(--tile-depth),0 calc(var(--w)*.1 + 2px) calc(var(--w)*.12 + 2px) var(--tile-shadow);margin-bottom:calc(var(--w)*.1)}
+.tile.back{background:linear-gradient(170deg,var(--back) 35%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),0 calc(var(--w)*.04 + 1px) 0 .5px var(--back-2),0 calc(var(--w)*.1 + 1px) 0 .5px var(--ivory-2),0 calc(var(--w)*.1 + 3px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
+@supports (width:calc(1px * sin(30deg))){
+  .tile{--tr:var(--rot,0deg);--sx:sin(var(--tr));--sy:cos(var(--tr));--t:max(2px,calc(var(--w)*.1));--dx:calc(var(--t)*var(--sx));--dy:calc(var(--t)*var(--sy));
+    background:linear-gradient(calc(170deg - var(--tr)),var(--ivory) 58%,var(--ivory-2) 140%);
+    box-shadow:inset calc(var(--sx)*1px) calc(var(--sy)*1px) 0 rgba(255,255,255,.75),0 0 0 1px var(--tile-edge),calc(var(--dx)*.45) calc(var(--dy)*.45) 0 .5px var(--ivory-2),var(--dx) var(--dy) 0 .5px var(--tile-depth),calc(var(--dx) + var(--sx)*2px) calc(var(--dy) + var(--sy)*2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
+  .tile.yoko{--tr:calc(var(--rot,0deg) - 90deg)}
+  .tile.back{--t:max(3px,calc(var(--w)*.15))}
+  /* Face down: the coloured back on top, so its side shows the back layer, then the ivory body. */
+  .tile.back{background:linear-gradient(calc(170deg - var(--tr)),var(--back) 35%,var(--back-2));
+    box-shadow:inset calc(var(--sx)*1px) calc(var(--sy)*1px) 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),calc(var(--dx)*.4) calc(var(--dy)*.4) 0 .5px var(--back-2),var(--dx) var(--dy) 0 .5px var(--ivory-2),calc(var(--dx) + var(--sx)*2px) calc(var(--dy) + var(--sy)*2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
+}
+/* Ponds space their tiles with gaps that leave room for the thickness on any side. */
+.pond .tile{margin-bottom:0}
 .tile svg .h{fill:var(--ivory)} .tile svg .hs{stroke:var(--ivory)}
 .tile .face{position:absolute;inset:7% 9% 9%;display:flex;align-items:center;justify-content:center}
 .tile svg{width:100%;height:100%;display:block}
-.tile.back{background:linear-gradient(170deg,var(--back) 35%,var(--back-2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),0 calc(var(--w)*.1) 0 .5px var(--ivory-2),0 calc(var(--w)*.1 + 2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
 /* Face inks (the faces are SVG; see face() in render.js). */
 .tile .gi{fill:var(--t-ink)} .tile .gr{fill:var(--t-red)} .tile .gg{fill:var(--t-green)} .tile .gb{stroke:var(--t-blue)}
 .tile.yoko{transform:rotate(-90deg);margin-left:calc(var(--w)*.18);margin-right:calc(var(--w)*.18)}

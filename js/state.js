@@ -11,7 +11,8 @@ const S = (() => {
     theme: 'auto',
     lang: 'auto',
     fx: true, // stamps and result-screen animations
-    sound: false, // synthesized sound effects (shell.js)
+    sound: true, // synthesized sound effects (shell.js)
+    soundV: 0, // 1 once older saves have had sound turned on (see below)
     styles: true // seat characters: play styles, avatars and lines
   };
   try {
@@ -22,6 +23,12 @@ const S = (() => {
 })();
 // Hints: full (coach panel and recommended tiles), mistakes (only warn about a discard that loses draws or
 // steps back, then show it), off (exam mode: the review after each hand is all you get). Older saves had hints:true/false.
+// Sound used to start off, and the whole settings object is saved, so older saves carry sound: false whether or
+// not it was ever touched. Turn it on once for them (soundV marks that this happened); the switch works as before.
+if (!S.soundV) {
+  S.sound = true;
+  S.soundV = 1;
+}
 if (!['full', 'mistakes', 'off'].includes(S.hint)) S.hint = S.hints === false ? 'off' : 'full';
 delete S.hints;
 function saveS() {
