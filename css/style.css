@@ -351,8 +351,19 @@ button{font:inherit;color:inherit}
 .tile .gi{fill:var(--t-ink)} .tile .gr{fill:var(--t-red)} .tile .gg{fill:var(--t-green)} .tile .gb{stroke:var(--t-blue)}
 .tile.yoko{transform:rotate(-90deg);margin-left:calc(var(--w)*.18);margin-right:calc(var(--w)*.18)}
 .tile.gone{opacity:.32}
-/* The latest discard: a ring just inside its face, so the touching tiles around it never hide it. */
-.tile.last{outline:2px solid var(--gold);outline-offset:-2px}
+/* The tile you have selected, wherever else it shows on the table (markSame in render.js): a gold wash and ring on
+   its face that breathes gently. */
+.tile.same::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+  background:color-mix(in srgb,var(--gold) 20%,transparent);box-shadow:inset 0 0 0 2px var(--gold),0 0 10px 1px color-mix(in srgb,var(--gold) 55%,transparent);animation:samepulse 1.6s ease-in-out infinite}
+@keyframes samepulse{50%{background:color-mix(in srgb,var(--gold) 8%,transparent);box-shadow:inset 0 0 0 2px var(--gold),0 0 4px 0 color-mix(in srgb,var(--gold) 35%,transparent)}}
+/* The latest discard: no ring (that is the selected-tile mark), but a small pointer at its near end (the end its
+   player sees first, beyond the tile's side) that bobs, in the warning colour. The tile keeps its place in the stacking order (raising it laid its side and shadow over its
+   neighbours); with no stacking order of its own, its pointer sits above every tile in the pond. */
+.pond .tile.last{z-index:auto}
+.tile.last::before{content:"";position:absolute;left:50%;top:calc(100% + max(2px,var(--w)*.1) + 3px);margin-left:calc(var(--w)*-.16);width:0;height:0;z-index:60;pointer-events:none;
+  border-left:calc(var(--w)*.16) solid transparent;border-right:calc(var(--w)*.16) solid transparent;border-bottom:calc(var(--w)*.22) solid var(--warn);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));animation:lastbob 1.2s ease-in-out infinite}
+@keyframes lastbob{50%{transform:translateY(25%)}}
 .tile.dora::before{content:"";position:absolute;right:2px;top:2px;width:0;height:0;border-left:calc(var(--w)*.2) solid transparent;border-top:calc(var(--w)*.2) solid var(--gold);border-radius:0 2px 0 0;z-index:1}
 .mini{--w:14px}
 .chip{--w:22px}
@@ -668,7 +679,7 @@ body.noscroll{overflow:hidden}
 .limit.l5{font-size:50px;color:var(--gold);border-color:var(--gold);box-shadow:0 0 24px -4px var(--gold)}
 .mbox.fx .limit{animation:stampin2 .6s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(var(--n,0) * 45ms + var(--i,0) * 160ms + 250ms)}
 @keyframes stampin2{from{transform:scale(2) rotate(-12deg);opacity:0}to{transform:rotate(-3deg)}}
-@media (prefers-reduced-motion:reduce){.mbox.fx .mhand .tile,.mbox.fx .mfinal,.mbox.fx .mhero .seal,.stick.drop,.meld.mnew,.pond .tile.fresh,.stamp span,.stamp small,.bubble,.mbox.fx .myaku li,.mbox.fx .ura .tile,.mbox.fx .limit{animation:none}.hand .tile,.drawer{transition:none}}
+@media (prefers-reduced-motion:reduce){.tile.last::before,.tile.same::after,.mbox.fx .mhand .tile,.mbox.fx .mfinal,.mbox.fx .mhero .seal,.stick.drop,.meld.mnew,.pond .tile.fresh,.stamp span,.stamp small,.bubble,.mbox.fx .myaku li,.mbox.fx .ura .tile,.mbox.fx .limit{animation:none}.hand .tile,.drawer{transition:none}}
 @media (max-width:520px){
   .app{--gut:10px;gap:12px;padding-top:10px}
   .btn{padding:10px 14px;font-size:14px}.btn.win{font-size:16px}
