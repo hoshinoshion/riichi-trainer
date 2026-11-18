@@ -356,13 +356,13 @@ button{font:inherit;color:inherit}
 .tile.same::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
   background:color-mix(in srgb,var(--gold) 20%,transparent);box-shadow:inset 0 0 0 2px var(--gold),0 0 10px 1px color-mix(in srgb,var(--gold) 55%,transparent);animation:samepulse 1.6s ease-in-out infinite}
 @keyframes samepulse{50%{background:color-mix(in srgb,var(--gold) 8%,transparent);box-shadow:inset 0 0 0 2px var(--gold),0 0 4px 0 color-mix(in srgb,var(--gold) 35%,transparent)}}
-/* The latest discard: no ring (that is the selected-tile mark), but a small pointer at its outer edge that bobs, in
-   the warning colour. The tile is raised over its neighbours so the pointer is never covered. */
+/* The latest discard: no ring (that is the selected-tile mark), but a small pointer at its near end (the end its
+   player sees first, beyond the tile's side) that bobs, in the warning colour. The tile is raised over its neighbours so the pointer is never covered. */
 .pond .tile.last{z-index:50}
-.tile.last::before{content:"";position:absolute;left:50%;bottom:calc(100% + 3px);margin-left:calc(var(--w)*-.16);width:0;height:0;z-index:3;pointer-events:none;
-  border-left:calc(var(--w)*.16) solid transparent;border-right:calc(var(--w)*.16) solid transparent;border-top:calc(var(--w)*.22) solid var(--warn);
+.tile.last::before{content:"";position:absolute;left:50%;top:calc(100% + max(2px,var(--w)*.1) + 3px);margin-left:calc(var(--w)*-.16);width:0;height:0;z-index:3;pointer-events:none;
+  border-left:calc(var(--w)*.16) solid transparent;border-right:calc(var(--w)*.16) solid transparent;border-bottom:calc(var(--w)*.22) solid var(--warn);
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));animation:lastbob 1.2s ease-in-out infinite}
-@keyframes lastbob{50%{transform:translateY(-25%)}}
+@keyframes lastbob{50%{transform:translateY(25%)}}
 .tile.dora::before{content:"";position:absolute;right:2px;top:2px;width:0;height:0;border-left:calc(var(--w)*.2) solid transparent;border-top:calc(var(--w)*.2) solid var(--gold);border-radius:0 2px 0 0;z-index:1}
 .mini{--w:14px}
 .chip{--w:22px}
