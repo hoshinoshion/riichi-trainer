@@ -208,7 +208,7 @@ function face(t, red) {
 }
 function tileHTML(id, cls = '', attr = '') {
   const red = isAka(id); // with red fives off (rule aka) they are drawn as ordinary fives
-  return `<div class="tile ${cls}" ${attr} title="${TN(tt(id))}${red ? t('red') : ''}"><div class="face">${face(tt(id), red)}</div></div>`;
+  return `<div class="tile ${cls}" data-t="${tt(id)}" ${attr} title="${TN(tt(id))}${red ? t('red') : ''}"><div class="face">${face(tt(id), red)}</div></div>`;
 }
 function tileT(t, cls = '') {
   return tileHTML(t * 4 + 3, cls);
@@ -528,6 +528,7 @@ function renderOpps() {
     <div class="ph">${ch ? `<span class="ava">${AVATARS[p]}</span>` : ''}<span class="wb${sw === 0 ? ' dealer' : ''}">${WIND_CH[sw]}</span><span class="nm">${ch ? `${charName(p)} <small>${P(p)}</small>` : P(p)}</span><span class="lv lv-${lvl(p)}" title="${t('lvTitle')}">${L('lv')[lvl(p)]}</span><b class="sc">${pl.score}</b>${pl.riichi ? `<span class="rtag">${t('riichiTag')}</span>` : ''}</div>
     <div class="pb"><div class="backs">${'<i></i>'.repeat(pl.hand.length)}</div><div class="pm">${meldsHTML(p, 'mini')}</div></div></div>`;
   }
+  markSame();
 }
 // ===================== Motion =====================
 // Cosmetic motion (setting fx): a discard flies from the hand or seat that played it into its pond, a riichi stick
@@ -640,6 +641,16 @@ function renderSquare() {
     <span>${t('wallLeft', { n: G.wall.length })}</span></div></div>`;
   $('#square').innerHTML = h;
   flyDiscards(src);
+  markSame();
+}
+// While you have a tile selected, the same tile wherever it shows on the table (every pond, every meld, the dora
+// indicators) is marked, so you can count how many are already out. Tiles a call took from a pond (shown faded)
+// are left out: the meld shows them.
+function markSame() {
+  const ty = UI.selected != null && G ? tt(UI.selected) : -1;
+  document
+    .querySelectorAll('.table .tile[data-t], #mymelds .tile[data-t]')
+    .forEach(el => el.classList.toggle('same', +el.dataset.t === ty && !el.classList.contains('gone')));
 }
 // Melds, the newest one sliding in when it was just called.
 function meldsHTML(p, cls = '') {
@@ -698,6 +709,7 @@ function renderMe() {
     if (el) el.focus();
   }
   $('#mymelds').innerHTML = meldsHTML(0);
+  markSame();
 }
 function renderActions() {
   const el = $('#actions');
