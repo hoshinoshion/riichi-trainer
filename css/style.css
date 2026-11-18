@@ -300,8 +300,10 @@ button{font:inherit;color:inherit}
   width:calc(var(--pw)*18.8 + 24px);height:calc(var(--pw)*18.8 + 24px);position:relative;background:var(--grain),var(--mat-bg);box-shadow:var(--mat-shadow),inset 0 2px 6px rgba(0,0,0,.12),0 1px 0 rgba(255,255,255,.18);border-radius:calc(var(--pw)*.9)}
 /* A thin inlaid rim just inside the mat's edge. */
 .square::before{content:"";position:absolute;inset:calc(var(--pw)*.3 + 2px);border:1px solid var(--mat-rim);border-radius:calc(var(--pw)*.7);pointer-events:none}
-.pond{--w:var(--pw);--rot:var(--r);position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.9 + 6px);display:flex;flex-wrap:wrap;gap:calc(var(--pw)*.1 + 2px) calc(var(--pw)*.1 + 1px);align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
-.center{position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.7);height:calc(var(--pw)*6.7);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--pw)*.16) 0 -1px color-mix(in srgb,var(--text) 22%,transparent),0 calc(var(--pw)*.16 + 2px) 4px var(--tile-shadow),0 calc(var(--pw)*.5) calc(var(--pw)*1.2) calc(var(--pw)*-.3) var(--tile-shadow)}
+/* A pond: six tiles to a row, touching with a hairline seam. Where one tile's near side would show, the tile in
+   front of it (lower on screen) covers it, as on a real table; renderSquare sets that stacking order (--z). */
+.pond{--w:var(--pw);--rot:var(--r);z-index:1;position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.4 + 6px);display:flex;flex-wrap:wrap;gap:1px;align-content:flex-start;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*3.45))}
+.center{z-index:0;position:absolute;left:50%;top:50%;width:calc(var(--pw)*6.5);height:calc(var(--pw)*6.5);transform:translate(-50%,-50%);background:var(--felt-core);border-radius:calc(var(--pw)*.6);border:1px solid var(--center-line);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.08),0 calc(var(--pw)*.12) 0 -1px color-mix(in srgb,var(--text) 22%,transparent),0 calc(var(--pw)*.12 + 1px) 3px var(--tile-shadow)}
 .seat{position:absolute;left:50%;top:50%;transform-origin:0 0;transform:rotate(var(--r)) translate(-50%,calc(var(--pw)*2.45));display:flex;align-items:center;gap:calc(var(--pw)*.25);white-space:nowrap;color:var(--muted);padding:1px calc(var(--pw)*.25);border-radius:calc(var(--pw)*.25)}
 .seat b{font:800 calc(var(--pw)*.62)/1.15 var(--f-tile);color:var(--muted)}
 .seat.dealer b{color:var(--dealer)}
@@ -335,7 +337,7 @@ button{font:inherit;color:inherit}
     box-shadow:inset calc(var(--sx)*1px) calc(var(--sy)*1px) 0 rgba(255,255,255,.25),inset 0 0 0 calc(var(--w)*.07) color-mix(in srgb,var(--back-2) 60%,transparent),calc(var(--dx)*.4) calc(var(--dy)*.4) 0 .5px var(--back-2),var(--dx) var(--dy) 0 .5px var(--ivory-2),calc(var(--dx) + var(--sx)*2px) calc(var(--dy) + var(--sy)*2px) calc(var(--w)*.12 + 2px) var(--tile-shadow)}
 }
 /* Ponds space their tiles with gaps that leave room for the thickness on any side. */
-.pond .tile{margin-bottom:0}
+.pond .tile{margin-bottom:0;z-index:var(--z,auto)}
 .tile svg .h{fill:var(--ivory)} .tile svg .hs{stroke:var(--ivory)}
 .tile .face{position:absolute;inset:7% 9% 9%;display:flex;align-items:center;justify-content:center}
 .tile svg{width:100%;height:100%;display:block}
